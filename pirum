@@ -644,7 +644,7 @@ EOF;
     <deps>
       <v>{$release['version']}</v>
       <d>{$release['deps']}</d>
-    <deps>
+    </deps>
 
 EOF;
       }
