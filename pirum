@@ -22,7 +22,7 @@ exit($cli->run());
  */
 class Pirum_CLI
 {
-  const VERSION = '0.9.0';
+  const VERSION = '0.9.1';
 
   protected $options;
   protected $formatter;
@@ -261,11 +261,11 @@ strong { font-weight: bold }
 small { font-size: 80% }
 h1, h2, h3 { font-family:Georgia,Times New Roman,serif; letter-spacing: -0.03em; }
 h1 { font-size: 35px; margin-top: 20px; margin-bottom: 30px }
-h2 { font-size: 25px; margin-bottom: 20px }
-h3 { font-size: 16px; margin-bottom: 10px }
+h2 { font-size: 30px; margin-bottom: 20px; margin-top: 15px }
+h3 { font-size: 26px; margin-bottom: 10px }
 pre { background-color: #000; color: #fff; margin: 5px 0; overflow: auto; padding: 10px; font-family: monospace }
 #ft { margin-top: 10px }
-ul { margin-left: 5px; margin-top: 5px }
+ul { margin-top: 5px }
 li strong { color: #666 }
 p { margin-bottom: 5px }
 EOF
@@ -303,6 +303,8 @@ EOF
     <li><strong>Releases</strong>: $releases</li>
     <li><strong>Install command</strong>: pear install {$this->server->alias}/{$package['name']}</li>
   </ul>
+
+  <hr />
 EOF;
     }
 
@@ -316,31 +318,26 @@ EOF;
   <link rel="alternate" type="application/rss+xml" href="{$this->server->url}/feed.xml" title="{$this->server->summary} Latest Releases" />
 </head>
 <body>
-  <div id="doc" class="yui-t6">
+  <div id="doc" class="yui-t7">
     <div id="hd">
       <h1>{$this->server->summary}</h1>
     </div>
     <div id="bd">
-      <div id="yui-main">
-        <div class="yui-b">
-          <div class="yui-g">
-            <h2>Using this Channel</h2>
-            <p>This channel is to be used with the PEAR installer.</p>
-            <em>Registering</em> the channel:
-            <pre><code>pear channel-discover {$this->server->url}</code></pre>
-            <em>Listing</em> available packages:
-            <pre><code>pear remote-list -c {$this->server->alias}</code></pre>
-            <em>Installing</em> a package:
-            <pre><code>pear install {$this->server->alias}/package_name</code></pre>
-            <em>Installing</em> a specific version/stability:
-            <pre><code>pear install {$this->server->alias}/package_name-1.0.0
+      <div class="yui-g">
+        <h2>Using this Channel</h2>
+        <p>This channel is to be used with the PEAR installer.</p>
+        <em>Registering</em> the channel:
+        <pre><code>pear channel-discover {$this->server->url}</code></pre>
+        <em>Listing</em> available packages:
+        <pre><code>pear remote-list -c {$this->server->alias}</code></pre>
+        <em>Installing</em> a package:
+        <pre><code>pear install {$this->server->alias}/package_name</code></pre>
+        <em>Installing</em> a specific version/stability:
+        <pre><code>pear install {$this->server->alias}/package_name-1.0.0
 pear install {$this->server->alias}/package_name-beta</code></pre>
-            <em>Receiving</em> updates via a <a href="{$this->server->url}/feed.xml">feed</a>:
-            <pre><code>{$this->server->url}/feed.xml</code></pre>
-          </div>
-        </div>
-      </div>
-      <div class="yui-b">
+        <em>Receiving</em> updates via a <a href="{$this->server->url}/feed.xml">feed</a>:
+        <pre><code>{$this->server->url}/feed.xml</code></pre>
+
         <h2>Packages</h2>
         $packages
       </div>
@@ -759,7 +756,7 @@ EOF;
     $files = array();
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file)
     {
-      if (!preg_match('#^(.+)\-([\d\.]+)\.tgz$#', $file->getFileName(), $match))
+      if (!preg_match('#^(.+)\-([\d\.]+((?:RC|BETA|ALPHA)\d*)?)\.tgz$#', $file->getFileName(), $match))
       {
         continue;
       }
@@ -899,7 +896,7 @@ class Pirum_Package
   public function __construct($archive)
   {
     $this->archive = $archive;
-    if (!preg_match('#^(.+)\-([\d\.]+)\.tgz$#', $filename = basename($archive), $match))
+    if (!preg_match('#^(.+)\-([\d\.]+((?:RC|BETA|ALPHA)\d*)?)\.tgz$#', $filename = basename($archive), $match))
     {
       throw new InvalidArgumentException(sprintf('The archive "%s" does not follow PEAR conventions', $filename));
     }
