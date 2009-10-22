@@ -771,6 +771,8 @@ EOF;
     // get information for each package
     foreach ($files as $file)
     {
+      $this->formatter and print $this->formatter->formatSection('INFO', 'Parsing Package '.basename($file));
+
       $info = new Pirum_Package($file);
 
       if ($info->getChannel() != $this->server->name)
