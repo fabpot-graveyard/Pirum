@@ -911,6 +911,11 @@ class Pirum_Package
     $this->loadPackage();
   }
 
+  public function __destruct()
+  {
+    system('rm -rf '.$this->tmpDir);
+  }
+
   public function getDate($format = 'Y-m-d H:i:s')
   {
     return date($format, strtotime($this->package->date.' '.$this->package->time));
