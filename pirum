@@ -98,9 +98,9 @@ class Pirum_CLI
       return 1;
     }
 
-    copy($this->options[3], $target.'/get/'.$this->options[3]);
-    system('cd '.$target.'/get/ && gunzip '.$this->options[3]);
-    copy($this->options[3], $target.'/get/'.$this->options[3]);
+    copy($this->options[3], $target.'/get/'.basename($this->options[3]));
+    system('cd '.$target.'/get/ && gunzip '.basename($this->options[3]));
+    copy($this->options[3], $target.'/get/'.basename($this->options[3]));
 
     $this->runBuild($target);
 
@@ -1151,3 +1151,4 @@ class Pirum_CLI_Formatter
     return sprintf("  %s %s\n", $this->format($section, $style), $text);
   }
 }
+
