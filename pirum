@@ -327,7 +327,7 @@ EOF;
         <h2>Using this Channel</h2>
         <p>This channel is to be used with the PEAR installer.</p>
         <em>Registering</em> the channel:
-        <pre><code>pear channel-discover {$this->server->url}</code></pre>
+        <pre><code>pear channel-discover {$this->server->name}</code></pre>
         <em>Listing</em> available packages:
         <pre><code>pear remote-list -c {$this->server->alias}</code></pre>
         <em>Installing</em> a package:
