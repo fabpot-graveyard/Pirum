@@ -230,7 +230,7 @@ EOF;
 
     $index = <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:base="http://fabien.potencier.org/">
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="{$this->server->url}">
   <title>{$this->server->summary} Latest Releases</title>
   <link href="{$this->server->url}" />
   <author>
