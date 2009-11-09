@@ -769,44 +769,58 @@ EOF;
     $files = array_reverse($files);
 
     // get information for each package
+    $packages = array();
     foreach ($files as $file)
+    {
+      $package = new Pirum_Package($file);
+      if (file_exists($file = $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml'))
+      {
+        $package->loadPackageFromFile($file);
+      }
+      else
+      {
+        $package->loadPackageFromArchive();
+      }
+
+      $packages[] = $package;
+    }
+
+    foreach ($packages as $package)
     {
       $this->formatter and print $this->formatter->formatSection('INFO', 'Parsing Package '.basename($file));
 
-      $info = new Pirum_Package($file);
-
-      if ($info->getChannel() != $this->server->name)
+      if ($package->getChannel() != $this->server->name)
       {
-        throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $info->getName(), $info->getChannel(), $this->server->name));
+        throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
       }
 
-      if (!isset($this->packages[$info->getName()]))
+      if (!isset($this->packages[$package->getName()]))
       {
-        $this->packages[$info->getName()] = array(
-          'name'        => $info->getName(),
-          'license'     => $info->getLicense(),
-          'summary'     => $info->getSummary(),
-          'description' => $info->getDescription(),
+        $this->packages[$package->getName()] = array(
+          'name'        => $package->getName(),
+          'license'     => $package->getLicense(),
+          'summary'     => $package->getSummary(),
+          'description' => $package->getDescription(),
           'releases'    => array(),
           'maintainers' => array(),
-          'current_maintainers' => $info->getMaintainers(),
+          'current_maintainers' => $package->getMaintainers(),
         );
       }
 
-      $this->packages[$info->getName()]['releases'][] = array(
-        'version'     => $info->getVersion(),
-        'api_version' => $info->getApiVersion(),
-        'stability'   => $info->getStability(),
-        'date'        => $info->getDate(),
-        'filesize'    => $info->getFilesize(),
-        'php'         => $info->getMinPhp(),
-        'deps'        => $info->getDeps(),
-        'notes'       => $info->getNotes(),
-        'maintainers' => $info->getMaintainers(),
-        'info'        => $info,
+      $this->packages[$package->getName()]['releases'][] = array(
+        'version'     => $package->getVersion(),
+        'api_version' => $package->getApiVersion(),
+        'stability'   => $package->getStability(),
+        'date'        => $package->getDate(),
+        'filesize'    => $package->getFilesize(),
+        'php'         => $package->getMinPhp(),
+        'deps'        => $package->getDeps(),
+        'notes'       => $package->getNotes(),
+        'maintainers' => $package->getMaintainers(),
+        'info'        => $package,
       );
 
-      $this->packages[$info->getName()]['maintainers'] = array_merge($info->getMaintainers(), $this->packages[$info->getName()]['maintainers']);
+      $this->packages[$package->getName()]['maintainers'] = array_merge($package->getMaintainers(), $this->packages[$package->getName()]['maintainers']);
     }
   }
 
@@ -894,6 +908,7 @@ class Pirum_Package
   protected $name;
   protected $version;
   protected $archive;
+  protected $packageFile;
 
   public function __construct($archive)
   {
@@ -909,8 +924,6 @@ class Pirum_Package
     $this->tmpDir = sys_get_temp_dir().'/pirum_package_'.uniqid();
 
     mkdir($this->tmpDir, 0777, true);
-
-    $this->loadPackage();
   }
 
   public function __destruct()
@@ -1025,21 +1038,14 @@ class Pirum_Package
 
   public function copyPackageXml($target)
   {
-    copy($this->tmpDir.'/package.xml', $target);
+    copy($this->packageFile, $target);
   }
 
-  protected function loadPackage()
+  public function loadPackageFromFile($file)
   {
-    copy($this->archive, $this->tmpDir.'/archive.tgz');
-    system('cd '.$this->tmpDir.' && tar zxpf archive.tgz');
+    $this->packageFile = $file;
 
-    if (!is_file($this->tmpDir.'/package.xml'))
-    {
-      throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
-    }
-
-    $packageXml = file_get_contents($this->tmpDir.'/package.xml');
-    $this->package = new SimpleXMLElement($packageXml);
+    $this->package = new SimpleXMLElement(file_get_contents($file));
 
     // check name
     if ($this->name != (string) $this->package->name)
@@ -1052,6 +1058,19 @@ class Pirum_Package
     {
       throw new InvalidArgumentException(sprintf('The package.xml version "%s" does not match the version of the archive file "%s".', $this->package->version->release, $this->version));
     }
+  }
+
+  public function loadPackageFromArchive()
+  {
+    copy($this->archive, $this->tmpDir.'/archive.tgz');
+    system('cd '.$this->tmpDir.' && tar zxpf archive.tgz');
+
+    if (!is_file($this->tmpDir.'/package.xml'))
+    {
+      throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
+    }
+
+    $this->loadPackageFromFile($this->tmpDir.'/package.xml');
   }
 
   protected function XMLToArray($xml)
