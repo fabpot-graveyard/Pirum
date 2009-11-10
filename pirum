@@ -10,8 +10,13 @@
  * file that was distributed with this source code.
  */
 
-$cli = new Pirum_CLI($argv);
-exit($cli->run());
+// only run Pirum automatically when this file is called directly
+// from the command line
+if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
+{
+  $cli = new Pirum_CLI($argv);
+  exit($cli->run());
+}
 
 /**
  * Command line interface for Pirum.
@@ -22,7 +27,7 @@ exit($cli->run());
  */
 class Pirum_CLI
 {
-  const VERSION = '0.9.2';
+  const VERSION = '0.9.3';
 
   protected $options;
   protected $formatter;
@@ -308,6 +313,7 @@ EOF
 EOF;
     }
 
+    $version = Pirum_CLI::VERSION;
     $index = <<<EOF
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
@@ -343,7 +349,7 @@ pear install {$this->server->alias}/package_name-beta</code></pre>
       </div>
     </div>
     <div id="ft">
-      <p><small>The {$this->server->url} PEAR Channel Server is proudly powered by <a href="http://www.pirum-project.org/">Pirum</a></small></p>
+      <p><small>The <em>{$this->server->name}</em> PEAR Channel Server is proudly powered by <a href="http://www.pirum-project.org/">Pirum</a> $version</small></p>
     </div>
   </div>
 </body>
