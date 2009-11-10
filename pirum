@@ -123,8 +123,8 @@ class Pirum_CLI
 
     $help  = $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::VERSION), 'INFO');
     $help .= $this->formatter->format("Available commands:\n", 'COMMENT');
-    $help .= sprintf("  %s build target_dir\n", $name);
-    $help .= sprintf("  %s add target_dir Pirum-1.0.0.tgz\n\n", $name);
+    $help .= sprintf("  php %s build target_dir\n", $name);
+    $help .= sprintf("  php %s add target_dir Pirum-1.0.0.tgz\n\n", $name);
 
     return $help;
   }
