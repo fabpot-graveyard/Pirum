@@ -31,7 +31,9 @@
    <dir name="/">
     <file name="LICENSE" role="doc" />
     <file name="README.markdown" role="doc" />
-    <file role="script" baseinstalldir="/" name="pirum" />
+    <file role="script" baseinstalldir="/" name="pirum">
+      <tasks:replace from="@package_version@" to="version" type="package-info" />
+    </file>
    </dir>
  </contents>
  <dependencies>
