@@ -118,14 +118,10 @@ class Pirum_CLI
 
   protected function getUsage()
   {
-    $name = isset($this->options[0]) ? $this->options[0] : 'pirum';
-
-    $help  = $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::VERSION), 'INFO');
-    $help .= $this->formatter->format("Available commands:\n", 'COMMENT');
-    $help .= sprintf("  php %s build target_dir\n", $name);
-    $help .= sprintf("  php %s add target_dir Pirum-1.0.0.tgz\n\n", $name);
-
-    return $help;
+    return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::VERSION), 'INFO') .
+           $this->formatter->format("Available commands:\n", 'COMMENT') .
+           "  pirum build target_dir\n" .
+           "  pirum add target_dir Pirum-1.0.0.tgz\n\n";
   }
 }
 
