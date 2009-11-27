@@ -825,6 +825,8 @@ EOF;
 
       $this->packages[$package->getName()]['maintainers'] = array_merge($package->getMaintainers(), $this->packages[$package->getName()]['maintainers']);
     }
+
+    ksort($this->packages);
   }
 
   protected function mirrorDir($build, $target)
