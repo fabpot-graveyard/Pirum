@@ -92,6 +92,18 @@ class Pirum_CLI
     return $ret;
   }
 
+  public static function version()
+  {
+    if (self::VERSION != '@package_version@')
+    {
+      return self::VERSION;
+    }
+    else
+    {
+      return 'DEV';
+    }
+  }
+
   protected function runAdd($target)
   {
     if (!isset($this->options[3]))
@@ -118,7 +130,7 @@ class Pirum_CLI
 
   protected function getUsage()
   {
-    return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::VERSION), 'INFO') .
+    return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
            $this->formatter->format("Available commands:\n", 'COMMENT') .
            "  pirum build target_dir\n" .
            "  pirum add target_dir Pirum-1.0.0.tgz\n\n";
@@ -306,7 +318,7 @@ EOF
 EOF;
     }
 
-    $version = Pirum_CLI::VERSION;
+    $version = Pirum_CLI::version();
     $index = <<<EOF
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
