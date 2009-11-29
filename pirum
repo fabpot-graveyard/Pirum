@@ -706,7 +706,12 @@ EOF
     {
       foreach ($package['maintainers'] as $nickname => $maintainer)
       {
-        mkdir($dir = $this->buildDir.'/rest/m/'.$nickname, 0777, true);
+        $dir = $this->buildDir.'/rest/m/'.$nickname;
+
+        if (!is_dir($dir))
+        {
+          mkdir($dir, 0777, true);
+        }
 
         $info = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
