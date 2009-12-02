@@ -94,13 +94,13 @@ class Pirum_CLI
 
   public static function version()
   {
-    if (self::VERSION != '@package_version@')
+    if (strpos(self::VERSION, '@package_version') === 0)
     {
-      return self::VERSION;
+      return 'DEV';
     }
     else
     {
-      return 'DEV';
+      return self::VERSION;
     }
   }
 
