@@ -1100,7 +1100,21 @@ class Pirum_Package
     $array = array();
     foreach ($xml->children() as $element => $value)
     {
-      $array[(string) $element] = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
+      $key = (string) $element;
+      $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
+
+      if (array_key_exists($key, $array))
+      {
+        if (!isset($array[0]))
+        {
+          $array[$key] = array($array[$key]);
+        }
+        $array[$key][] = $value;
+      }
+      else
+      {
+        $array[$key] = $value;
+      }
     }
 
     return $array;
