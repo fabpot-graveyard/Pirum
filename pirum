@@ -803,10 +803,10 @@ EOF;
         $package->loadPackageFromArchive();
       }
 
-      $packages[] = $package;
+      $packages[$file] = $package;
     }
 
-    foreach ($packages as $package)
+    foreach ($packages as $file => $package)
     {
       $this->formatter and print $this->formatter->formatSection('INFO', 'Parsing Package '.basename($file));
 
