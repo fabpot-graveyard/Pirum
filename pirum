@@ -808,7 +808,7 @@ EOF;
 
     foreach ($packages as $file => $package)
     {
-      $this->formatter and print $this->formatter->formatSection('INFO', 'Parsing Package '.basename($file));
+      $this->formatter and print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s', $package->getVersion(), $package->getName()));
 
       if ($package->getChannel() != $this->server->name)
       {
