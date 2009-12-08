@@ -1105,7 +1105,7 @@ class Pirum_Package
 
       if (array_key_exists($key, $array))
       {
-        if (!isset($array[0]))
+        if (!isset($array[$key][0]))
         {
           $array[$key] = array($array[$key]);
         }
