@@ -777,7 +777,7 @@ EOF;
     $files = array();
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file)
     {
-      if (!preg_match('#^(.+)\-([\d\.]+((?:RC|BETA|ALPHA)\d*)?)\.tgz$#', $file->getFileName(), $match))
+      if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match))
       {
         continue;
       }
@@ -925,6 +925,8 @@ EOF;
  */
 class Pirum_Package
 {
+  const PACKAGE_FILE_PATTERN = '#^(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha)\d*)?)\.tgz$#i';
+
   protected $package;
   protected $tmpDir;
   protected $name;
@@ -935,13 +937,13 @@ class Pirum_Package
   public function __construct($archive)
   {
     $this->archive = $archive;
-    if (!preg_match('#^(.+)\-([\d\.]+((?:RC|BETA|ALPHA)\d*)?)\.tgz$#', $filename = basename($archive), $match))
+    if (!preg_match(self::PACKAGE_FILE_PATTERN, $filename = basename($archive), $match))
     {
       throw new InvalidArgumentException(sprintf('The archive "%s" does not follow PEAR conventions', $filename));
     }
 
-    $this->name    = $match[1];
-    $this->version = $match[2];
+    $this->name    = $match['name'];
+    $this->version = $match['version'];
 
     $this->tmpDir = sys_get_temp_dir().'/pirum_package_'.uniqid();
 
