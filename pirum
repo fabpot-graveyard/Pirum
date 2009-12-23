@@ -55,7 +55,7 @@ class Pirum_CLI
 
     echo $this->formatter->format(sprintf("Running the %s command:\n", $command), 'COMMENT');
 
-    if (!isset($this->options[2]))
+    if (!isset($this->options[2]) || !is_dir($this->options[2]))
     {
       echo $this->formatter->formatSection('ERROR', "You must give the root dir of the PEAR channel server");
 
@@ -106,7 +106,7 @@ class Pirum_CLI
 
   protected function runAdd($target)
   {
-    if (!isset($this->options[3]))
+    if (!isset($this->options[3]) || !is_file($this->options[3]))
     {
       echo $this->formatter->formatSection('ERROR', "You must pass a PEAR packge file path");
 
