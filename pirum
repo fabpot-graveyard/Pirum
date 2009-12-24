@@ -106,9 +106,16 @@ class Pirum_CLI
 
   protected function runAdd($target)
   {
-    if (!isset($this->options[3]) || !is_file($this->options[3]))
+    if (!isset($this->options[3]))
     {
-      echo $this->formatter->formatSection('ERROR', "You must pass a PEAR packge file path");
+      echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package file path");
+
+      return 1;
+    }
+
+    if (!is_file($this->options[3]))
+    {
+      echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist', $this->options[3]));
 
       return 1;
     }
