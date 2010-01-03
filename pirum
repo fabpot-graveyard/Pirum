@@ -203,6 +203,15 @@ class Pirum_Builder
   {
     $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files");
 
+    $this->updateChannel();
+    $this->updateIndex();
+    $this->updateCss();
+    $this->updateFeed();
+    $this->updatePackages();
+  }
+
+  protected function updateChannel()
+  {
     if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml'))
     {
       if (file_exists($this->targetDir.'/channel.xml'))
@@ -212,10 +221,25 @@ class Pirum_Builder
 
       rename($this->buildDir.'/channel.xml', $this->targetDir.'/channel.xml');
     }
+  }
 
+  protected function updateIndex()
+  {
     copy($this->buildDir.'/index.html', $this->targetDir.'/index.html');
+  }
+
+  protected function updateCss()
+  {
     copy($this->buildDir.'/pirum.css', $this->targetDir.'/pirum.css');
+  }
+
+  protected function updateFeed()
+  {
     copy($this->buildDir.'/feed.xml', $this->targetDir.'/feed.xml');
+  }
+
+  protected function updatePackages()
+  {
     $this->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
   }
 
