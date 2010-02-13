@@ -778,12 +778,18 @@ EOF;
   {
     $this->formatter and print $this->formatter->formatSection('INFO', "Building channel");
 
+    $suggestedalias = '';
+    if (!empty($this->server->alias))
+    {
+      $suggestedalias = '
+  <suggestedalias>'.$this->server->alias.'</suggestedalias>';
+    }
+
     $content = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <channel version="1.0" xmlns="http://pear.php.net/channel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/channel-1.0 http://pear.php.net/dtd/channel-1.0.xsd">
   <name>{$this->server->name}</name>
-  <summary>{$this->server->summary}</summary>
-  <suggestedalias>{$this->server->alias}</suggestedalias>
+  <summary>{$this->server->summary}</summary>{$suggestedalias}
   <servers>
     <primary>
       <rest>
