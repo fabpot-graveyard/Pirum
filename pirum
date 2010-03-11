@@ -126,7 +126,7 @@ class Pirum_CLI
     }
 
     copy($this->options[3], $target.'/get/'.basename($this->options[3]));
-    system('cd '.$target.'/get/ && gunzip '.basename($this->options[3]));
+    system('cd '.$target.'/get/ && gunzip -f '.basename($this->options[3]));
     copy($this->options[3], $target.'/get/'.basename($this->options[3]));
 
     $this->runBuild($target);
