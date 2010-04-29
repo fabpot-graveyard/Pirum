@@ -867,7 +867,7 @@ EOF;
         continue;
       }
 
-      $files[$file->getFileName()] = (string) $file;
+      $files[$match['release']] = (string) $file;
     }
 
     // order files to have latest versions first
@@ -1010,7 +1010,7 @@ EOF;
  */
 class Pirum_Package
 {
-  const PACKAGE_FILE_PATTERN = '#^(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha)\d*)?)\.tgz$#i';
+  const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha)\d*)?))\.tgz$#i';
 
   protected $package;
   protected $tmpDir;
