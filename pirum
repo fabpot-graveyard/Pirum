@@ -503,6 +503,11 @@ EOF;
       $this->buildRelease($dir, $package, $release);
     }
 
+    if (count($package['releases']))
+    {
+      file_put_contents($dir.'/latest.txt', $package['releases'][0]['version']);
+    }
+
     if ($stable)
     {
       file_put_contents($dir.'/stable.txt', $stable);
