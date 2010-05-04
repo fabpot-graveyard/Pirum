@@ -126,8 +126,24 @@ class Pirum_CLI
     }
 
     copy($this->options[3], $target.'/get/'.basename($this->options[3]));
-    system('cd '.$target.'/get/ && gunzip -f '.basename($this->options[3]));
-    copy($this->options[3], $target.'/get/'.basename($this->options[3]));
+    if (function_exists('gzopen'))
+    {
+      $archive = $target.'/get/'.basename($this->options[3]);
+      $gz = gzopen($archive, 'r');
+      $fp = fopen(str_replace('.tgz', '.tar', $archive), 'wb');
+      $tar = '';
+      while (!gzeof($gz))
+      {
+        fwrite($fp, gzread($gz, 10000));
+      }
+      gzclose($gz);
+      fclose($fp);
+    }
+    else
+    {
+      system('cd '.$target.'/get/ && gunzip -f '.basename($this->options[3]));
+      copy($this->options[3], $target.'/get/'.basename($this->options[3]));
+    }
 
     $this->runBuild($target);
 
@@ -1037,7 +1053,30 @@ class Pirum_Package
 
   public function __destruct()
   {
-    system('rm -rf '.$this->tmpDir);
+    $this->removeDir($this->tmpDir);
+  }
+
+  protected function removeDir($target)
+  {
+    $fp = opendir($target);
+    while (false !== $file = readdir($fp))
+    {
+      if (in_array($file, array('.', '..')))
+      {
+        continue;
+      }
+
+      if (is_dir($target.'/'.$file))
+      {
+        $this->removeDir($target.'/'.$file);
+        rmdir($target.'/'.$file);
+      }
+      else
+      {
+        unlink($target.'/'.$file);
+      }
+    }
+    closedir($fp);
   }
 
   public function getDate($format = 'Y-m-d H:i:s')
@@ -1171,15 +1210,66 @@ class Pirum_Package
 
   public function loadPackageFromArchive()
   {
-    copy($this->archive, $this->tmpDir.'/archive.tgz');
-    system('cd '.$this->tmpDir.' && tar zxpf archive.tgz');
-
-    if (!is_file($this->tmpDir.'/package.xml'))
+    if (!function_exists('gzopen'))
     {
-      throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
+      copy($this->archive, $this->tmpDir.'/archive.tgz');
+      system('cd '.$this->tmpDir.' && tar zxpf archive.tgz');
+
+      if (!is_file($this->tmpDir.'/package.xml'))
+      {
+        throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
+      }
+
+      $this->loadPackageFromFile($this->tmpDir.'/package.xml');
+
+      return;
     }
 
-    $this->loadPackageFromFile($this->tmpDir.'/package.xml');
+    $gz = gzopen($this->archive, 'r');
+    $tar = '';
+    while (!gzeof($gz))
+    {
+      $tar .= gzread($gz, 10000);
+    }
+    gzclose($gz);
+
+    while (strlen($tar))
+    {
+      $filename = rtrim(substr($tar, 0, 100), chr(0));
+      $filesize = octdec(rtrim(substr($tar, 124, 12), chr(0)));
+
+      if ($filename != 'package.xml')
+      {
+        $offset = $filesize % 512 == 0 ? $filesize : $filesize + (512 - $filesize % 512);
+        $tar = substr($tar, 512 + $offset);
+
+        continue;
+      }
+
+      $checksum = octdec(rtrim(substr($tar, 148, 8), chr(0)));
+      $cchecksum = 0;
+      $tar = substr_replace($tar, '        ', 148, 8);
+      for ($i = 0; $i < 512; $i++)
+      {
+        $cchecksum += ord($tar[$i]);
+      }
+
+      if ($checksum != $cchecksum)
+      {
+        throw new InvalidArgumentException('The PEAR archive is not a valid archive.');
+      }
+
+      $package = substr($tar, 512, $filesize);
+      $this->packageFile = $this->tmpDir.'/package.xml';
+
+      file_put_contents($this->packageFile, $package);
+
+      $this->loadPackageFromFile($this->tmpDir.'/package.xml');
+
+      return;
+    }
+
+    throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
   }
 
   protected function XMLToArray($xml)
