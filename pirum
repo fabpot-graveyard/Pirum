@@ -306,7 +306,8 @@ EOF;
 
     protected function buildCss()
     {
-        if (file_exists($file = dirname(__FILE__).'/templates/pirum.css')) {
+        if (file_exists($file = dirname(__FILE__).'/templates/pirum.css') ||
+            file_exists($file = $this->buildDir.'/templates/pirum.css')) {
             $content = file_get_contents($file);
         } else {
             $content = <<<EOF
@@ -343,7 +344,8 @@ EOF;
 
         $version = Pirum_CLI::version();
 
-        if (file_exists($file = dirname(__FILE__).'/templates/index.html')) {
+        if (file_exists($file = dirname(__FILE__).'/templates/index.html') ||
+            file_exists($file = $this->buildDir.'/templates/index.html')) {
             ob_start();
             include $file;
             $html = ob_get_clean();
