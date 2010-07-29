@@ -108,6 +108,12 @@ class Pirum_CLI
             return 1;
         }
 
+        if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
+
+            return 1;
+        }
+
         if (!is_dir($target.'/get')) {
             mkdir($target.'/get', 0777, true);
         }
