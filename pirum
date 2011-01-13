@@ -32,6 +32,7 @@ class Pirum_CLI
     protected $commands = array(
         'build',
         'add',
+        'clone-package',
     );
 
     public function __construct(array $options)
@@ -74,6 +75,9 @@ class Pirum_CLI
                     break;
                 case 'add':
                     $ret = $this->runAdd($target);
+                    break;
+                case 'clone-package':
+                    $ret = $this->runClonePackage($target);
                     break;
             }
 
@@ -148,17 +152,55 @@ class Pirum_CLI
         $builder = new Pirum_Builder($target, $this->formatter);
         $builder->build();
     }
-    
+
+    protected function runClonePackage($target)
+    {
+        if (!isset($this->options[3])) {
+            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package file path");
+
+            return 1;
+        }
+
+        $pb = new Pirum_Builder($target);
+
+        mkdir('build-tmp');
+        chdir('build-tmp');
+        $tgz = file_get_contents($this->options[3]);
+        $package = basename($this->options[3]);
+        file_put_contents($package, $tgz);
+        unset($tgz);
+
+        $pathinfo = pathinfo($package);
+        system('tar -zxf ' . escapeshellarg($package));
+        unlink($package);
+
+        $xml = simplexml_load_file('package.xml');
+        $xml->channel = $pb->getServer()->name;
+        $xml->asXML('package.xml');
+        unset($pb, $xml);
+
+        system('tar -zcf ../' . escapeshellarg($package) . ' *');
+        chdir("../");
+        system('rm -rf build-tmp/');
+
+        $this->options[3] = $package;
+
+        $this->runAdd($target);
+        unlink($package);
+        return 0;
+    }
+
     protected function isCommand($cmd) {
         return in_array($cmd, $this->commands);
     }
-    
+
     protected function getUsage()
     {
         return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
                      $this->formatter->format("Available commands:\n", 'COMMENT') .
                      "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n\n";
+                     "  pirum add target_dir Pirum-1.0.0.tgz\n" . 
+                     "  pirum clone-package target_dir http://pear.pirum-project.org/get/Pirum-1.0.0.tgz\n\n";
     }
 }
 
@@ -211,6 +253,11 @@ class Pirum_Builder
         $this->targetDir = $targetDir;
         $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
         mkdir($this->buildDir.'/rest', 0777, true);
+    }
+
+    public function getServer()
+    {
+        return $this->server;
     }
 
     public function build()
