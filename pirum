@@ -424,7 +424,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         $releases = implode(', ', $releases);
                         ?>
                         <li><strong>Releases</strong>: <?php echo $releases ?></li>
-                        <li><strong>Install command</strong>: pear install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></li>
+                        <li><strong>Install command</strong>: <?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></li>
                     </ul>
 
                     <hr />
@@ -884,6 +884,7 @@ EOF;
                     'license'     => htmlspecialchars($package->getLicense()),
                     'summary'     => htmlspecialchars($package->getSummary()),
                     'description' => htmlspecialchars($package->getDescription()),
+                    'extension'   => $package->getProvidedExtension(),
                     'releases'    => array(),
                     'maintainers' => array(),
                     'current_maintainers' => $package->getMaintainers(),
@@ -1126,6 +1127,10 @@ class Pirum_Package
     public function getVersion()
     {
         return $this->version;
+    }
+
+    public function getProvidedExtension() {
+        return isset($this->package->providesextension) ? (string)$this->package->providesextension : null;
     }
 
     public function copyPackageXml($target)
