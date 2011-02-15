@@ -880,10 +880,10 @@ EOF;
 
             if (!isset($this->packages[$package->getName()])) {
                 $this->packages[$package->getName()] = array(
-                    'name'        => $package->getName(),
-                    'license'     => $package->getLicense(),
-                    'summary'     => $package->getSummary(),
-                    'description' => $package->getDescription(),
+                    'name'        => htmlspecialchars($package->getName()),
+                    'license'     => htmlspecialchars($package->getLicense()),
+                    'summary'     => htmlspecialchars($package->getSummary()),
+                    'description' => htmlspecialchars($package->getDescription()),
                     'releases'    => array(),
                     'maintainers' => array(),
                     'current_maintainers' => $package->getMaintainers(),
@@ -898,7 +898,7 @@ EOF;
                 'filesize'    => $package->getFilesize(),
                 'php'         => $package->getMinPhp(),
                 'deps'        => $package->getDeps(),
-                'notes'       => $package->getNotes(),
+                'notes'       => htmlspecialchars($package->getNotes()),
                 'maintainers' => $package->getMaintainers(),
                 'info'        => $package,
             );
