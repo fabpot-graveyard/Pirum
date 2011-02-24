@@ -32,6 +32,7 @@ class Pirum_CLI
     protected $commands = array(
         'build',
         'add',
+        'remove',
     );
 
     public function __construct(array $options)
@@ -75,6 +76,9 @@ class Pirum_CLI
                 case 'add':
                     $ret = $this->runAdd($target);
                     break;
+                case 'remove':
+                    $ret = $this->runRemove($target);
+                    break;
             }
 
             if (0 == $ret) {
@@ -96,6 +100,32 @@ class Pirum_CLI
         } else {
             return self::VERSION;
         }
+    }
+    
+    protected function runRemove($target) 
+    {
+        if (!isset($this->options[3])) {
+            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package name");
+
+            return 1;
+        }
+        
+        if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
+
+            return 1;
+        }
+        
+        if (!is_file($target.'/get/'.basename($this->options[3]))) {
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist in this channel', $this->options[3]));
+
+            return 1;
+        }
+
+        unlink($target.'/get/'.basename($this->options[3]));
+        unlink($target.'/get/'.substr_replace(basename($this->options[3]), '.tar', -4));
+        
+        $this->runBuild($target);
     }
 
     protected function runAdd($target)
@@ -158,7 +188,8 @@ class Pirum_CLI
         return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
                      $this->formatter->format("Available commands:\n", 'COMMENT') .
                      "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n\n";
+                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
+                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
     }
 }
 
@@ -424,7 +455,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         $releases = implode(', ', $releases);
                         ?>
                         <li><strong>Releases</strong>: <?php echo $releases ?></li>
-                        <li><strong>Install command</strong>: pear install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></li>
+                        <li><strong>Install command</strong>: <?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></li>
                     </ul>
 
                     <hr />
@@ -890,6 +921,7 @@ EOF;
                     'license'     => htmlspecialchars($package->getLicense()),
                     'summary'     => htmlspecialchars($package->getSummary()),
                     'description' => htmlspecialchars($package->getDescription()),
+                    'extension'   => $package->getProvidedExtension(),
                     'releases'    => array(),
                     'maintainers' => array(),
                     'current_maintainers' => $package->getMaintainers(),
@@ -983,7 +1015,7 @@ EOF;
  */
 class Pirum_Package
 {
-    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha)\d*)?))\.tgz$#i';
+    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev)\d*)?))\.tgz$#i';
 
     protected $package;
     protected $tmpDir;
@@ -1132,6 +1164,10 @@ class Pirum_Package
     public function getVersion()
     {
         return $this->version;
+    }
+
+    public function getProvidedExtension() {
+        return isset($this->package->providesextension) ? (string)$this->package->providesextension : null;
     }
 
     public function copyPackageXml($target)
