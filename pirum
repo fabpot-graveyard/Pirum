@@ -880,6 +880,12 @@ EOF;
     <suggestedalias>'.$this->server->alias.'</suggestedalias>';
         }
 
+        $validator = '';
+        if (!empty($this->server->validatepackage) && !empty($this->server->validateversion)) {
+            $validator = '
+    <validatepackage version="'.$this->server->validateversion.'">'.$this->server->validatepackage.'</validatepackage>';
+        }
+
         $content = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <channel version="1.0" xmlns="http://pear.php.net/channel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/channel-1.0 http://pear.php.net/dtd/channel-1.0.xsd">
@@ -894,7 +900,7 @@ EOF;
                 <baseurl type="REST1.3">{$this->server->url}/rest/</baseurl>
             </rest>
         </primary>
-    </servers>
+    </servers>{$validator}
 </channel>
 EOF;
 
