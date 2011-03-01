@@ -496,6 +496,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $alpha = '';
         $beta = '';
         $stable = '';
+        $snapshot = '';
         $allreleases = '';
         $allreleases2 = '';
         foreach ($package['releases'] as $release) {
@@ -506,6 +507,8 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 $beta = $release['version'];
             } elseif ('alpha' == $release['stability'] && !$alpha) {
                 $alpha = $release['version'];
+            } elseif ('snapshot' == $release['stability'] && !$snapshot) {
+                $snapshot = $release['version'];
             }
 
             $allreleases .= <<<EOF
@@ -542,6 +545,10 @@ EOF;
 
         if ($alpha) {
             file_put_contents($dir.'/alpha.txt', $alpha);
+        }
+
+        if ($snapshot) {
+            file_put_contents($dir.'/snapshot.txt', $snapshot);
         }
 
         file_put_contents($dir.'/allreleases.xml', <<<EOF
@@ -1009,7 +1016,7 @@ EOF;
  */
 class Pirum_Package
 {
-    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev)\d*)?))\.tgz$#i';
+    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
 
     protected $package;
     protected $tmpDir;
