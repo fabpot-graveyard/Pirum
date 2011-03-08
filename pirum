@@ -93,6 +93,25 @@ class Pirum_CLI
         return $ret;
     }
 
+    public static function removeDir($target)
+    {
+        $fp = opendir($target);
+        while (false !== $file = readdir($fp)) {
+            if (in_array($file, array('.', '..')))
+            {
+                continue;
+            }
+
+            if (is_dir($target.'/'.$file)) {
+                self::removeDir($target.'/'.$file);
+            } else {
+                unlink($target.'/'.$file);
+            }
+        }
+        closedir($fp);
+        rmdir($target);
+    }
+
     public static function version()
     {
         if (strpos(self::VERSION, '@package_version') === 0) {
@@ -242,6 +261,11 @@ class Pirum_Builder
         $this->targetDir = $targetDir;
         $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
         mkdir($this->buildDir.'/rest', 0777, true);
+    }
+
+    public function __destruct()
+    {
+        Pirum_CLI::removeDir($this->buildDir);
     }
 
     public function build()
@@ -1041,26 +1065,7 @@ class Pirum_Package
 
     public function __destruct()
     {
-        $this->removeDir($this->tmpDir);
-    }
-
-    protected function removeDir($target)
-    {
-        $fp = opendir($target);
-        while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
-                continue;
-            }
-
-            if (is_dir($target.'/'.$file)) {
-                $this->removeDir($target.'/'.$file);
-                rmdir($target.'/'.$file);
-            } else {
-                unlink($target.'/'.$file);
-            }
-        }
-        closedir($fp);
+        Pirum_CLI::removeDir($this->tmpDir);
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
