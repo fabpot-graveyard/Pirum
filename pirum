@@ -175,6 +175,9 @@ class Pirum_CLI
         if (function_exists('gzopen')) {
             $archive = $target.'/get/'.basename($this->options[3]);
             $gz = gzopen($archive, 'r');
+            if ($gz === false) {
+                throw new Exception(sprintf('Failed extracting archive "%s"!', $this->archive));
+            }
             $fp = fopen(str_replace('.tgz', '.tar', $archive), 'wb');
             $tar = '';
             while (!gzeof($gz)) {
@@ -1213,6 +1216,9 @@ class Pirum_Package
         }
 
         $gz = gzopen($this->archive, 'r');
+        if ($gz === false) {
+            throw new Exception(sprintf('Failed extracting archive "%s"!', $this->archive));
+        }
         $tar = '';
         while (!gzeof($gz)) {
             $tar .= gzread($gz, 10000);
