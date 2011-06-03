@@ -1351,7 +1351,6 @@ class Pirum_CLI_Formatter
      *
      * @param string  $section  The section name
      * @param string  $text     The text message
-     * @param string  $style    The color scheme to apply to the section string
      */
     public function formatSection($section, $text)
     {
