@@ -53,6 +53,7 @@ class Pirum_CLI
         'build',
         'add',
         'remove',
+        'clean',
     );
 
     public function __construct(array $options)
@@ -98,6 +99,9 @@ class Pirum_CLI
                     break;
                 case 'remove':
                     $ret = $this->runRemove($target);
+                    break;
+                case 'clean':
+                    $ret = $this->runClean($target);
                     break;
             }
 
@@ -165,6 +169,21 @@ class Pirum_CLI
         unlink($target.'/get/'.substr_replace(basename($this->options[3]), '.tar', -4));
 
         $this->runBuild($target);
+    }
+
+    protected function runClean($target)
+    {
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($target, RecursiveDirectoryIterator::SKIP_DOTS)) as $file) {
+            if ($file->getFilename() == 'pirum.xml') {
+                continue;
+            }
+
+            if ($file->isDir()) {
+                rmdir($file);
+            } else {
+                unlink($file);
+            }
+        }
     }
 
     protected function runAdd($target)
