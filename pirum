@@ -9,6 +9,26 @@
  * file that was distributed with this source code.
  */
 
+if(php_sapi_name() !== 'CLI' && isset($_REQUEST['__rest']))
+{
+    if ($_SERVER['REQUEST_METHOD'] == 'POST')
+    {
+        $argv = array(
+            __FILE__,
+            'add',
+            $_FILES['package']['tmp_name']
+        );
+    }
+    else if($_SERVER['REQUEST_METHOD'] == 'DELETE')
+    {
+        $argv = array(
+            __FILE__,
+            'delete',
+            $_REQUEST['package']
+        );
+    }
+}
+
 // only run Pirum automatically when this file is called directly
 // from the command line
 if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
@@ -259,6 +279,7 @@ class Pirum_Builder
         $this->extractInformationFromPackages();
 
         $this->fixArchives();
+        $this->buildSelf();
         $this->buildChannel();
         $this->buildMaintainers();
         $this->buildCategories();
@@ -269,6 +290,12 @@ class Pirum_Builder
         $this->buildFeed();
 
         $this->updateTargetDir();
+    }
+
+    private function buildSelf()
+    {
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building self");
+        file_put_contents($this->buildDir.'/pirum.php', file_get_contents(__FILE__));
     }
 
     protected function fixArchives()
@@ -300,11 +327,17 @@ class Pirum_Builder
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files");
 
+        $this->updateSelf();
         $this->updateChannel();
         $this->updateIndex();
         $this->updateCss();
         $this->updateFeed();
         $this->updatePackages();
+    }
+
+    protected function updateSelf()
+    {
+        copy($this->buildDir.'/pirum.php', $this->targetDir.'/pirum.php');
     }
 
     protected function updateChannel()
