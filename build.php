@@ -1,7 +1,7 @@
 <?php
 
 $baseDir    = __dir__;
-$buildDir   = $baseDir.'/build';
+$buildDir   = $baseDir.'/builders';
 $classesDir = $baseDir.'/classes';
 $stubsDir   = $baseDir.'/stubs';
 $standalone = $baseDir.'/pirum';
