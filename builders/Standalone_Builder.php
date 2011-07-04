@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: fqqdk
- * Date: 7/4/11
- * Time: 3:35 PM
- * To change this template use File | Settings | File Templates.
- */
  
 class Standalone_Builder implements Builder
 {
@@ -16,17 +9,16 @@ class Standalone_Builder implements Builder
         $this->classesDir = $classesDir;
     }
 
-    public function build(Project $project)
+    public function build(FileSystem $fs)
     {
-        $targetFile = new TargetFile($this->targetPath);
-        $targetFile->clean();
+        $fs->deleteFile($this->targetPath);
 
-        foreach ($project->resourceDir($this->stubsDir) as $classFile) {
-            $targetFile->append(file_get_contents($classFile));
+        foreach ($fs->resourceDir($this->stubsDir) as $classFile) {
+            $fs->appendTo($this->targetPath, $fs->contentsOf($classFile));
         }
 
-        foreach ($project->resourceDir($this->classesDir) as $classFile) {
-            $targetFile->append(file_get_contents($classFile));
+        foreach ($fs->resourceDir($this->classesDir) as $classFile) {
+            $fs->appendTo($this->targetPath, $fs->contentsOf($classFile));
         }
     }
 }

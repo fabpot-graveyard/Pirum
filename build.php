@@ -1,23 +1,7 @@
 <?php
 
-interface Project {
-	public function resourceDir($dir);
-}
-
-class PirumProject implements Project
+class FileSystem
 {
-	private $baseDir;
-
-	public function  __construct($baseDir) {
-		$this->baseDir = $baseDir;
-	}
-
-	public static function build()
-	{
-		$project = new self(__dir__);
-		exit($project->buildAll());
-	}
-
 	public function resourceDir($dir) {
 		return new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator(
@@ -27,31 +11,65 @@ class PirumProject implements Project
 		);
 	}
 
+	public function deleteFile($file)
+	{
+		if(file_exists($file)) {
+			unlink($file);
+		}
+	}
+
+	public function deleteGlob($glob)
+	{
+		foreach (glob($glob) as $file) {
+			if (is_file($file)) {
+				$this->deleteFile($file);
+			}
+		}
+	}
+
+	public function appendTo($file, $contents)
+	{
+		file_put_contents($file, $contents, FILE_APPEND);
+	}
+
+	public function contentsOf($file)
+	{
+		return file_get_contents($file);
+	}
+}
+
+interface Builder
+{
+	public function build(FileSystem $fs);
+}
+
+class PirumBuilder
+{
+	private $baseDir;
+
+	public function  __construct($baseDir) {
+		$this->baseDir = $baseDir;
+	}
+
 	public function buildAll()
 	{
-		$this->loadFramework();
-		$this->loadBuilders();
-		$this->runBuilders();
+		$fs = new FileSystem();
+
+		$this->loadBuilders($fs);
+		$this->runBuilders($fs);
 	}
 
-	private function loadFramework()
+	private function loadBuilders($fs)
 	{
-		foreach ($this->resourceDir($this->baseDir.'/buildfw') as $file) {
+		foreach ($fs->resourceDir($this->baseDir.'/builders') as $file) {
 			require_once $file;
 		}
 	}
 
-	private function loadBuilders()
-	{
-		foreach ($this->resourceDir($this->baseDir.'/builders') as $file) {
-			require_once $file;
-		}
-	}
-
-	private function runBuilders()
+	private function runBuilders($fs)
 	{
 		foreach ($this->builders() as $builder) {
-			$builder->build($this);
+			$builder->build($fs);
 		}
 	}
 
@@ -62,7 +80,7 @@ class PirumProject implements Project
 	}
 
 	function builders() {
-		$targetDir = $this->baseDir.'/target';
+		$targetDir = $this->baseDir;
 
 		switch ($this->target()) {
 			case 'clean' : return array(
@@ -80,11 +98,17 @@ class PirumProject implements Project
 			);
 		}
 	}
+
+	public static function build()
+	{
+		$project = new self(__dir__);
+		exit($project->buildAll());
+	}
 }
 
 
 if (isset($_SERVER['argv'][0]) && __FILE__ == realpath($_SERVER['argv'][0])) {
-	PirumProject::build();
+	PirumBuilder::build();
 }
 
 ?>

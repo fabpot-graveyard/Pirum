@@ -14,7 +14,7 @@ class PearPackage_Builder implements Builder
 		$this->targetDir = $targetDir;
 	}
 
-    public function build(Project $project)
+    public function build(FileSystem $fs)
     {
 		$oldCwd = getcwd();
 		chdir($this->targetDir);
