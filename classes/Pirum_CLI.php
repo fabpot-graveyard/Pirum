@@ -11,6 +11,9 @@ class Pirum_CLI
     const VERSION = '@package_version@';
 
     protected $options;
+	/**
+	 * @var Pirum_CLI_Formatter
+	 */
     protected $formatter;
     protected $commands = array(
         'build',
@@ -25,9 +28,19 @@ class Pirum_CLI
         $this->formatter = $formatter;
     }
 
-    public function run()
+
+    public static function version()
     {
-        echo $this->getUsage();
+        if (strpos(self::VERSION, '@package_version') === 0) {
+            return 'DEV';
+        } else {
+            return self::VERSION;
+        }
+    }
+
+	public function run()
+    {
+		$this->formatter->printUsage(self::version());
 
         if (!isset($this->options[1])) {
             return 0;
@@ -35,17 +48,17 @@ class Pirum_CLI
 
         $command = $this->options[1];
         if (!$this->isCommand($command)) {
-            echo $this->formatter->formatSection('ERROR', sprintf('"%s" is not a valid command', $command));
-
-            return 1;
+			return $this->formatter->error(
+				'"%s" is not a valid command', $command
+			);
         }
 
-        echo $this->formatter->format(sprintf("Running the %s command:\n", $command), 'COMMENT');
+		$this->formatter->comment("Running the %s command:\n", $command);
 
         if (!isset($this->options[2]) || !is_dir($this->options[2])) {
-            echo $this->formatter->formatSection('ERROR', "You must give the root dir of the PEAR channel server");
-
-            return 1;
+			return $this->formatter->error(
+				"You must give the root dir of the PEAR channel server"
+			);
         }
 
         $target = $this->options[2];
@@ -69,12 +82,10 @@ class Pirum_CLI
             }
 
             if (0 == $ret) {
-                echo $this->formatter->formatSection('INFO', sprintf("Command %s run successfully", $command));
+				$this->formatter->info("Command %s run successfully", $command);
             }
         } catch (Exception $e) {
-            echo $this->formatter->formatSection('ERROR', sprintf("%s (%s, %s)", $e->getMessage(), get_class($e), $e->getCode()));
-
-            return 1;
+			return $this->formatter->exception($e);
         }
 
         return $ret;
@@ -97,15 +108,6 @@ class Pirum_CLI
         }
         closedir($fp);
         rmdir($target);
-    }
-
-    public static function version()
-    {
-        if (strpos(self::VERSION, '@package_version') === 0) {
-            return 'DEV';
-        } else {
-            return self::VERSION;
-        }
     }
 
     protected function runRemove($target)
@@ -188,15 +190,6 @@ class Pirum_CLI
 
     protected function isCommand($cmd) {
         return in_array($cmd, $this->commands);
-    }
-
-    protected function getUsage()
-    {
-        return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
-                     $this->formatter->format("Available commands:\n", 'COMMENT') .
-                     "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
-                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
     }
 }
 

@@ -76,5 +76,48 @@ class Pirum_CLI_Formatter
 
         return sprintf("  %s %s\n", $this->format($section, $style), $text);
     }
+
+	private function getText(array $args)
+	{
+		if (count($args) == 0) {
+			throw new UnexpectedValueException('No text given');
+		}
+
+		if (count($args) == 1) {
+			return $args[0];
+		}
+
+		return call_user_func_array('sprintf', $args);
+	}
+
+	public function error()
+	{
+		echo $this->formatSection('ERROR', $this->getText(func_get_args()));
+		return 1;
+	}
+
+	public function exception($e)
+	{
+		return $this->error("%s (%s, %s)", $e->getMessage(), get_class($e), $e->getCode());
+	}
+
+	public function comment()
+	{
+		echo $this->format($this->getText(func_get_args()), 'COMMENT');
+	}
+
+	public function info()
+	{
+		echo $this->formatSection('INFO', $this->getText(func_get_args()));
+	}
+
+    public function printUsage($version)
+    {
+        return $this->format(sprintf("Pirum %s by Fabien Potencier\n", $version), 'INFO') .
+                     $this->format("Available commands:\n", 'COMMENT') .
+                     "  pirum build target_dir\n" .
+                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
+                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
+    }
 }
 ?>
