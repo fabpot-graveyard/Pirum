@@ -7,10 +7,18 @@
  * To change this template use File | Settings | File Templates.
  */
  
-class PearPackage_Builder
+class PearPackage_Builder implements Builder
 {
-    public function build()
+	public function  __construct($targetDir)
+	{
+		$this->targetDir = $targetDir;
+	}
+
+    public function build(Project $project)
     {
+		$oldCwd = getcwd();
+		chdir($this->targetDir);
         exec('pear package');
+		chdir($oldCwd);
     }
 }
