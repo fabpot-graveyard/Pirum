@@ -84,7 +84,9 @@ class Pirum_CLI
             if (0 == $ret) {
 				$this->formatter->info("Command %s run successfully", $command);
             }
-        } catch (Exception $e) {
+        } catch (Pirum_Package_Exception $e) {
+			return $this->formatter->error($e->getMessage());
+		} catch (Exception $e) {
 			return $this->formatter->exception($e);
         }
 
@@ -110,31 +112,49 @@ class Pirum_CLI
         rmdir($target);
     }
 
-    protected function runRemove($target)
+    protected function runRemove($targetDir)
     {
-        if (!isset($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package name");
+		$pearPackage = $this->getPearPackage();
 
-            return 1;
+        if (!is_file($targetDir.'/get/'.basename($pearPackage))) {
+            return $this->formatter->error(
+				'The PEAR package "%s" does not exist in this channel',
+				$pearPackage
+			);
         }
 
-        if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
+        unlink($targetDir.'/get/'.basename($pearPackage));
+        unlink($targetDir.'/get/'.substr_replace(basename($pearPackage), '.tar', -4));
 
-            return 1;
-        }
-
-        if (!is_file($target.'/get/'.basename($this->options[3]))) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist in this channel', $this->options[3]));
-
-            return 1;
-        }
-
-        unlink($target.'/get/'.basename($this->options[3]));
-        unlink($target.'/get/'.substr_replace(basename($this->options[3]), '.tar', -4));
-
-        $this->runBuild($target);
+        $this->runBuild($targetDir);
     }
+
+    protected function runAdd($targetDir)
+    {
+		$pearPackage = $this->getPearPackage();
+
+        if (!is_file($pearPackage)) {
+			throw new Pirum_Package_Exception(sprintf(
+				'The PEAR package "%s" does not exist',
+				$pearPackage
+			));
+        }
+
+        if (!is_dir($targetDir.'/get')) {
+            mkdir($targetDir.'/get', 0777, true);
+        }
+
+        copy($this->options[3], $targetDir.'/get/'.basename($this->options[3]));
+
+        $this->runBuild($targetDir);
+
+        $package = $this->options[3];
+    }
+
+	private function isValidPearPackageFileName($pearPackage)
+	{
+		return (bool)preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $pearPackage);
+	}
 
     protected function runClean($target)
     {
@@ -151,36 +171,21 @@ class Pirum_CLI
         }
     }
 
-    protected function runAdd($target)
-    {
+	private function getPearPackage()
+	{
         if (!isset($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package file path");
-
-            return 1;
+			throw new Pirum_Package_Exception('You must pass a PEAR package file path');
         }
 
-        if (!is_file($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist', $this->options[3]));
-
-            return 1;
+        if (!$this->isValidPearPackageFileName($pearPackage)) {
+            throw new Pirum_Package_Exception(sprintf(
+				'The PEAR package "%s" filename is badly formatted',
+				$this->options[3]
+			));
         }
 
-        if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
-
-            return 1;
-        }
-
-        if (!is_dir($target.'/get')) {
-            mkdir($target.'/get', 0777, true);
-        }
-
-        copy($this->options[3], $target.'/get/'.basename($this->options[3]));
-
-        $this->runBuild($target);
-
-        $package = $this->options[3];
-    }
+		return $this->options[3];
+	}
 
     protected function runBuild($target)
     {
