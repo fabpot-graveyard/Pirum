@@ -19,10 +19,10 @@ class Pirum_CLI
         'clean',
     );
 
-    public function __construct(array $options)
+    public function __construct(array $options, $formatter)
     {
-        $this->options = $options;
-        $this->formatter = new Pirum_CLI_Formatter();
+        $this->options   = $options;
+        $this->formatter = $formatter;
     }
 
     public function run()

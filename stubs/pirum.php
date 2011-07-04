@@ -33,7 +33,7 @@ if(php_sapi_name() !== 'CLI' && isset($_REQUEST['__rest']))
 // from the command line
 if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
 {
-    $cli = new Pirum_CLI($argv);
+    $cli = new Pirum_CLI($argv, new Pirum_CLI_Formatter());
     exit($cli->run());
 }
 ?>
