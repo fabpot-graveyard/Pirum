@@ -6,7 +6,7 @@
  * @package    Pirum
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class Pirum_Builder
+class Pirum_Server_Builder
 {
     protected $buildDir;
     protected $targetDir;
@@ -14,7 +14,7 @@ class Pirum_Builder
     protected $packages;
     protected $formatter;
 
-    public function __construct($targetDir, $formatter = false)
+    public function __construct($targetDir, $formatter)
     {
         if (!file_exists($targetDir.'/pirum.xml')) {
             throw new InvalidArgumentException('You must create a "pirum.xml" file at the root of the target dir.');

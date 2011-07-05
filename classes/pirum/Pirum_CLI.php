@@ -189,7 +189,7 @@ class Pirum_CLI
 
     protected function runBuild($target)
     {
-        $builder = new Pirum_Builder($target, $this->formatter);
+        $builder = new Pirum_Server_Builder($target, $this->formatter);
         $builder->build();
     }
 
