@@ -69,6 +69,33 @@ class FileSystem
 	{
 		return sys_get_temp_dir().'/'.$seed.'_'.uniqid();
 	}
+
+	public function createTempDir($seed, $path = '')
+	{
+		$result = sys_get_temp_dir().'/'.$seed.'_'.uniqid();
+		$this->mkDir($result.$path);
+		var_dump($result.$path);
+		return $result;
+	}
+
+    public function removeDir($target)
+    {
+        $fp = opendir($target);
+        while (false !== $file = readdir($fp)) {
+            if (in_array($file, array('.', '..')))
+            {
+                continue;
+            }
+
+            if (is_dir($target.'/'.$file)) {
+                $this->removeDir($target.'/'.$file);
+            } else {
+                unlink($target.'/'.$file);
+            }
+        }
+        closedir($fp);
+        rmdir($target);
+    }
 }
 
 ?>

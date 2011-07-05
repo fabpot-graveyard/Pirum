@@ -22,16 +22,9 @@ class Pirum_Server_Builder
         $this->buildDir  = $buildDir;
     }
 
-    public function __destruct()
+    public function build($fs)
     {
-        Pirum_CLI::removeDir($this->buildDir);
-    }
-
-    public function build()
-    {
-		mkdir($this->buildDir.'/rest', 0777, true);
-
-        $this->extractInformationFromPackages();
+        $this->extractInformationFromPackages($fs);
 
         $this->fixArchives();
         $this->buildSelf();
@@ -707,7 +700,11 @@ EOF;
         file_put_contents($this->buildDir.'/channel.xml', $content);
     }
 
-    protected function extractInformationFromPackages()
+	/**
+	 *
+	 * @param FileSystem $fs
+	 */
+    protected function extractInformationFromPackages($fs)
     {
         $this->packages = array();
 
@@ -728,14 +725,17 @@ EOF;
         // get information for each package
         $packages = array();
         foreach ($files as $file) {
-            $package = new Pirum_Package($file);
+			$packageTmpDir = $fs->createTempDir('pirum_package');
+            $package       = new Pirum_Package($file);
+
             if (file_exists($file = $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml')) {
                 $package->loadPackageFromFile($file);
             } else {
-                $package->loadPackageFromArchive();
+                $package->loadPackageFromArchive($packageTmpDir);
             }
 
             $packages[$file] = $package;
+			$fs->removeDir($packageTmpDir);
         }
 
         foreach ($packages as $file => $package) {

@@ -69,23 +69,23 @@ class Pirum_CLI
 			);
         }
 
-        $target = $this->options[2];
+        $serverDir = $this->options[2];
 
         $ret = 0;
         try {
             switch ($command)
             {
                 case 'build':
-                    $this->runBuild($target);
+                    $this->runBuild($serverDir);
                     break;
                 case 'add':
-                    $ret = $this->runAdd($target);
+                    $ret = $this->runAdd($serverDir);
                     break;
                 case 'remove':
-                    $ret = $this->runRemove($target);
+                    $ret = $this->runRemove($serverDir);
                     break;
                 case 'clean':
-                    $ret = $this->runClean($target);
+                    $ret = $this->runClean($serverDir);
                     break;
             }
 
@@ -99,25 +99,6 @@ class Pirum_CLI
         }
 
         return $ret;
-    }
-
-    public static function removeDir($target)
-    {
-        $fp = opendir($target);
-        while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
-                continue;
-            }
-
-            if (is_dir($target.'/'.$file)) {
-                self::removeDir($target.'/'.$file);
-            } else {
-                unlink($target.'/'.$file);
-            }
-        }
-        closedir($fp);
-        rmdir($target);
     }
 
     protected function runRemove($targetDir)
@@ -197,10 +178,12 @@ class Pirum_CLI
 
     protected function runBuild($targetDir)
     {
-        $this->createServerBuilder($targetDir)->build();
+		$buildDir = $this->fs->createTempDir('pirum_build', '/rest');
+        $this->createServerBuilder($targetDir, $buildDir)->build($this->fs);
+		$this->fs->removeDir($buildDir);
     }
 
-	private function createServerBuilder($targetDir)
+	private function createServerBuilder($targetDir, $buildDir)
 	{
         if (!$this->fs->fileExists($targetDir.'/pirum.xml')) {
             throw new InvalidArgumentException(
@@ -232,8 +215,6 @@ class Pirum_CLI
         if (!empty($emptyFields)) {
             throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml: %s.', implode(', ', $emptyFields)));
         }
-
-		$buildDir = $this->fs->getTempDir('pirum_build');
 
         return new Pirum_Server_Builder($targetDir, $buildDir, $this->formatter, $server);
 	}

@@ -10,7 +10,6 @@ class Pirum_Package
     const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
 
     protected $package;
-    protected $tmpDir;
     protected $name;
     protected $version;
     protected $archive;
@@ -25,15 +24,6 @@ class Pirum_Package
 
         $this->name    = $match['name'];
         $this->version = $match['version'];
-
-        $this->tmpDir = sys_get_temp_dir().'/pirum_package_'.uniqid();
-
-        mkdir($this->tmpDir, 0777, true);
-    }
-
-    public function __destruct()
-    {
-        Pirum_CLI::removeDir($this->tmpDir);
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
@@ -165,17 +155,17 @@ class Pirum_Package
         }
     }
 
-    public function loadPackageFromArchive()
+    public function loadPackageFromArchive($tmpDir)
     {
         if (!function_exists('gzopen')) {
-            copy($this->archive, $this->tmpDir.'/archive.tgz');
-            system('cd '.$this->tmpDir.' && tar zxpf archive.tgz');
+            copy($this->archive, $tmpDir.'/archive.tgz');
+            system('cd '.$tmpDir.' && tar zxpf archive.tgz');
 
-            if (!is_file($this->tmpDir.'/package.xml')) {
+            if (!is_file($tmpDir.'/package.xml')) {
                 throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
             }
 
-            $this->loadPackageFromFile($this->tmpDir.'/package.xml');
+            $this->loadPackageFromFile($tmpDir.'/package.xml');
 
             return;
         }
@@ -210,11 +200,11 @@ class Pirum_Package
             }
 
             $package = substr($tar, 512, $filesize);
-            $this->packageFile = $this->tmpDir.'/package.xml';
+            $this->packageFile = $tmpDir.'/package.xml';
 
             file_put_contents($this->packageFile, $package);
 
-            $this->loadPackageFromFile($this->tmpDir.'/package.xml');
+            $this->loadPackageFromFile($tmpDir.'/package.xml');
 
             return;
         }
