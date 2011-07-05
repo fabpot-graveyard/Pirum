@@ -45,6 +45,30 @@ class FileSystem
 	{
 		return file_get_contents($file);
 	}
+
+	public function isDir($dir)
+	{
+		return is_dir($dir);
+	}
+
+	public function fileExists($file)
+	{
+		return file_exists($file);
+	}
+
+	public function mkDir($dir)
+	{
+        if ($this->isDir($dir)) {
+			return;
+        }
+
+		mkdir($dir, 0777, true);
+	}
+
+	public function getTempDir($seed)
+	{
+		return sys_get_temp_dir().'/'.$seed.'_'.uniqid();
+	}
 }
 
 ?>

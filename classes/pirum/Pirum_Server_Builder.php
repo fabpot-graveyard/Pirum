@@ -14,41 +14,12 @@ class Pirum_Server_Builder
     protected $packages;
     protected $formatter;
 
-    public function __construct($targetDir, $formatter)
+    public function __construct($targetDir, $buildDir, $formatter, $server)
     {
-        if (!file_exists($targetDir.'/pirum.xml')) {
-            throw new InvalidArgumentException('You must create a "pirum.xml" file at the root of the target dir.');
-        }
-
-        if (!is_dir($targetDir.'/get')) {
-            mkdir($targetDir.'/get', 0777, true);
-        }
-
-        $this->server = simplexml_load_file($targetDir.'/pirum.xml');
-
-        if (!$this->server) {
-            throw new InvalidArgumentException('Invalid pirum.xml (you must have a <server> tag).');
-        }
-
-        $emptyFields = array();
-        if (empty($this->server->name)) {
-            $emptyFields[] = 'name';
-        }
-        if (empty($this->server->summary)) {
-            $emptyFields[] = 'summary';
-        }
-        if (empty($this->server->url)) {
-            $emptyFields[] = 'url';
-        }
-
-        if (!empty($emptyFields)) {
-            throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml: %s.', implode(', ', $emptyFields)));
-        }
-
+		$this->server    = $server;
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
-        $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
-        mkdir($this->buildDir.'/rest', 0777, true);
+        $this->buildDir  = $buildDir;
     }
 
     public function __destruct()
@@ -58,6 +29,8 @@ class Pirum_Server_Builder
 
     public function build()
     {
+		mkdir($this->buildDir.'/rest', 0777, true);
+
         $this->extractInformationFromPackages();
 
         $this->fixArchives();

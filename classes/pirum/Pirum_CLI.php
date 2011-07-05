@@ -11,10 +11,7 @@ class Pirum_CLI
     const VERSION = '@package_version@';
 
     protected $options;
-	/**
-	 * @var Pirum_CLI_Formatter
-	 */
-    protected $formatter;
+
     protected $commands = array(
         'build',
         'add',
@@ -22,10 +19,21 @@ class Pirum_CLI
         'clean',
     );
 
-    public function __construct(array $options, $formatter)
+	/**
+	 * @var Pirum_CLI_Formatter
+	 */
+    protected $formatter;
+
+	/**
+	 * @var FileSystem
+	 */
+	protected $fs;
+
+    public function __construct(array $options, $formatter, $fs)
     {
         $this->options   = $options;
         $this->formatter = $formatter;
+		$this->fs        = $fs;
     }
 
 
@@ -187,11 +195,48 @@ class Pirum_CLI
 		return $this->options[3];
 	}
 
-    protected function runBuild($target)
+    protected function runBuild($targetDir)
     {
-        $builder = new Pirum_Server_Builder($target, $this->formatter);
-        $builder->build();
+        $this->createServerBuilder($targetDir)->build();
     }
+
+	private function createServerBuilder($targetDir)
+	{
+        if (!$this->fs->fileExists($targetDir.'/pirum.xml')) {
+            throw new InvalidArgumentException(
+				'You must create a "pirum.xml" file at the root of the target dir.'
+			);
+        }
+
+		$this->fs->mkDir($targetDir.'/get');
+
+        $server = simplexml_load_file($targetDir.'/pirum.xml');
+
+        if (!$server) {
+            throw new InvalidArgumentException(
+				'Invalid pirum.xml (you must have a <server> tag).'
+			);
+        }
+
+        $emptyFields = array();
+        if (empty($server->name)) {
+            $emptyFields[] = 'name';
+        }
+        if (empty($server->summary)) {
+            $emptyFields[] = 'summary';
+        }
+        if (empty($server->url)) {
+            $emptyFields[] = 'url';
+        }
+
+        if (!empty($emptyFields)) {
+            throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml: %s.', implode(', ', $emptyFields)));
+        }
+
+		$buildDir = $this->fs->getTempDir('pirum_build');
+
+        return new Pirum_Server_Builder($targetDir, $buildDir, $this->formatter, $server);
+	}
 
     protected function isCommand($cmd) {
         return in_array($cmd, $this->commands);
