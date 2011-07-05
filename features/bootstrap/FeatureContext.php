@@ -53,7 +53,7 @@ class FeatureContext extends BehatContext
     public function thePirumBuildFilesAreCleaned()
     {
 
-		PirumBuilder::build(array('', 'clean'));
+		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
     }
 
     /**
@@ -61,7 +61,7 @@ class FeatureContext extends BehatContext
      */
     public function thePirumStandaloneIsBuilt()
     {
-		PirumBuilder::build();
+		Pirum_Base_Builder::build($this->baseDir, array(''));
 	}
 
     /**
