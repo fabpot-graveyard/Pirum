@@ -17,34 +17,32 @@ class FeatureContext extends BehatContext
      */
     public function __construct(array $parameters)
     {
-        $this->baseDir = __dir__.'/../../';
+        $this->baseDir     = __dir__.'/../../';
+		$this->channelUrl  = 'http://localhost/pear/';
+		$this->channelDesc = 'Dummy Pear Channel';
+		$this->webRoot     = '/var/www/pear';
+
 		require_once $this->baseDir.'/build.php';
     }
 
-   /**
-     * @Given /^there is a directory '(.+)'$/
+    /**
+     * @Given /^pirum xml file is in place$/
      */
-    public function thereIsADirectory($dir)
+    public function pirumXmlFileIsInPlace()
     {
-        if (!is_dir($dir)) {
-			throw new Exception;
+		if (!is_dir($this->webRoot)) {
+			mkdir($this->webRoot, 0777, true);
 		}
-    }
-
-	/**
-	 * @Given /^the pirum\.xml is in place$/
-	 */
-    public function thePirumxmlIsInPlace()
-    {
 		file_put_contents(
 			'/var/www/pear/pirum.xml',
 			'<?xml version="1.0" encoding="UTF-8" ?>
-	<server>
-		<name>dummy</name>
-		<summary>Dummy PEAR channel</summary>
-		<alias>dummy</alias>
-		<url>http://localhost/</url>
-	</server>');
+			<server>
+				<name>dummy</name>
+				<summary>'.$this->channelDesc.'</summary>
+				<alias>dummy</alias>
+				<url>'.$this->channelUrl.'</url>
+			</server>'
+		);
     }
 
    /**
@@ -52,7 +50,6 @@ class FeatureContext extends BehatContext
      */
     public function thePirumBuildFilesAreCleaned()
     {
-
 		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
     }
 
@@ -95,4 +92,14 @@ class FeatureContext extends BehatContext
 		}
     }
 
+    /**
+     * @Given /^the server index contains channel description$/
+     */
+    public function theServerIndexContainsChannelDescription()
+    {
+        $index = file_get_contents($this->channelUrl);
+		if (false === strpos($index, $this->channelDesc)) {
+			throw new Exception();
+		}
+    }
 }
