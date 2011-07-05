@@ -47,8 +47,9 @@ class PirumBuilder
 {
 	private $baseDir;
 
-	public function  __construct($baseDir) {
+	public function  __construct($baseDir, array $argv) {
 		$this->baseDir = $baseDir;
+		$this->argv    = $argv;
 	}
 
 	public function buildAll()
@@ -74,8 +75,8 @@ class PirumBuilder
 	}
 
 	function target() {
-		return isset($_SERVER['argv'][1])
-			? $_SERVER['argv'][1]
+		return isset($this->argv[1])
+			? $this->argv[1]
 			: null;
 	}
 
@@ -99,16 +100,16 @@ class PirumBuilder
 		}
 	}
 
-	public static function build()
+	public static function build(array $argv = null)
 	{
-		$project = new self(__dir__);
-		exit($project->buildAll());
+		$project = new self(__dir__, null === $argv ? $_SERVER['argv'] : $argv);
+		return $project->buildAll();
 	}
 }
 
 
 if (isset($_SERVER['argv'][0]) && __FILE__ == realpath($_SERVER['argv'][0])) {
-	PirumBuilder::build();
+	exit(PirumBuilder::build());
 }
 
 ?>
