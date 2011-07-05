@@ -7,16 +7,6 @@ use Behat\Behat\Context\ClosuredContextInterface,
 use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode;
 
-//
-// Require 3rd-party libraries here:
-//
-//   require_once 'PHPUnit/Autoload.php';
-//   require_once 'PHPUnit/Framework/Assert/Functions.php';
-//
-
-/**
- * Features context.
- */
 class FeatureContext extends BehatContext
 {
     /**
@@ -27,7 +17,8 @@ class FeatureContext extends BehatContext
      */
     public function __construct(array $parameters)
     {
-        // Initialize your context here
+        $this->baseDir = __dir__.'/../../';
+		require_once $this->baseDir.'/build.php';
     }
 
    /**
@@ -40,13 +31,29 @@ class FeatureContext extends BehatContext
 		}
     }
 
-    /**
+	/**
+	 * @Given /^the pirum\.xml is in place$/
+	 */
+    public function thePirumxmlIsInPlace()
+    {
+		file_put_contents(
+			'/var/www/pear/pirum.xml',
+			'<?xml version="1.0" encoding="UTF-8" ?>
+	<server>
+		<name>dummy</name>
+		<summary>Dummy PEAR channel</summary>
+		<alias>dummy</alias>
+		<url>http://localhost/</url>
+	</server>');
+    }
+
+   /**
      * @Given /^the pirum build files are cleaned$/
      */
     public function thePirumBuildFilesAreCleaned()
     {
-		require_once __dir__.'/../../build.php';
-		\PirumBuilder::build(array('', 'clean'));
+
+		PirumBuilder::build(array('', 'clean'));
     }
 
     /**
@@ -54,8 +61,7 @@ class FeatureContext extends BehatContext
      */
     public function thePirumStandaloneIsBuilt()
     {
-		require_once __dir__.'/../../build.php';
-		\PirumBuilder::build();
+		PirumBuilder::build();
 	}
 
     /**

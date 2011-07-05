@@ -5,6 +5,7 @@ Feature: Build
 
   Scenario: Build localhost
     Given there is a directory '/var/www/pear'
+		And the pirum.xml is in place
 		And the pirum build files are cleaned
 		And the pirum standalone is built
 	When I issue the command `php pirum build '/var/www/pear'`
