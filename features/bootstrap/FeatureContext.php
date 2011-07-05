@@ -78,31 +78,15 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @Given /^pirum files should exist$/
+     * @Given /^the following files should exist in '([^\']*)':$/
      */
-    public function pirumFilesShouldExist()
+    public function theFollowingFilesShouldExistIn($dir, TableNode $table)
     {
-//		www
-//		├── channel.xml
-//		├── feed.xml
-//		├── get
-//		├── index.html
-//		├── pirum.css
-//		├── pirum.php
-//		├── pirum.xml
-//		└── rest
-//			├── c
-//			│   ├── categories.xml
-//			│   └── Default
-//			│       ├── info.xml
-//			│       ├── packagesinfo.xml
-//			│       └── packages.xml
-//			├── m
-//			│   └── allmaintainers.xml
-//			├── p
-//			│   └── packages.xml
-//			└── r
-		throw new Pending("check directory tree");
+		foreach ($table->getHash() as $row) {
+			if (!file_exists($dir.'/'.$row['file'])) {
+				throw new Exception('File '.$row['file'].' does not exist!');
+			}
+		}
     }
 
 }

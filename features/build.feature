@@ -9,5 +9,19 @@ Feature: Build
 		And the pirum standalone is built
 	When I issue the command `php pirum build '/var/www'`
 	Then the exit status of the command should be 0
-		And pirum files should exist
+		And the following files should exist in '/var/www':
+			| file                            |
+			| channel.xml                     |
+			| feed.xml                        |
+			| index.html                      |
+			| pirum.css                       |
+			| pirum.php                       |
+			| pirum.xml                       |
+			| rest/c/categories.xml           |
+			| rest/c/Default/info.xml         |
+			| rest/c/Default/packagesinfo.xml |
+			| rest/c/Default/packages.xml     |
+			| rest/m/allmaintainers.xml       |
+			| rest/p/packages.xml             |
+
   
