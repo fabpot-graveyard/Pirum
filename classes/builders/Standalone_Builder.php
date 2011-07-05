@@ -1,6 +1,6 @@
 <?php
  
-class Standalone_Builder implements Builder
+class Standalone_Builder
 {
     public function __construct($targetPath, $startStub, $endStub, $classesDir)
     {

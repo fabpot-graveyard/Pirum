@@ -1,6 +1,6 @@
 <?php
 
-class PearPackage_Builder implements Builder
+class PearPackage_Builder
 {
 	public function  __construct($targetDir)
 	{

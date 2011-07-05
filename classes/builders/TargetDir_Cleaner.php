@@ -2,7 +2,7 @@
 /**
  * @author fqqdk
  */
-class TargetDir_Cleaner implements Builder
+class TargetDir_Cleaner
 {
 	public function __construct($targetDir)
 	{
