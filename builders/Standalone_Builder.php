@@ -2,10 +2,11 @@
  
 class Standalone_Builder implements Builder
 {
-    public function __construct($targetPath, $stubsDir, $classesDir)
+    public function __construct($targetPath, $startStub, $endStub, $classesDir)
     {
         $this->targetPath = $targetPath;
-        $this->stubsDir   = $stubsDir;
+        $this->startStub  = $startStub;
+        $this->endStub    = $endStub;
         $this->classesDir = $classesDir;
     }
 
@@ -13,13 +14,13 @@ class Standalone_Builder implements Builder
     {
         $fs->deleteFile($this->targetPath);
 
-        foreach ($fs->resourceDir($this->stubsDir) as $classFile) {
-            $fs->appendTo($this->targetPath, $fs->contentsOf($classFile));
-        }
+		$fs->appendTo($this->targetPath, $fs->contentsOf($this->startStub));
 
         foreach ($fs->resourceDir($this->classesDir) as $classFile) {
             $fs->appendTo($this->targetPath, $fs->contentsOf($classFile));
         }
+
+		$fs->appendTo($this->targetPath, $fs->contentsOf($this->endStub));
     }
 }
 

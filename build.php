@@ -92,7 +92,8 @@ class PirumBuilder
 			return array(
 				new Standalone_Builder(
 					$targetDir.'/pirum',
-					$this->baseDir.'/stubs',
+					$this->baseDir.'/stubs/pirum_start.php',
+					$this->baseDir.'/stubs/pirum_end.php',
 					$this->baseDir.'/classes'
 				),
 				new PearPackage_Builder($targetDir),
