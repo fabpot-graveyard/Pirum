@@ -4,12 +4,12 @@ Feature: Build
   I want to be able to build it using the executable
 
   Scenario: Build localhost
-    Given there is a directory '/var/www'
+    Given there is a directory '/var/www/pear'
 		And the pirum build files are cleaned
 		And the pirum standalone is built
-	When I issue the command `php pirum build '/var/www'`
+	When I issue the command `php pirum build '/var/www/pear'`
 	Then the exit status of the command should be 0
-		And the following files should exist in '/var/www':
+		And the following files should exist in '/var/www/pear':
 			| file                            |
 			| channel.xml                     |
 			| feed.xml                        |
