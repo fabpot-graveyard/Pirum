@@ -166,7 +166,7 @@ class Pirum_CLI
 			throw new Pirum_Package_Exception('You must pass a PEAR package file path');
         }
 
-        if (!$this->isValidPearPackageFileName($pearPackage)) {
+        if (!$this->isValidPearPackageFileName($this->options[3])) {
             throw new Pirum_Package_Exception(sprintf(
 				'The PEAR package "%s" filename is badly formatted',
 				$this->options[3]

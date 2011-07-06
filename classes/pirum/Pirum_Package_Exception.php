@@ -1,6 +1,6 @@
 <?php
 
-class Pirum_Package_Exception
+class Pirum_Package_Exception extends Exception
 {
 }
 
