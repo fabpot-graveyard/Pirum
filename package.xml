@@ -1,68 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package 
+	packagerversion="1.8.0"
+	version="2.0"
+	xmlns="http://pear.php.net/dtd/package-2.0"
+	xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
     http://pear.php.net/dtd/tasks-1.0.xsd
     http://pear.php.net/dtd/package-2.0
     http://pear.php.net/dtd/package-2.0.xsd">
- <name>Pirum</name>
- <channel>pear.pirum-project.org</channel>
- <summary>Pirum is a simple PEAR channel server manager.</summary>
- <description>
-   Pirum is a simple PEAR channel server manager.
- </description>
- <lead>
-  <name>Fabien Potencier</name>
-  <user>fabpot</user>
-  <email>fabien.potencier@symfony-project.org</email>
-  <active>yes</active>
- </lead>
- <date>2011-03-27</date>
- <time>12:00:00</time>
- <version>
-  <release>1.0.1</release>
-  <api>1.0.0</api>
- </version>
- <stability>
-  <release>stable</release>
-  <api>stable</api>
- </stability>
- <license uri="http://www.opensource.org/licenses/mit-license.php">MIT</license>
- <notes>-</notes>
- <contents>
-   <dir name="/">
-    <file name="LICENSE" role="doc" />
-    <file name="README.markdown" role="doc" />
-    <file role="script" baseinstalldir="/" name="pirum">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file role="script" baseinstalldir="/" name="pirum.bat">
-      <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
-      <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
-    </file>
-   </dir>
- </contents>
- <dependencies>
-  <required>
-   <php>
-    <min>5.2.1</min>
-   </php>
-   <pearinstaller>
-    <min>1.4.0</min>
-   </pearinstaller>
-  </required>
- </dependencies>
- <phprelease>
-  <installconditions>
-   <os>
-    <name>windows</name>
-   </os>
-  </installconditions>
-  <filelist>
-   <install name="pirum.bat" as="pirum.bat" />
-  </filelist>
- </phprelease>
- <phprelease>
-  <filelist>
-   <ignore name="pirum.bat" />
-  </filelist>
- </phprelease>
+
+	<name>Pirum</name>
+	<channel>pear.pirum-project.org</channel>
+	<summary>Pirum is a simple PEAR channel server manager.</summary>
+	<description>Pirum is a simple PEAR channel server manager.</description>
+
+	<lead>
+		<name>Fabien Potencier</name>
+		<user>fabpot</user>
+		<email>fabien.potencier@symfony-project.org</email>
+		<active>yes</active>
+	</lead>
+
+	<date>2011-03-27</date>
+	<time>12:00:00</time>
+
+	<version>
+		<release>1.0.1</release>
+		<api>1.0.0</api>
+	</version>
+
+	<stability>
+		<release>stable</release>
+		<api>stable</api>
+	</stability>
+
+	<license uri="http://www.opensource.org/licenses/mit-license.php">MIT</license>
+
+	<notes>-</notes>
+
+	<contents>
+		<dir name="/">
+			<file name="LICENSE" role="doc" />
+			<file name="README.markdown" role="doc" />
+			<file role="script" baseinstalldir="/" name="pirum">
+				<tasks:replace from="@package_version@" to="version" type="package-info" />
+			</file>
+			<file role="script" baseinstalldir="/" name="pirum.bat">
+				<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+				<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+			</file>
+		</dir>
+	</contents>
+
+	<dependencies>
+		<required>
+			<php><min>5.2.1</min></php>
+			<pearinstaller><min>1.4.0</min></pearinstaller>
+		</required>
+	</dependencies>
+
+	<phprelease>
+		<installconditions>
+			<os><name>windows</name></os>
+		</installconditions>
+		<filelist>
+			<install name="pirum.bat" as="pirum.bat" />
+		</filelist>
+	</phprelease>
+
+	<phprelease>
+		<filelist>
+		<ignore name="pirum.bat" />
+		</filelist>
+	</phprelease>
 </package>

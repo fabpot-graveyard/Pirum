@@ -23,36 +23,42 @@ class Pirum_Base_Builder
 		}
 	}
 
-	function target() {
-		return isset($this->argv[1])
-			? $this->argv[1]
-			: null;
+	function buildJobs()
+	{
+		if (!isset($this->argv[1])) {
+			$this->argv[1] = 'build';
+		}
+		return array_splice($this->argv, 1);
 	}
 
 	function builders() {
 		$targetDir = $this->baseDir;
+		$buildJobs = $this->buildJobs();
 
-		switch ($this->target()) {
-			case 'clean' : return array(
-				new TargetDir_Cleaner($targetDir)
-			);
+		foreach ($buildJobs as $buildJob) {
+			switch ($buildJob) {
+				case 'clean' : return array(
+					new TargetDir_Cleaner($targetDir)
+				);
 
-			default :
-			return array(
-				new Standalone_Builder(
-					$targetDir.'/pirum',
-					$this->baseDir.'/stubs/pirum_start.php',
-					$this->baseDir.'/stubs/pirum_end.php',
-					$this->baseDir.'/classes'
-				),
-				new PearPackage_Builder($targetDir),
-			);
+				case 'build': return array(
+					new Standalone_Builder(
+						$targetDir.'/pirum',
+						$this->baseDir.'/stubs/pirum_start.php',
+						$this->baseDir.'/stubs/pirum_end.php',
+						$this->baseDir.'/classes'
+					),
+					new PearPackage_Builder($targetDir),
+				);
+				default :
+					throw new Exception('Invalid build job: '.$buildJob);
+			}
 		}
 	}
 
 	public static function build($baseDir, array $argv = null)
 	{
-		$project = new self($baseDir, $argv);
+		$project = new Pirum_Base_Builder($baseDir, $argv);
 		return $project->buildAll();
 	}
 }

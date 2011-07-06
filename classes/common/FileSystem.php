@@ -2,11 +2,9 @@
 
 class FileSystem
 {
-	public static function loadClasses($dir)
+	public function loadClasses($dir)
 	{
-		$fs = new FileSystem();
-		foreach ($fs->resourceDir($dir) as $classFile)
-		{
+		foreach ($this->resourceDir($dir) as $classFile) {
 			require_once $classFile;
 		}
 	}
