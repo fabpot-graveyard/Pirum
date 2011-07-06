@@ -23,19 +23,18 @@ class Pirum_Server_Builder
 	 */
     protected $formatter;
 
-    public function __construct($targetDir, $buildDir, $fs, $formatter, $server)
+    public function __construct($targetDir, $buildDir, $fs, $formatter, $server, $packages)
     {
 		$this->server    = $server;
 		$this->fs        = $fs;
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = $buildDir;
+		$this->packages  = $packages;
     }
 
     public function build()
     {
-        $this->extractInformationFromPackages();
-
         $this->fixArchives();
         $this->buildSelf();
         $this->buildChannel();
@@ -57,22 +56,6 @@ class Pirum_Server_Builder
         $this->updatePackages();
     }
 
-	private function getServerName()
-	{
-		return $this->server->name;
-	}
-
-    protected function extractInformationFromPackages()
-    {
-		$repoBuilder    = new Pirum_Repository_Builder(
-			$this->getServerName(),
-			$this->targetDir,
-			$this->fs,
-			$this->formatter
-		);
-		$this->packages = $repoBuilder->build();
-    }
-
     private function buildSelf()
     {
 		$this->formatter->info("Building self");
@@ -82,8 +65,8 @@ class Pirum_Server_Builder
     protected function fixArchives()
     {
         // create tar files when missing
-        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+        foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
+            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName())) {
                 continue;
             }
 

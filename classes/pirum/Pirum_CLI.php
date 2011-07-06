@@ -230,8 +230,17 @@ class Pirum_CLI
 			));
         }
 
+		$repoBuilder = new Pirum_Repository_Builder(
+			$server->name,
+			$targetDir,
+			$this->fs,
+			$this->formatter
+		);
+
         return new Pirum_Server_Builder(
-			$targetDir, $buildDir, $this->fs, $this->formatter, $server
+			$targetDir, $buildDir,
+			$this->fs, $this->formatter,
+			$server, $repoBuilder->build()
 		);
 	}
 
