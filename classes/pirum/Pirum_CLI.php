@@ -190,7 +190,7 @@ class Pirum_CLI
     protected function runBuild($targetDir)
     {
 		$buildDir = $this->fs->createTempDir('pirum_build', '/rest');
-        $this->createServerBuilder($targetDir, $buildDir)->build($this->fs);
+        $this->createServerBuilder($targetDir, $buildDir)->build();
 		$this->fs->removeDir($buildDir);
     }
 
@@ -224,10 +224,15 @@ class Pirum_CLI
         }
 
         if (!empty($emptyFields)) {
-            throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml: %s.', implode(', ', $emptyFields)));
+            throw new InvalidArgumentException(sprintf(
+				'You must fill required tags in your pirum.xml: %s.',
+				implode(', ', $emptyFields)
+			));
         }
 
-        return new Pirum_Server_Builder($targetDir, $buildDir, $this->formatter, $server);
+        return new Pirum_Server_Builder(
+			$targetDir, $buildDir, $this->fs, $this->formatter, $server
+		);
 	}
 
     protected function isCommand($cmd) {

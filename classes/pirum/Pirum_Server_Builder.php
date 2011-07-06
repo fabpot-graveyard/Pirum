@@ -12,19 +12,29 @@ class Pirum_Server_Builder
     protected $targetDir;
     protected $server;
     protected $packages;
+
+	/**
+	 * @var FileSystem
+	 */
+	protected $fs;
+
+	/**
+	 * @var Pirum_CLI_Formatter
+	 */
     protected $formatter;
 
-    public function __construct($targetDir, $buildDir, $formatter, $server)
+    public function __construct($targetDir, $buildDir, $fs, $formatter, $server)
     {
 		$this->server    = $server;
+		$this->fs        = $fs;
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = $buildDir;
     }
 
-    public function build($fs)
+    public function build()
     {
-        $this->extractInformationFromPackages($fs);
+        $this->extractInformationFromPackages($this->fs);
 
         $this->fixArchives();
         $this->buildSelf();
@@ -37,12 +47,12 @@ class Pirum_Server_Builder
         $this->buildCss();
         $this->buildFeed();
 
-        $this->updateTargetDir($fs);
+        $this->updateTargetDir($this->fs);
     }
 
     private function buildSelf()
     {
-        print $this->formatter->formatSection('INFO', "Building self");
+		$this->formatter->info("Building self");
         file_put_contents($this->buildDir.'/pirum.php', file_get_contents(__FILE__));
     }
 
@@ -634,23 +644,23 @@ EOF;
         file_put_contents($this->buildDir.'/channel.xml', $content);
     }
 
-	/**
-	 *
-	 * @param FileSystem $fs
-	 */
-    protected function extractInformationFromPackages($fs)
+    protected function extractInformationFromPackages()
     {
         $this->packages = array();
 
         // get all package files
         $files = array();
-        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+
+		foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
+			if ($this->fs->isDir($file)) {
+				continue;
+			}
+            if (null === $releaseInfo = $this->getReleaseInfoFrom($file)) {
                 continue;
             }
 
-            $files[$match['release']] = (string) $file;
-        }
+            $files[$releaseInfo] = (string) $file;
+		}
 
         // order files to have latest versions first
         uksort($files, 'version_compare');
@@ -659,13 +669,13 @@ EOF;
         // get information for each package
         $packages = array();
         foreach ($files as $file) {
-			$packageTmpDir = $fs->createTempDir('pirum_package');
+			$packageTmpDir = $this->fs->createTempDir('pirum_package');
             $package       = new Pirum_Package($file);
 
 			$package->loadWith($this);
 
             $packages[$file] = $package;
-			$fs->removeDir($packageTmpDir);
+			$this->fs->removeDir($packageTmpDir);
         }
 
         foreach ($packages as $file => $package) {
@@ -706,6 +716,15 @@ EOF;
 
         ksort($this->packages);
     }
+
+	private function getReleaseInfoFrom(SplFileInfo $file)
+	{
+		if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+			return null;
+		}
+
+		return $match['release'];
+	}
 
 	public function getPackageXmlFor($package)
 	{
