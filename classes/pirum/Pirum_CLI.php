@@ -48,7 +48,7 @@ class Pirum_CLI
 
 	public function run()
     {
-		$this->formatter->printUsage(self::version());
+		$this->printUsage();
 
         if (!isset($this->options[1])) {
             return 0;
@@ -100,6 +100,17 @@ class Pirum_CLI
 
         return $ret;
     }
+
+	private function printUsage()
+	{
+		$this->formatter->comment("Pirum %s by Fabien Potencier".PHP_EOL, self::version());
+		$this->formatter->comment("Available commands:".PHP_EOL);
+		$this->formatter->printUsage(array(
+			"  pirum build target_dir",
+			"  pirum add target_dir Pirum-1.0.0.tgz",
+			"  pirum remove target_dir Pirum-1.0.0.tgz",
+		));
+	}
 
     protected function runRemove($targetDir)
     {

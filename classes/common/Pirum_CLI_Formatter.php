@@ -111,13 +111,9 @@ class Pirum_CLI_Formatter
 		echo $this->formatSection('INFO', $this->getText(func_get_args()));
 	}
 
-    public function printUsage($version)
+    public function printUsage($usage)
     {
-        return $this->format(sprintf("Pirum %s by Fabien Potencier\n", $version), 'INFO') .
-                     $this->format("Available commands:\n", 'COMMENT') .
-                     "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
-                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
+		echo implode(PHP_EOL, $usage).PHP_EOL.PHP_EOL;
     }
 }
 ?>
