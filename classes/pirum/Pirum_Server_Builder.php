@@ -57,17 +57,27 @@ class Pirum_Server_Builder
         $this->updatePackages();
     }
 
+	private function getServerName()
+	{
+		return $this->server->name;
+	}
+
     protected function extractInformationFromPackages()
     {
         $this->packages = array();
 
 		$files    = $this->getPackageFiles();
-		$packages = $this->getPackagesInfo($files);
+		$packages = $this->getPackageList($files);
 
+		$this->packages = $this->processPackageList($packages);
+    }
+
+	private function processPackageList($packages)
+	{
         foreach ($packages as $file => $package) {
 			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
 
-            if ($package->getChannel() != $this->server->name) {
+            if ($package->getChannel() != $this->getServerName()) {
                 throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
             }
 
@@ -77,7 +87,9 @@ class Pirum_Server_Builder
         }
 
         ksort($this->packages);
-    }
+
+		return $this->packages;
+	}
 
 	private function initPackageMetaData($package)
 	{
@@ -142,7 +154,7 @@ class Pirum_Server_Builder
 		return $files;
 	}
 
-	private function getPackagesInfo(array $files)
+	private function getPackageList(array $files)
 	{
         $packages = array();
         foreach ($files as $file) {
