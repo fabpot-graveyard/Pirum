@@ -21,6 +21,7 @@ class FeatureContext extends BehatContext
 		require_once $this->baseDir.'/build.php';
 
 		$this->fs          = new FileSystem();
+		$this->channelName = 'dummy';
 		$this->channelUrl  = 'http://localhost/pear/';
 		$this->channelDesc = 'Dummy Pear Channel';
 		$this->webRoot     = '/var/www/pear';
@@ -39,7 +40,7 @@ class FeatureContext extends BehatContext
 			'/var/www/pear/pirum.xml',
 			'<?xml version="1.0" encoding="UTF-8" ?>
 			<server>
-				<name>dummy</name>
+				<name>'.$this->channelName.'</name>
 				<summary>'.$this->channelDesc.'</summary>
 				<alias>dummy</alias>
 				<url>'.$this->channelUrl.'</url>
@@ -47,19 +48,12 @@ class FeatureContext extends BehatContext
 		);
     }
 
-   /**
-     * @Given /^the pirum build files are cleaned$/
-     */
-    public function thePirumBuildFilesAreCleaned()
-    {
-		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
-    }
-
     /**
      * @Given /^the pirum standalone is built$/
      */
     public function thePirumStandaloneIsBuilt()
     {
+		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
 		Pirum_Base_Builder::build($this->baseDir, array(''));
 	}
 
@@ -68,10 +62,7 @@ class FeatureContext extends BehatContext
      */
     public function iIssueTheCommandPhpPirumBuild()
     {
-        exec('php pirum build '.$this->webRoot, $output, $exitStatus);
-
-		if (0 !== $exitStatus) {
-			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+		if (0 !== $this->execute('php pirum build '.$this->webRoot)) {
 			throw new Exception();
 		}
     }
@@ -81,37 +72,165 @@ class FeatureContext extends BehatContext
      */
     public function theServerIndexContainsChannelDescription()
     {
-        $index = file_get_contents($this->channelUrl);
-		if (false === strpos($index, $this->channelDesc)) {
+		if (false === $this->textContains($this->serverIndex(), $this->channelDesc)) {
 			throw new Exception();
 		}
     }
+
+	private function serverIndex()
+	{
+		return file_get_contents($this->channelUrl);
+	}
+
+	private function textContains($baseText, $text, $afterText = '')
+	{
+		$afterPos = $afterText ? strpos($baseText, $afterText) : 0;
+		return false !== strpos($baseText, $text, $afterPos);
+	}
 
     /**
      * @Given /^the channel is discoverable$/
      */
     public function theChannelIsDiscoverable()
     {
-		$channel = str_replace('http://', '', $this->channelUrl);
 		$tmpDir = $this->fs->createTempDir('pear_installation');
+
+		$this->discoverChannel($tmpDir);
+
+		$this->fs->removeDir($tmpDir);
+    }
+
+	private function discoverChannel($tmpDir)
+	{
+		$channel = str_replace('http://', '', $this->channelUrl);
 		$cfgFile = $tmpDir.'/dummyconfig';
 
-		exec('pear config-create '.$tmpDir. ' '. $cfgFile, $output, $exitStatus);
-
-		if (0 !== $exitStatus) {
-			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+		if (0 !== $this->execute('pear config-create '.$tmpDir. ' '. $cfgFile)) {
 			$this->fs->removeDir($tmpDir);
 			throw new Exception();
 		}
 
-        exec('pear -c '.$cfgFile.' channel-discover '.$channel, $output, $exitStatus);
-
-		if (0 !== $exitStatus) {
-			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+		if (0 !== $this->execute('pear -c '.$cfgFile.' channel-discover '.$channel)) {
 			$this->fs->removeDir($tmpDir);
 			throw new Exception();
 		}
 
+		return $cfgFile;
+	}
+
+	private function execute($command)
+	{
+		exec($command, $output, $exitStatus);
+
+		if (0 !== $exitStatus) {
+			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+		}
+
+		return $exitStatus;
+	}
+
+    /**
+     * @Given /^a built up pirum repo is in place$/
+     */
+    public function aBuiltUpPirumRepoIsInPlace()
+    {
+		$this->thePirumStandaloneIsBuilt();
+        $this->pirumXmlFileIsInPlace();
+		$this->iIssueTheCommandPhpPirumBuild();
+    }
+
+    /**
+     * @Given /^the pirum repo does not contain package$/
+     */
+    public function thePirumRepoDoesNotContainPackage()
+    {
+        return false === $this->textContains($this->serverIndex(), 'Dummy-1.0.0', 'Packages');
+    }
+
+    /**
+     * @When /^I issue the command `php pirum add packagename`$/
+     */
+    public function iIssueTheCommandPhpPirumAddPackagename()
+    {
+		$tmpDir   = $this->fs->createTempDir('temp_package');
+		$cfgFile  = $this->discoverChannel($tmpDir);
+		file_put_contents($tmpDir.'/dummy', '');
+		file_put_contents($tmpDir.'/package.xml',
+			'<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>Dummy</name>
+ <channel>'.$this->channelName.'</channel>
+ <summary>Dummy</summary>
+ <description>Dummy</description>
+ <lead>
+  <name>Dummy</name>
+  <user>dummy</user>
+  <email>dummy@dummy.net</email>
+  <active>yes</active>
+ </lead>
+ <date>'.date('Y-m-d').'</date>
+ <time>12:00:00</time>
+ <version>
+  <release>1.0.0</release>
+  <api>1.0.0</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/mit-license.php">MIT</license>
+ <notes>dummy</notes>
+ <contents>
+   <dir name="/">
+    <file role="script" baseinstalldir="/" name="dummy"></file>
+   </dir>
+ </contents>
+<dependencies>
+  <required>
+   <php>
+    <min>5.2.1</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+<phprelease>
+</phprelease>
+</package>');
+
+	$oldCwd = getcwd();
+	chdir($tmpDir);
+	if (0!==$this->execute('pear -c '.$cfgFile.' package')) {
+		throw new Exception();
+    }
+	chdir($oldCwd);
+
+	if($this->execute('pirum add '.$this->webRoot.' '.$tmpDir.'/Dummy-1.0.0.tgz')) {
+		throw new Exception();
+	}
+}
+    /**
+     * @Then /^the server index contains package description$/
+     */
+    public function theServerIndexContainsPackageDescription()
+    {
+        $this->textContains($this->serverIndex(), 'Dummy', 'Packages');
+    }
+
+    /**
+     * @Given /^the package is installable$/
+     */
+    public function thePackageIsInstallable()
+    {
+        $tmpDir  = $this->fs->createTempDir('packageinst');
+		$cfgFile = $this->discoverChannel($tmpDir);
+		if (0 !== $this->execute('pear -c '.$cfgFile.' install dummy/Dummy')) {
+			throw new Exception();
+		}
 		$this->fs->removeDir($tmpDir);
     }
 }
