@@ -7,22 +7,8 @@ Feature: Build
 		Given pirum xml file is in place
 			And the pirum build files are cleaned
 			And the pirum standalone is built
-		When I issue the command `php pirum build '/var/www/pear'`
-		Then the exit status of the command should be 0
-			And the following files should exist in '/var/www/pear':
-				| file                            |
-				| channel.xml                     |
-				| feed.xml                        |
-				| index.html                      |
-				| pirum.css                       |
-				| pirum.php                       |
-				| pirum.xml                       |
-				| rest/c/categories.xml           |
-				| rest/c/Default/info.xml         |
-				| rest/c/Default/packagesinfo.xml |
-				| rest/c/Default/packages.xml     |
-				| rest/m/allmaintainers.xml       |
-				| rest/p/packages.xml             |
-			And the server index contains channel description
+		When I issue the command `php pirum build webroot`
+		Then the server index contains channel description
+			And the channel is discoverable
 
   

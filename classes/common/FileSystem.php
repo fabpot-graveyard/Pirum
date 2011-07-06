@@ -74,7 +74,6 @@ class FileSystem
 	{
 		$result = sys_get_temp_dir().'/'.$seed.'_'.uniqid();
 		$this->mkDir($result.$path);
-		var_dump($result.$path);
 		return $result;
 	}
 

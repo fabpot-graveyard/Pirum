@@ -18,11 +18,13 @@ class FeatureContext extends BehatContext
     public function __construct(array $parameters)
     {
         $this->baseDir     = __dir__.'/../../';
+		require_once $this->baseDir.'/build.php';
+
+		$this->fs          = new FileSystem();
 		$this->channelUrl  = 'http://localhost/pear/';
 		$this->channelDesc = 'Dummy Pear Channel';
 		$this->webRoot     = '/var/www/pear';
 
-		require_once $this->baseDir.'/build.php';
     }
 
     /**
@@ -62,33 +64,15 @@ class FeatureContext extends BehatContext
 	}
 
     /**
-     * @When /^I issue the command `php pirum build '(.+)'`$/
+     * @When /^I issue the command `php pirum build webroot`$/
      */
-    public function iIssueTheCommandPhpPirumBuild($dir)
+    public function iIssueTheCommandPhpPirumBuild()
     {
-        exec('php pirum build '.$dir, $this->output, $this->exitStatus);
-    }
+        exec('php pirum build '.$this->webRoot, $output, $exitStatus);
 
-    /**
-     * @Then /^the exit status of the command should be (\d+)$/
-     */
-    public function theExitStatusOfTheCommandShouldBe($exitStatus)
-    {
-        if ($exitStatus != $this->exitStatus) {
-			echo implode(PHP_EOL, $this->output).PHP_EOL.PHP_EOL;
+		if (0 !== $exitStatus) {
+			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
 			throw new Exception();
-		}
-    }
-
-    /**
-     * @Given /^the following files should exist in '([^\']*)':$/
-     */
-    public function theFollowingFilesShouldExistIn($dir, TableNode $table)
-    {
-		foreach ($table->getHash() as $row) {
-			if (!file_exists($dir.'/'.$row['file'])) {
-				throw new Exception('File '.$row['file'].' does not exist!');
-			}
 		}
     }
 
@@ -102,4 +86,34 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
     }
+
+    /**
+     * @Given /^the channel is discoverable$/
+     */
+    public function theChannelIsDiscoverable()
+    {
+		$channel = str_replace('http://', '', $this->channelUrl);
+		$tmpDir = $this->fs->createTempDir('pear_installation');
+		$cfgFile = $tmpDir.'/dummyconfig';
+
+		exec('pear config-create '.$tmpDir. ' '. $cfgFile, $output, $exitStatus);
+
+		if (0 !== $exitStatus) {
+			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+			$this->fs->removeDir($tmpDir);
+			throw new Exception();
+		}
+
+        exec('pear -c '.$cfgFile.' channel-discover '.$channel, $output, $exitStatus);
+
+		if (0 !== $exitStatus) {
+			echo implode(PHP_EOL, $output).PHP_EOL.PHP_EOL;
+			$this->fs->removeDir($tmpDir);
+			throw new Exception();
+		}
+
+		$this->fs->removeDir($tmpDir);
+    }
 }
+
+?>
