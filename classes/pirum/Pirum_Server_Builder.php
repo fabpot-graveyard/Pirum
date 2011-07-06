@@ -23,13 +23,15 @@ class Pirum_Server_Builder
 	 */
     protected $formatter;
 
-    public function __construct($targetDir, $buildDir, $fs, $formatter, $server, $packages)
+    public function __construct(
+		$targetDir, $buildDir, $fs, $formatter, $server, $packages
+	)
     {
-		$this->server    = $server;
-		$this->fs        = $fs;
-        $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = $buildDir;
+		$this->fs        = $fs;
+        $this->formatter = $formatter;
+		$this->server    = $server;
 		$this->packages  = $packages;
     }
 
