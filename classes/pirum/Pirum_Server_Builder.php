@@ -34,7 +34,7 @@ class Pirum_Server_Builder
 
     public function build()
     {
-        $this->extractInformationFromPackages($this->fs);
+        $this->extractInformationFromPackages();
 
         $this->fixArchives();
         $this->buildSelf();
@@ -47,8 +47,125 @@ class Pirum_Server_Builder
         $this->buildCss();
         $this->buildFeed();
 
-        $this->updateTargetDir($this->fs);
+        $this->formatter->info("Updating PEAR server files");
+
+        $this->updateSelf();
+        $this->updateChannel();
+        $this->updateIndex();
+        $this->updateCss();
+        $this->updateFeed();
+        $this->updatePackages();
     }
+
+    protected function extractInformationFromPackages()
+    {
+        $this->packages = array();
+
+		$files    = $this->getPackageFiles();
+		$packages = $this->getPackagesInfo($files);
+
+        foreach ($packages as $file => $package) {
+			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
+
+            if ($package->getChannel() != $this->server->name) {
+                throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
+            }
+
+			$this->initPackageMetaData($package);
+			$this->addPackageRelease($package);
+			$this->addPackageMaintainers($package);
+        }
+
+        ksort($this->packages);
+    }
+
+	private function initPackageMetaData($package)
+	{
+		if (isset($this->packages[$package->getName()])) {
+			return;
+		}
+
+		$this->packages[$package->getName()] = array(
+			'name'        => htmlspecialchars($package->getName()),
+			'license'     => htmlspecialchars($package->getLicense()),
+			'summary'     => htmlspecialchars($package->getSummary()),
+			'description' => htmlspecialchars($package->getDescription()),
+			'extension'   => $package->getProvidedExtension(),
+			'releases'    => array(),
+			'maintainers' => array(),
+			'current_maintainers' => $package->getMaintainers(),
+		);
+	}
+
+	private function addPackageRelease($package)
+	{
+		$this->packages[$package->getName()]['releases'][] = array(
+			'version'     => $package->getVersion(),
+			'api_version' => $package->getApiVersion(),
+			'stability'   => $package->getStability(),
+			'date'        => $package->getDate(),
+			'filesize'    => $package->getFilesize(),
+			'php'         => $package->getMinPhp(),
+			'deps'        => $package->getDeps(),
+			'notes'       => htmlspecialchars($package->getNotes()),
+			'maintainers' => $package->getMaintainers(),
+			'info'        => $package,
+		);
+	}
+
+	private function addPackageMaintainers($package)
+	{
+		$this->packages[$package->getName()]['maintainers'] = array_merge(
+			$package->getMaintainers(),
+			$this->packages[$package->getName()]['maintainers']
+		);
+	}
+
+	private function getPackageFiles()
+	{
+        $files = array();
+
+		foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
+			if ($this->fs->isDir($file)) {
+				continue;
+			}
+            if (null === $releaseInfo = $this->getReleaseInfoFrom($file)) {
+                continue;
+            }
+
+            $files[$releaseInfo] = (string) $file;
+		}
+
+        // order files to have latest versions first
+        uksort($files, 'version_compare');
+        $files = array_reverse($files);
+		return $files;
+	}
+
+	private function getPackagesInfo(array $files)
+	{
+        $packages = array();
+        foreach ($files as $file) {
+			$packageTmpDir = $this->fs->createTempDir('pirum_package');
+            $package       = new Pirum_Package($file);
+
+			$package->loadWith($this);
+
+            $packages[$file] = $package;
+			$this->fs->removeDir($packageTmpDir);
+        }
+
+		return $packages;
+	}
+
+	private function getReleaseInfoFrom(SplFileInfo $file)
+	{
+		if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+			return null;
+		}
+
+		return $match['release'];
+	}
 
     private function buildSelf()
     {
@@ -79,18 +196,6 @@ class Pirum_Server_Builder
                 }
             }
         }
-    }
-
-    protected function updateTargetDir($fs)
-    {
-        print $this->formatter->formatSection('INFO', "Updating PEAR server files");
-
-        $this->updateSelf();
-        $this->updateChannel();
-        $this->updateIndex();
-        $this->updateCss();
-        $this->updateFeed();
-        $this->updatePackages($fs);
     }
 
     protected function updateSelf()
@@ -125,9 +230,9 @@ class Pirum_Server_Builder
         copy($this->buildDir.'/feed.xml', $this->targetDir.'/feed.xml');
     }
 
-    protected function updatePackages($fs)
+    protected function updatePackages()
     {
-        $fs->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
+        $this->fs->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
     }
 
     protected function buildFeed()
@@ -643,88 +748,6 @@ EOF;
 
         file_put_contents($this->buildDir.'/channel.xml', $content);
     }
-
-    protected function extractInformationFromPackages()
-    {
-        $this->packages = array();
-
-        // get all package files
-        $files = array();
-
-		foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
-			if ($this->fs->isDir($file)) {
-				continue;
-			}
-            if (null === $releaseInfo = $this->getReleaseInfoFrom($file)) {
-                continue;
-            }
-
-            $files[$releaseInfo] = (string) $file;
-		}
-
-        // order files to have latest versions first
-        uksort($files, 'version_compare');
-        $files = array_reverse($files);
-
-        // get information for each package
-        $packages = array();
-        foreach ($files as $file) {
-			$packageTmpDir = $this->fs->createTempDir('pirum_package');
-            $package       = new Pirum_Package($file);
-
-			$package->loadWith($this);
-
-            $packages[$file] = $package;
-			$this->fs->removeDir($packageTmpDir);
-        }
-
-        foreach ($packages as $file => $package) {
-            print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s', $package->getVersion(), $package->getName()));
-
-            if ($package->getChannel() != $this->server->name) {
-                throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
-            }
-
-            if (!isset($this->packages[$package->getName()])) {
-                $this->packages[$package->getName()] = array(
-                    'name'        => htmlspecialchars($package->getName()),
-                    'license'     => htmlspecialchars($package->getLicense()),
-                    'summary'     => htmlspecialchars($package->getSummary()),
-                    'description' => htmlspecialchars($package->getDescription()),
-                    'extension'   => $package->getProvidedExtension(),
-                    'releases'    => array(),
-                    'maintainers' => array(),
-                    'current_maintainers' => $package->getMaintainers(),
-                );
-            }
-
-            $this->packages[$package->getName()]['releases'][] = array(
-                'version'     => $package->getVersion(),
-                'api_version' => $package->getApiVersion(),
-                'stability'   => $package->getStability(),
-                'date'        => $package->getDate(),
-                'filesize'    => $package->getFilesize(),
-                'php'         => $package->getMinPhp(),
-                'deps'        => $package->getDeps(),
-                'notes'       => htmlspecialchars($package->getNotes()),
-                'maintainers' => $package->getMaintainers(),
-                'info'        => $package,
-            );
-
-            $this->packages[$package->getName()]['maintainers'] = array_merge($package->getMaintainers(), $this->packages[$package->getName()]['maintainers']);
-        }
-
-        ksort($this->packages);
-    }
-
-	private function getReleaseInfoFrom(SplFileInfo $file)
-	{
-		if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
-			return null;
-		}
-
-		return $match['release'];
-	}
 
 	public function getPackageXmlFor($package)
 	{
