@@ -54,7 +54,7 @@ class FeatureContext extends BehatContext
     public function thePirumStandaloneIsBuilt()
     {
 		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
-		Pirum_Base_Builder::build($this->baseDir, array(''));
+		Pirum_Base_Builder::build($this->baseDir, array('', 'build'));
 	}
 
     /**
@@ -98,7 +98,8 @@ class FeatureContext extends BehatContext
 		$this->discoverChannel($tmpDir);
 
 		$this->fs->removeDir($tmpDir);
-    }
+		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
+   }
 
 	private function discoverChannel($tmpDir)
 	{
@@ -232,7 +233,9 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
 		$this->fs->removeDir($tmpDir);
+		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
     }
+
 }
 
 ?>
