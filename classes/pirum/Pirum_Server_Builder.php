@@ -237,7 +237,7 @@ class Pirum_Server_Builder
 
     protected function buildFeed()
     {
-        print $this->formatter->formatSection('INFO', "Building feed");
+        $this->formatter->info("Building feed");
 
         $entries = '';
         foreach ($this->packages as $package) {
@@ -317,7 +317,7 @@ EOF;
 
     protected function buildIndex()
     {
-        print $this->formatter->formatSection('INFO', "Building index");
+        $this->formatter->info("Building index");
 
         if (file_exists($file = dirname(__FILE__).'/templates/index.html') ||
             file_exists($file = $this->buildDir.'/templates/index.html')) {
@@ -342,7 +342,7 @@ EOF;
 
     protected function buildReleasePackages()
     {
-        print $this->formatter->formatSection('INFO', "Building releases");
+        $this->formatter->info("Building releases");
 
         mkdir($this->buildDir.'/rest/r', 0777, true);
 
@@ -355,7 +355,7 @@ EOF;
 
     protected function buildReleasePackage($dir, $package)
     {
-        print $this->formatter->formatSection('INFO', "Building releases for {$package['name']}");
+        $this->formatter->info("Building releases for %s", $package['name']);
 
         $url = strtolower($package['name']);
 
@@ -440,7 +440,7 @@ EOF
 
     protected function buildRelease($dir, $package, $release)
     {
-        print $this->formatter->formatSection('INFO', "Building release {$release['version']} for {$package['name']}");
+        $this->formatter->info("Building release %s for %s", $release['version'], $package['name']);
 
         $url = strtolower($package['name']);
 
@@ -496,7 +496,7 @@ EOF
 
     protected function buildPackages()
     {
-        print $this->formatter->formatSection('INFO', "Building packages");
+        $this->formatter->info("Building packages");
 
         mkdir($this->buildDir.'/rest/p', 0777, true);
 
@@ -520,7 +520,7 @@ EOF
 
     protected function buildPackage($dir, $package)
     {
-        print $this->formatter->formatSection('INFO', "Building package {$package['name']}");
+        $this->formatter->info("Building package %s", $package['name']);
 
         $url = strtolower($package['name']);
 
@@ -582,7 +582,7 @@ EOF
 
     protected function buildCategories()
     {
-        print $this->formatter->formatSection('INFO', "Building categories");
+        $this->formatter->info("Building categories");
 
         mkdir($this->buildDir.'/rest/c/Default', 0777, true);
 
@@ -673,7 +673,7 @@ EOF
 
     protected function buildMaintainers()
     {
-        print $this->formatter->formatSection('INFO', "Building maintainers");
+        $this->formatter->info("Building maintainers");
 
         mkdir($dir = $this->buildDir.'/rest/m/', 0777, true);
 
@@ -714,7 +714,7 @@ EOF;
 
     protected function buildChannel()
     {
-        print $this->formatter->formatSection('INFO', "Building channel");
+        $this->formatter->info("Building channel");
 
         $suggestedalias = '';
         if (!empty($this->server->alias)) {
