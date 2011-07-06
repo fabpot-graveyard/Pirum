@@ -95,6 +95,65 @@ class FileSystem
         closedir($fp);
         rmdir($target);
     }
+
+    public function mirrorDir($build, $target)
+    {
+        if (!is_dir($target)) {
+            mkdir($target, 0777, true);
+        }
+
+
+        $this->removeFilesFromDir($target, $build);
+
+        $this->copyFiles($build, $target);
+    }
+
+    protected function copyFiles($build, $target)
+    {
+        $fp = opendir($build);
+        while (false !== $file = readdir($fp)) {
+            if (in_array($file, array('.', '..')))
+            {
+                continue;
+            }
+
+            if (is_dir($build.'/'.$file)) {
+                if (!is_dir($target.'/'.$file))
+                {
+                    mkdir($target.'/'.$file, 0777, true);
+                }
+
+                $this->copyFiles($build.'/'.$file, $target.'/'.$file);
+            } else {
+                rename($build.'/'.$file, $target.'/'.$file);
+            }
+        }
+        closedir($fp);
+    }
+
+    protected function removeFilesFromDir($target, $build)
+    {
+        $fp = opendir($target);
+        while (false !== $file = readdir($fp)) {
+            if (in_array($file, array('.', '..')))
+            {
+                continue;
+            }
+
+            if (is_dir($target.'/'.$file)) {
+                if (!in_array($file, array('.svn', 'CVS')))
+                {
+                    $this->removeFilesFromDir($target.'/'.$file, $build.'/'.$file);
+                    if (!is_dir($build.'/'.$file)) {
+                        rmdir($target.'/'.$file);
+                    }
+                }
+            } else {
+                unlink($target.'/'.$file);
+            }
+        }
+        closedir($fp);
+    }
 }
 
 ?>

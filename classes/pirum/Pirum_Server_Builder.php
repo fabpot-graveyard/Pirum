@@ -37,7 +37,7 @@ class Pirum_Server_Builder
         $this->buildCss();
         $this->buildFeed();
 
-        $this->updateTargetDir();
+        $this->updateTargetDir($fs);
     }
 
     private function buildSelf()
@@ -71,7 +71,7 @@ class Pirum_Server_Builder
         }
     }
 
-    protected function updateTargetDir()
+    protected function updateTargetDir($fs)
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files");
 
@@ -80,7 +80,7 @@ class Pirum_Server_Builder
         $this->updateIndex();
         $this->updateCss();
         $this->updateFeed();
-        $this->updatePackages();
+        $this->updatePackages($fs);
     }
 
     protected function updateSelf()
@@ -115,9 +115,9 @@ class Pirum_Server_Builder
         copy($this->buildDir.'/feed.xml', $this->targetDir.'/feed.xml');
     }
 
-    protected function updatePackages()
+    protected function updatePackages($fs)
     {
-        $this->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
+        $fs->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
     }
 
     protected function buildFeed()
@@ -711,65 +711,6 @@ EOF;
 	{
 		return $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml';
 	}
-
-    protected function mirrorDir($build, $target)
-    {
-        if (!is_dir($target)) {
-            mkdir($target, 0777, true);
-        }
-
-
-        $this->removeFilesFromDir($target, $build);
-
-        $this->copyFiles($build, $target);
-    }
-
-    protected function copyFiles($build, $target)
-    {
-        $fp = opendir($build);
-        while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
-                continue;
-            }
-
-            if (is_dir($build.'/'.$file)) {
-                if (!is_dir($target.'/'.$file))
-                {
-                    mkdir($target.'/'.$file, 0777, true);
-                }
-
-                $this->copyFiles($build.'/'.$file, $target.'/'.$file);
-            } else {
-                rename($build.'/'.$file, $target.'/'.$file);
-            }
-        }
-        closedir($fp);
-    }
-
-    protected function removeFilesFromDir($target, $build)
-    {
-        $fp = opendir($target);
-        while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
-                continue;
-            }
-
-            if (is_dir($target.'/'.$file)) {
-                if (!in_array($file, array('.svn', 'CVS')))
-                {
-                    $this->removeFilesFromDir($target.'/'.$file, $build.'/'.$file);
-                    if (!is_dir($build.'/'.$file)) {
-                        rmdir($target.'/'.$file);
-                    }
-                }
-            } else {
-                unlink($target.'/'.$file);
-            }
-        }
-        closedir($fp);
-    }
 }
 
 ?>
