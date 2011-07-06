@@ -42,7 +42,7 @@ class Pirum_Server_Builder
 
     private function buildSelf()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building self");
+        print $this->formatter->formatSection('INFO', "Building self");
         file_put_contents($this->buildDir.'/pirum.php', file_get_contents(__FILE__));
     }
 
@@ -73,7 +73,7 @@ class Pirum_Server_Builder
 
     protected function updateTargetDir($fs)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files");
+        print $this->formatter->formatSection('INFO', "Updating PEAR server files");
 
         $this->updateSelf();
         $this->updateChannel();
@@ -122,7 +122,7 @@ class Pirum_Server_Builder
 
     protected function buildFeed()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building feed");
+        print $this->formatter->formatSection('INFO', "Building feed");
 
         $entries = '';
         foreach ($this->packages as $package) {
@@ -202,7 +202,7 @@ EOF;
 
     protected function buildIndex()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building index");
+        print $this->formatter->formatSection('INFO', "Building index");
 
         if (file_exists($file = dirname(__FILE__).'/templates/index.html') ||
             file_exists($file = $this->buildDir.'/templates/index.html')) {
@@ -227,7 +227,7 @@ EOF;
 
     protected function buildReleasePackages()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases");
+        print $this->formatter->formatSection('INFO', "Building releases");
 
         mkdir($this->buildDir.'/rest/r', 0777, true);
 
@@ -240,7 +240,7 @@ EOF;
 
     protected function buildReleasePackage($dir, $package)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases for {$package['name']}");
+        print $this->formatter->formatSection('INFO', "Building releases for {$package['name']}");
 
         $url = strtolower($package['name']);
 
@@ -325,7 +325,7 @@ EOF
 
     protected function buildRelease($dir, $package, $release)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building release {$release['version']} for {$package['name']}");
+        print $this->formatter->formatSection('INFO', "Building release {$release['version']} for {$package['name']}");
 
         $url = strtolower($package['name']);
 
@@ -381,7 +381,7 @@ EOF
 
     protected function buildPackages()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building packages");
+        print $this->formatter->formatSection('INFO', "Building packages");
 
         mkdir($this->buildDir.'/rest/p', 0777, true);
 
@@ -405,7 +405,7 @@ EOF
 
     protected function buildPackage($dir, $package)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building package {$package['name']}");
+        print $this->formatter->formatSection('INFO', "Building package {$package['name']}");
 
         $url = strtolower($package['name']);
 
@@ -467,7 +467,7 @@ EOF
 
     protected function buildCategories()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building categories");
+        print $this->formatter->formatSection('INFO', "Building categories");
 
         mkdir($this->buildDir.'/rest/c/Default', 0777, true);
 
@@ -558,7 +558,7 @@ EOF
 
     protected function buildMaintainers()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building maintainers");
+        print $this->formatter->formatSection('INFO', "Building maintainers");
 
         mkdir($dir = $this->buildDir.'/rest/m/', 0777, true);
 
@@ -599,7 +599,7 @@ EOF;
 
     protected function buildChannel()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building channel");
+        print $this->formatter->formatSection('INFO', "Building channel");
 
         $suggestedalias = '';
         if (!empty($this->server->alias)) {
@@ -669,7 +669,7 @@ EOF;
         }
 
         foreach ($packages as $file => $package) {
-            $this->formatter and print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s', $package->getVersion(), $package->getName()));
+            print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s', $package->getVersion(), $package->getName()));
 
             if ($package->getChannel() != $this->server->name) {
                 throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
