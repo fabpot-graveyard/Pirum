@@ -138,7 +138,16 @@ class Pirum_Package
         copy($this->packageFile, $target);
     }
 
-    public function loadPackageFromFile($file)
+	public function loadWith($pirum)
+	{
+		if (file_exists($file = $pirum->getPackageXmlFor($this))) {
+			$this->loadPackageFromFile($file);
+		} else {
+			$this->loadPackageFromArchive($packageTmpDir);
+		}
+	}
+
+    private function loadPackageFromFile($file)
     {
         $this->packageFile = $file;
 
@@ -155,7 +164,7 @@ class Pirum_Package
         }
     }
 
-    public function loadPackageFromArchive($tmpDir)
+    private function loadPackageFromArchive($tmpDir)
     {
         if (!function_exists('gzopen')) {
             copy($this->archive, $tmpDir.'/archive.tgz');

@@ -728,11 +728,7 @@ EOF;
 			$packageTmpDir = $fs->createTempDir('pirum_package');
             $package       = new Pirum_Package($file);
 
-            if (file_exists($file = $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml')) {
-                $package->loadPackageFromFile($file);
-            } else {
-                $package->loadPackageFromArchive($packageTmpDir);
-            }
+			$package->loadWith($this);
 
             $packages[$file] = $package;
 			$fs->removeDir($packageTmpDir);
@@ -776,6 +772,11 @@ EOF;
 
         ksort($this->packages);
     }
+
+	public function getPackageXmlFor($package)
+	{
+		return $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml';
+	}
 
     protected function mirrorDir($build, $target)
     {
