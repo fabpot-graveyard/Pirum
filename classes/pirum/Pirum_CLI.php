@@ -144,21 +144,22 @@ class Pirum_CLI
             mkdir($targetDir.'/get', 0777, true);
         }
 
-        copy($this->options[3], $targetDir.'/get/'.basename($this->options[3]));
+        copy($pearPackage, $targetDir.'/get/'.basename($pearPackage));
 
         $this->runBuild($targetDir);
-
-        $package = $this->options[3];
     }
 
 	private function isValidPearPackageFileName($pearPackage)
 	{
-		return (bool)preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $pearPackage);
+		return (bool)preg_match(
+			Pirum_Package::PACKAGE_FILE_PATTERN,
+			$pearPackage
+		);
 	}
 
     protected function runClean($target)
     {
-        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($target, RecursiveDirectoryIterator::SKIP_DOTS)) as $file) {
+        foreach ($this->fs->resourceDir($target) as $file) {
             if ($file->getFilename() == 'pirum.xml') {
                 continue;
             }
@@ -174,7 +175,9 @@ class Pirum_CLI
 	private function getPearPackage()
 	{
         if (!isset($this->options[3])) {
-			throw new Pirum_Package_Exception('You must pass a PEAR package file path');
+			throw new Pirum_Package_Exception(
+				'You must pass a PEAR package file path'
+			);
         }
 
         if (!$this->isValidPearPackageFileName($this->options[3])) {
