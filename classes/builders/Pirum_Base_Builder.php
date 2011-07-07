@@ -3,10 +3,16 @@
 class Pirum_Base_Builder
 {
 	private $baseDir;
+	private $commands = array(
+		'build' => 'Build pirum standalone file and pear package',
+		'clean' => 'Clean build artifacts ^^',
+		'test'  => 'Run phpunit and behat tests',
+	);
 
-	public function  __construct($baseDir, array $argv) {
-		$this->baseDir = $baseDir;
-		$this->argv    = $argv;
+	public function  __construct($formatter, $baseDir, array $argv) {
+		$this->formatter = $formatter;
+		$this->baseDir   = $baseDir;
+		$this->argv      = $argv;
 	}
 
 	public function buildAll()
@@ -33,7 +39,28 @@ class Pirum_Base_Builder
 		return array_splice($this->argv, 1);
 	}
 
+	private function printUsage()
+	{
+		$this->formatter->comment('Build for pirum by fqqdk'.PHP_EOL);
+		$this->formatter->comment('Usage:'.PHP_EOL.PHP_EOL);
+
+		foreach ($this->commands as $command => $desc) {
+			$this->formatter->info($command."\t\t".$desc);
+		}
+	}
+
 	function builders() {
+		if (!isset($this->argv[1])) {
+			$this->printUsage();
+			return array();
+		}
+
+		if (!array_key_exists($this->argv[1], $this->commands)) {
+			$this->formatter->error('Invalid build job "%s"', $this->argv[1]);
+			$this->printUsage();
+			return array();
+		}
+
 		$targetDir = $this->baseDir;
 		$buildJobs = $this->buildJobs();
 
@@ -68,7 +95,10 @@ class Pirum_Base_Builder
 
 	public static function build($baseDir, array $argv = null)
 	{
-		$project = new Pirum_Base_Builder($baseDir, $argv);
+		$project = new Pirum_Base_Builder(
+			new Pirum_CLI_Formatter(), $baseDir, $argv
+		);
+
 		return $project->buildAll();
 	}
 }

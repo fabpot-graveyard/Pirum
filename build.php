@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 require_once 'classes/common/FileSystem.php';
