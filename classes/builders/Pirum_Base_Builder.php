@@ -12,7 +12,7 @@ class Pirum_Base_Builder
 	public function buildAll()
 	{
 		$fs   = new FileSystem();
-		$exec = new Executor();
+		$exec = new Executor(STDIN, STDOUT, STDERR);
 
 		$this->runBuilders($fs, $exec);
 	}
@@ -51,6 +51,14 @@ class Pirum_Base_Builder
 						$this->baseDir.'/classes'
 					),
 					new PearPackage_Builder($targetDir),
+				);
+				case 'test': return array(
+					new PhpUnit_Builder(
+						$this->baseDir,
+						'tests/bootstrap.php',
+						'tests/'
+					),
+					new Behat_Builder($this->baseDir),
 				);
 				default :
 					throw new Exception('Invalid build job: '.$buildJob);
