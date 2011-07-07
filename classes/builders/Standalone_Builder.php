@@ -10,6 +10,18 @@ class Standalone_Builder
         $this->classesDir = $classesDir;
     }
 
+	public function run(BuildProject $project)
+	{
+		$collector = $project->collector();
+		$filter    = $project->fileFilter('.php');
+		$collector
+			->collect($project->file($this->startStub))
+			->collect($project->scan($this->classesDir, $collector, $filter))
+			->collect($project->file($this->endStub));
+
+		$project->mergeCollection($collector, $this->targetPath);
+	}
+
     public function build(FileSystem $fs)
     {
         $fs->deleteFile($this->targetPath);

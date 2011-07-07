@@ -27,11 +27,22 @@ class FileSystem
 
 	public function deleteGlob($glob)
 	{
-		foreach (glob($glob) as $file) {
-			if (is_file($file)) {
+		foreach ($this->getFilesOfGlob($glob) as $file) {
+			if ($this->isFile($file)) {
 				$this->deleteFile($file);
 			}
 		}
+	}
+
+	public function getFilesOfGlob($glob)
+	{
+		$result = array();
+
+		foreach (glob($glob) as $file) {
+			$result []= new SplFileInfo($file);
+		}
+
+		return $result;
 	}
 
 	public function appendTo($file, $contents)
@@ -47,6 +58,11 @@ class FileSystem
 	public function isDir($dir)
 	{
 		return is_dir($dir);
+	}
+
+	public function isFile($file)
+	{
+		return is_file($file);
 	}
 
 	public function fileExists($file)
@@ -141,7 +157,9 @@ class FileSystem
             if (is_dir($target.'/'.$file)) {
                 if (!in_array($file, array('.svn', 'CVS')))
                 {
-                    $this->removeFilesFromDir($target.'/'.$file, $build.'/'.$file);
+                    $this->removeFilesFromDir(
+						$target.'/'.$file, $build.'/'.$file
+					);
                     if (!is_dir($build.'/'.$file)) {
                         rmdir($target.'/'.$file);
                     }
@@ -152,6 +170,21 @@ class FileSystem
         }
         closedir($fp);
     }
+
+	public function getCwd()
+	{
+		return getcwd();
+	}
+
+	public function chDir($dir)
+	{
+		return chdir($dir);
+	}
+
+	public function exec($command)
+	{
+		return exec($command);
+	}
 }
 
 ?>

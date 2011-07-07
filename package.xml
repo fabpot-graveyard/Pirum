@@ -43,9 +43,11 @@
 		<dir name="/">
 			<file name="LICENSE" role="doc" />
 			<file name="README.markdown" role="doc" />
+
 			<file role="script" baseinstalldir="/" name="pirum">
 				<tasks:replace from="@package_version@" to="version" type="package-info" />
 			</file>
+
 			<file role="script" baseinstalldir="/" name="pirum.bat">
 				<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
 				<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />

@@ -11,15 +11,17 @@ class Pirum_Base_Builder
 
 	public function buildAll()
 	{
-		$fs = new FileSystem();
+		$fs   = new FileSystem();
+		$exec = new Executor();
 
-		$this->runBuilders($fs);
+		$this->runBuilders($fs, $exec);
 	}
 
-	private function runBuilders($fs)
+	private function runBuilders($fs, $exec)
 	{
+		$project = new BuildProject($fs, $exec);
 		foreach ($this->builders() as $builder) {
-			$builder->build($fs);
+			$builder->run($project);
 		}
 	}
 
