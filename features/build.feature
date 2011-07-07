@@ -16,3 +16,15 @@ Feature: Build
 		When I issue the command `php pirum add packagename`
 		Then the server index contains package description
 			And the package is installable
+
+	Scenario: Remove package from localhost
+		Given a built up pirum repo is in place
+			And the server index contains package description
+		When I issue the command `php pirum remove packagename`
+		Then the pirum repo does not contain package
+
+	Scenario: Remove package from localhost
+		Given a built up pirum repo is in place
+		When I issue the command `php pirum clean`
+		Then the pirum repo only contains pirum.xml
+

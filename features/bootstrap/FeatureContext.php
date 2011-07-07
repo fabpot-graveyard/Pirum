@@ -153,15 +153,15 @@ class FeatureContext extends BehatContext
      */
     public function iIssueTheCommandPhpPirumAddPackagename()
     {
-		$tmpDir   = $this->fs->createTempDir('temp_package');
-		$cfgFile  = $this->discoverChannel($tmpDir);
-		file_put_contents($tmpDir.'/dummy', '');
-		file_put_contents($tmpDir.'/package.xml',
-			'<?xml version="1.0" encoding="UTF-8"?>
+			$tmpDir   = $this->fs->createTempDir('temp_package');
+			$cfgFile  = $this->discoverChannel($tmpDir);
+			file_put_contents($tmpDir.'/dummy', '');
+			file_put_contents($tmpDir.'/package.xml',
+				'<?xml version="1.0" encoding="UTF-8"?>
 <package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
-    http://pear.php.net/dtd/tasks-1.0.xsd
-    http://pear.php.net/dtd/package-2.0
-    http://pear.php.net/dtd/package-2.0.xsd">
+	http://pear.php.net/dtd/tasks-1.0.xsd
+	http://pear.php.net/dtd/package-2.0
+	http://pear.php.net/dtd/package-2.0.xsd">
  <name>Dummy</name>
  <channel>'.$this->channelName.'</channel>
  <summary>Dummy</summary>
@@ -186,16 +186,16 @@ class FeatureContext extends BehatContext
  <notes>dummy</notes>
  <contents>
    <dir name="/">
-    <file role="script" baseinstalldir="/" name="dummy"></file>
+	<file role="script" baseinstalldir="/" name="dummy"></file>
    </dir>
  </contents>
 <dependencies>
   <required>
    <php>
-    <min>5.2.1</min>
+	<min>5.2.1</min>
    </php>
    <pearinstaller>
-    <min>1.4.0</min>
+	<min>1.4.0</min>
    </pearinstaller>
   </required>
  </dependencies>
@@ -203,18 +203,28 @@ class FeatureContext extends BehatContext
 </phprelease>
 </package>');
 
-	$oldCwd = getcwd();
-	chdir($tmpDir);
-	if (0!==$this->execute('pear -c '.$cfgFile.' package')) {
-		throw new Exception();
-    }
-	chdir($oldCwd);
+		$oldCwd = getcwd();
+		chdir($tmpDir);
+		if (0!==$this->execute('pear -c '.$cfgFile.' package')) {
+			throw new Exception();
+		}
+		chdir($oldCwd);
 
-	if($this->execute('pirum add '.$this->webRoot.' '.$tmpDir.'/Dummy-1.0.0.tgz')) {
-		throw new Exception();
+		if($this->execute('pirum add '.$this->webRoot.' '.$tmpDir.'/Dummy-1.0.0.tgz')) {
+			throw new Exception();
+		}
 	}
-}
-    /**
+	/**
+     * @When /^I issue the command `php pirum remove packagename`$/
+     */
+    public function iIssueTheCommandPhpPirumRemovePackagename()
+    {
+        if ($this->execute('pirum remove '.$this->webRoot.' Dummy-1.0.0.tgz')) {
+			throw new Exception();
+		}
+    }
+
+   /**
      * @Then /^the server index contains package description$/
      */
     public function theServerIndexContainsPackageDescription()
@@ -236,6 +246,29 @@ class FeatureContext extends BehatContext
 		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
     }
 
+    /**
+     * @When /^I issue the command `php pirum clean`$/
+     */
+    public function iIssueTheCommandPhpPirumClean()
+    {
+        if ($this->execute('php pirum clean '.$this->webRoot)) {
+			throw new Exception();
+		}
+    }
+
+    /**
+     * @Then /^the pirum repo only contains pirum\.xml$/
+     */
+    public function thePirumRepoOnlyContainsPirumxml()
+    {
+        if (!file_exists($this->webRoot.'/pirum.xml')) {
+			throw new Exception('pirum.xml disappeared');
+		}
+
+        if (file_exists($this->webRoot.'/index.html')) {
+			throw new Exception('index.html has not disappear');
+		}
+    }
 }
 
 ?>

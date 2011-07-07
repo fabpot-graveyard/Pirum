@@ -101,6 +101,10 @@ class Pirum_CLI
         return $ret;
     }
 
+    protected function isCommand($cmd) {
+        return in_array($cmd, $this->commands);
+    }
+
 	private function printUsage()
 	{
 		$this->formatter->comment("Pirum %s by Fabien Potencier".PHP_EOL, self::version());
@@ -246,10 +250,6 @@ class Pirum_CLI
 			$server, $repoBuilder->build()
 		);
 	}
-
-    protected function isCommand($cmd) {
-        return in_array($cmd, $this->commands);
-    }
 }
 
 ?>
