@@ -15,17 +15,23 @@ class Pirum_Base_Builder
 		$this->argv      = $argv;
 	}
 
-	public function buildAll()
+	public static function build($baseDir, array $argv = null)
 	{
-		$fs   = new FileSystem();
-		$exec = new Executor(STDIN, STDOUT, STDERR);
+		$baseBuilder = new Pirum_Base_Builder(
+			new Pirum_CLI_Formatter(),
+			$baseDir,
+			$argv
+		);
 
-		$this->runBuilders($fs, $exec);
+		$fs      = new FileSystem();
+		$exec    = new Executor(STDIN, STDOUT, STDERR);
+		$project = new BuildProject($fs, $exec);
+
+		return $baseBuilder->run($project);
 	}
 
-	private function runBuilders($fs, $exec)
+	public function run(BuildProject $project)
 	{
-		$project = new BuildProject($fs, $exec);
 		foreach ($this->builders() as $builder) {
 			$builder->run($project);
 		}
@@ -91,15 +97,6 @@ class Pirum_Base_Builder
 					throw new Exception('Invalid build job: '.$buildJob);
 			}
 		}
-	}
-
-	public static function build($baseDir, array $argv = null)
-	{
-		$project = new Pirum_Base_Builder(
-			new Pirum_CLI_Formatter(), $baseDir, $argv
-		);
-
-		return $project->buildAll();
 	}
 }
 
