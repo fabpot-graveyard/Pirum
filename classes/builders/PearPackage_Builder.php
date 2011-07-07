@@ -14,14 +14,6 @@ class PearPackage_Builder
 	{
 		$p->runCommandInDir($this->command, $this->targetDir);
 	}
-
-    public function build(FileSystem $fs)
-    {
-		$oldCwd = $fs->getcwd();
-		$fs->chDir($this->targetDir);
-        $fs->exec($this->command);
-		$fs->chDir($oldCwd);
-    }
 }
 
 ?>

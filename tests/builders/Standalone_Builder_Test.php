@@ -28,10 +28,10 @@ class Standalone_Builder_Test extends PHPUnit_Framework_TestCase
 			->with($collector, $targetPath);
 		$project->expects($this->exactly(2))->method('file')
 			->will($this->returnValue($this->getMock('Resource')));
-		$project->expects($this->once())->method('scan')
+		$project->expects($this->exactly(3))->method('scan')
 			->will($this->returnValue($this->getMock('Resource')));
 
-		$collector->expects($this->exactly(3))->method('collect')
+		$collector->expects($this->exactly(5))->method('collect')
 			->will($this->returnValue($collector));
 
 		$builder->run($project);

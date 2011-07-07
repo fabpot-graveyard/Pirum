@@ -18,12 +18,6 @@ class TargetDir_Cleaner
 
 		$project->deleteCollection($collector);
 	}
-
-	public function build(FileSystem $fs)
-	{
-		$fs->deleteFile($this->targetDir.'/pirum');
-		$fs->deleteGlob($this->targetDir.'/Pirum-*');
-	}
 }
 
 ?>

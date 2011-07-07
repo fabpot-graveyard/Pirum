@@ -16,24 +16,13 @@ class Standalone_Builder
 		$filter    = $project->fileFilter('.php');
 		$collector
 			->collect($project->file($this->startStub))
-			->collect($project->scan($this->classesDir, $collector, $filter))
+			->collect($project->scan($this->classesDir.'/_interfaces', $collector, $filter))
+			->collect($project->scan($this->classesDir.'/common', $collector, $filter))
+			->collect($project->scan($this->classesDir.'/pirum', $collector, $filter))
 			->collect($project->file($this->endStub));
 
 		$project->mergeCollection($collector, $this->targetPath);
 	}
-
-    public function build(FileSystem $fs)
-    {
-        $fs->deleteFile($this->targetPath);
-
-		$fs->appendTo($this->targetPath, $fs->contentsOf($this->startStub));
-
-        foreach ($fs->resourceDir($this->classesDir) as $classFile) {
-            $fs->appendTo($this->targetPath, $fs->contentsOf($classFile));
-        }
-
-		$fs->appendTo($this->targetPath, $fs->contentsOf($this->endStub));
-    }
 }
 
 ?>
