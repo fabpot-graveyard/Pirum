@@ -24,7 +24,7 @@ if(php_sapi_name() !== 'CLI' && isset($_REQUEST['__rest']))
 // from the command line
 if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
 {
-    $cli = new Pirum_CLI($argv, new Pirum_CLI_Formatter(), new FileSystem());
+    $cli = new Pirum_CLI($argv, new CLI_Formatter(), new FileSystem());
     exit($cli->run());
 }
 

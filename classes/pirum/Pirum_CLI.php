@@ -20,7 +20,7 @@ class Pirum_CLI
     );
 
 	/**
-	 * @var Pirum_CLI_Formatter
+	 * @var CLI_Formatter
 	 */
     protected $formatter;
 

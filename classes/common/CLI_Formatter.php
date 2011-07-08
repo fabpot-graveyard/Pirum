@@ -1,11 +1,10 @@
 <?php
 /**
- * Command line colorizer for Pirum.
+ * Command line colorizer
  *
- * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class Pirum_CLI_Formatter
+class CLI_Formatter
 {
     protected $styles = array(
         'ERROR_SECTION'   => array('bg' => 'red', 'fg' => 'white'),

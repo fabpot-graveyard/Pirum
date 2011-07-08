@@ -19,7 +19,7 @@ class Pirum_Server_Builder
 	protected $fs;
 
 	/**
-	 * @var Pirum_CLI_Formatter
+	 * @var CLI_Formatter
 	 */
     protected $formatter;
 

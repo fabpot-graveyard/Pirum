@@ -18,7 +18,7 @@ class Pirum_Base_Builder
 	public static function build($baseDir, array $argv = null)
 	{
 		$baseBuilder = new Pirum_Base_Builder(
-			new Pirum_CLI_Formatter(),
+			new CLI_Formatter(),
 			$baseDir,
 			$argv
 		);
