@@ -131,6 +131,9 @@ class Pirum_Server_Builder
 
     protected function buildFeed()
     {
+		$serverUrl     = $this->server->url;
+		$serverSummary = $this->server->summary;
+
         $this->formatter->info("Building feed");
 
         $entries = '';
@@ -145,7 +148,7 @@ class Pirum_Server_Builder
                 $entries .= <<<EOF
     <entry>
         <title>{$package['name']} {$release['version']} ({$release['stability']})</title>
-        <link href="{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz" />
+        <link href="$serverUrl/get/{$package['name']}-{$release['version']}.tgz" />
         <id>{$package['name']}-{$release['version']}</id>
         <author>
             <name>{$maintainer['nickname']}</name>
@@ -161,11 +164,11 @@ EOF;
 
         $index = <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:base="{$this->server->url}">
-    <title>{$this->server->summary} Latest Releases</title>
-    <link href="{$this->server->url}" />
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="$serverUrl">
+    <title>$serverSummary Latest Releases</title>
+    <link href="$serverUrl" />
     <author>
-        <name>{$this->server->url}</name>
+        <name>$serverUrl</name>
     </author>
 
 $entries
@@ -249,6 +252,8 @@ EOF;
 
     protected function buildReleasePackage($dir, $package)
     {
+		$serverName = $this->server->name;
+
         $this->formatter->info("Building releases for %s", $package['name']);
 
         $url = strtolower($package['name']);
@@ -315,7 +320,7 @@ EOF;
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allreleases" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases http://pear.php.net/dtd/rest.allreleases.xsd">
     <p>{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
 $allreleases
 </a>
 EOF
@@ -325,7 +330,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allreleases2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases2 http://pear.php.net/dtd/rest.allreleases2.xsd">
     <p>{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
 $allreleases2
 </a>
 EOF
@@ -334,6 +339,9 @@ EOF
 
     protected function buildRelease($dir, $package, $release)
     {
+		$serverName = $this->server->name;
+		$serverUrl  = $this->server->url;
+
         $this->formatter->info("Building release %s for %s", $release['version'], $package['name']);
 
         $url = strtolower($package['name']);
@@ -345,7 +353,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <r xmlns="http://pear.php.net/dtd/rest.release" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.release http://pear.php.net/dtd/rest.release.xsd">
     <p xlink:href="/rest/p/$url">{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
     <v>{$release['version']}</v>
     <st>{$release['stability']}</st>
     <l>{$package['license']}</l>
@@ -355,7 +363,7 @@ EOF
     <da>{$release['date']}</da>
     <n>{$release['notes']}</n>
     <f>{$release['filesize']}</f>
-    <g>{$this->server->url}/get/{$package['name']}-{$release['version']}</g>
+    <g>$serverUrl/get/{$package['name']}-{$release['version']}</g>
     <x xlink:href="package.{$release['version']}.xml"/>
 </r>
 EOF
@@ -365,7 +373,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <r xmlns="http://pear.php.net/dtd/rest.release2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.release2 http://pear.php.net/dtd/rest.release2.xsd">
     <p xlink:href="/rest/p/$url">{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
     <v>{$release['version']}</v>
     <a>{$release['api_version']}</a>
     <mp>{$release['php']}</mp>
@@ -377,7 +385,7 @@ EOF
     <da>{$release['date']}</da>
     <n>{$release['notes']}</n>
     <f>{$release['filesize']}</f>
-    <g>{$this->server->url}/get/{$package['name']}-{$release['version']}</g>
+    <g>$serverUrl/get/{$package['name']}-{$release['version']}</g>
     <x xlink:href="package.{$release['version']}.xml"/>
 </r>
 EOF
@@ -390,6 +398,8 @@ EOF
 
     protected function buildPackages()
     {
+		$serverName = $this->server->name;
+
         $this->formatter->info("Building packages");
 
         mkdir($this->buildDir.'/rest/p', 0777, true);
@@ -405,7 +415,7 @@ EOF
         file_put_contents($this->buildDir.'/rest/p/packages.xml', <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allpackages" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.allpackages http://pear.php.net/dtd/rest.allpackages.xsd">
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
 $packages
 </a>
 EOF
@@ -414,7 +424,9 @@ EOF
 
     protected function buildPackage($dir, $package)
     {
-        $this->formatter->info("Building package %s", $package['name']);
+ 		$serverName = $this->server->name;
+
+		$this->formatter->info("Building package %s", $package['name']);
 
         $url = strtolower($package['name']);
 
@@ -422,7 +434,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <p xmlns="http://pear.php.net/dtd/rest.package" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.package    http://pear.php.net/dtd/rest.package.xsd">
 <n>{$package['name']}</n>
-<c>{$this->server->name}</c>
+<c>$serverName</c>
 <ca xlink:href="/rest/c/Default">Default</ca>
 <l>{$package['license']}</l>
 <s>{$package['summary']}</s>
@@ -457,7 +469,7 @@ EOF;
 <?xml version="1.0" encoding="UTF-8" ?>
 <m xmlns="http://pear.php.net/dtd/rest.packagemaintainers" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.packagemaintainers http://pear.php.net/dtd/rest.packagemaintainers.xsd">
     <p>{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
 $maintainers
 </m>
 EOF
@@ -467,7 +479,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <m xmlns="http://pear.php.net/dtd/rest.packagemaintainers2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.packagemaintainers2 http://pear.php.net/dtd/rest.packagemaintainers2.xsd">
     <p>{$package['name']}</p>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
 $maintainers2
 </m>
 EOF
@@ -476,14 +488,16 @@ EOF
 
     protected function buildCategories()
     {
-        $this->formatter->info("Building categories");
+		$serverName = $this->server->name;
+
+		$this->formatter->info("Building categories");
 
         mkdir($this->buildDir.'/rest/c/Default', 0777, true);
 
         file_put_contents($this->buildDir.'/rest/c/categories.xml', <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allcategories" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.allcategories http://pear.php.net/dtd/rest.allcategories.xsd">
-    <ch>{$this->server->name}</ch>
+    <ch>$serverName</ch>
     <c xlink:href="/rest/c/Default/info.xml">Default</c>
 </a>
 EOF
@@ -493,7 +507,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <c xmlns="http://pear.php.net/dtd/rest.category" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.category http://pear.php.net/dtd/rest.category.xsd">
     <n>Default</n>
-    <c>{$this->server->name}</c>
+    <c>$serverName</c>
     <a>Default</a>
     <d>Default category</d>
 </c>
@@ -531,7 +545,7 @@ EOF;
     <pi>
         <p>
             <n>{$package['name']}</n>
-            <c>{$this->server->name}</c>
+            <c>$serverName</c>
             <ca xlink:href="/rest/c/Default">Default</ca>
             <l>{$package['license']}</l>
             <s>{$package['summary']}</s>
@@ -608,15 +622,21 @@ EOF;
 
     protected function buildChannel()
     {
+		$serverAlias   = $this->server->alias;
+		$serverName    = $this->server->name;
+		$serverSummary = $this->server->summary;
+		$serverUrl     = $this->server->url;
+
         $this->formatter->info("Building channel");
 
-        $suggestedalias = '';
-        if (!empty($this->server->alias)) {
-            $suggestedalias = '
-    <suggestedalias>'.$this->server->alias.'</suggestedalias>';
+        $suggestedAlias = '';
+        if (!empty($serverAlias)) {
+            $suggestedAlias = '
+	<suggestedalias>'.$serverAlias.'</suggestedalias>';
         }
 
         $validator = '';
+
         if (!empty($this->server->validatepackage) && !empty($this->server->validateversion)) {
             $validator = '
     <validatepackage version="'.$this->server->validateversion.'">'.$this->server->validatepackage.'</validatepackage>';
@@ -625,15 +645,15 @@ EOF;
         $content = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <channel version="1.0" xmlns="http://pear.php.net/channel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/channel-1.0 http://pear.php.net/dtd/channel-1.0.xsd">
-    <name>{$this->server->name}</name>
-    <summary>{$this->server->summary}</summary>{$suggestedalias}
+    <name>$serverName</name>
+    <summary>$serverSummary</summary>$suggestedAlias
     <servers>
         <primary>
             <rest>
-                <baseurl type="REST1.0">{$this->server->url}/rest/</baseurl>
-                <baseurl type="REST1.1">{$this->server->url}/rest/</baseurl>
-                <baseurl type="REST1.2">{$this->server->url}/rest/</baseurl>
-                <baseurl type="REST1.3">{$this->server->url}/rest/</baseurl>
+                <baseurl type="REST1.0">$serverUrl/rest/</baseurl>
+                <baseurl type="REST1.1">$serverUrl/rest/</baseurl>
+                <baseurl type="REST1.2">$serverUrl/rest/</baseurl>
+                <baseurl type="REST1.3">$serverUrl/rest/</baseurl>
             </rest>
         </primary>
     </servers>{$validator}

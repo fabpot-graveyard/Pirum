@@ -142,7 +142,7 @@ class Pirum_CLI
 
 		$this->fs->mkDir($targetDir.'/get');
 
-        $server = simplexml_load_file($targetDir.'/pirum.xml');
+        $server = simplexml_load_file($targetDir.'/pirum.xml', 'Pirum_Server');
 
         if (!$server) {
             throw new InvalidArgumentException(
