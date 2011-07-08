@@ -85,7 +85,7 @@ class Pirum_CLI
 			}
 
 			$this->formatter->info("Command %s run successfully", $command);
-        } catch (Pirum_Package_Release_Exception $e) {
+        } catch (Pirum_Package_Exception $e) {
 			return $this->formatter->error($e->getMessage());
 		} catch (Exception $e) {
 			return $this->formatter->exception($e);
@@ -184,13 +184,13 @@ class Pirum_CLI
 	public function getPearPackage()
 	{
         if (!isset($this->options[3])) {
-			throw new Pirum_Package_Release_Exception(
+			throw new Pirum_Package_Exception(
 				'You must pass a PEAR package file path'
 			);
         }
 
         if (!$this->isValidPearPackageFileName($this->options[3])) {
-            throw new Pirum_Package_Release_Exception(sprintf(
+            throw new Pirum_Package_Exception(sprintf(
 				'The PEAR package "%s" filename is badly formatted',
 				$this->options[3]
 			));
