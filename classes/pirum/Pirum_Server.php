@@ -77,6 +77,16 @@ EOF;
 EOF;
 
 	}
+
+	/**
+	 *
+	 * @param Pirum_Package_Loader $loader
+	 * @param string               $archive
+	 */
+	public function loadPackage($loader, $archive)
+	{
+		return $loader->loadPackage($archive, $this->name);
+	}
 }
 
 ?>

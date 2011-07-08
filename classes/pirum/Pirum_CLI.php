@@ -142,7 +142,9 @@ class Pirum_CLI
 
 		$this->fs->mkDir($targetDir.'/get');
 
-        $server = simplexml_load_file($targetDir.'/pirum.xml', 'Pirum_Server');
+        $server = simplexml_load_file(
+			$targetDir.'/pirum.xml', 'Pirum_Server'
+		);
 
         if (!$server) {
             throw new InvalidArgumentException(
@@ -169,7 +171,6 @@ class Pirum_CLI
         }
 
 		$repoBuilder = new Pirum_Repository_Builder(
-			$server->name,
 			$targetDir,
 			$this->fs,
 			$this->formatter
@@ -177,7 +178,7 @@ class Pirum_CLI
 
         return new Pirum_Build_Command(
 			$targetDir, $this->fs, $this->formatter,
-			$server, $repoBuilder->build(),
+			$server, $repoBuilder->build($server),
 			new Pirum_StaticAsset_Builder()
 		);
 	}

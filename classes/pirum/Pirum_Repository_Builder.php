@@ -14,23 +14,20 @@ class Pirum_Repository_Builder
 	 */
 	private $formatter;
 
-	public function __construct($serverName, $targetDir, $fs, $formatter)
+	public function __construct($targetDir, $fs, $formatter)
 	{
-		$this->serverName = $serverName;
 		$this->targetDir  = $targetDir;
 		$this->fs         = $fs;
 		$this->formatter  = $formatter;
 	}
 
-	private function getServerName()
-	{
-		return $this->serverName;
-	}
-
-	public function build()
+	/**
+	 * @param Pirum_Server $server
+	 */
+	public function build($server)
 	{
 		$files    = $this->getPackageFiles();
-		$packages = $this->getPackageList($files);
+		$packages = $this->getPackageList($server, $files);
 
 		return $this->processPackageList($packages);
 	}
@@ -56,13 +53,17 @@ class Pirum_Repository_Builder
 		return $files;
 	}
 
-	private function getPackageList(array $files)
+	/**
+	 * @param Pirum_Server $server
+	 * @param array        $files
+	 */
+	private function getPackageList($server, array $files)
 	{
 		$loader = $this->createLoader();
 
 		$releasePackages = array();
         foreach ($files as $archive) {
-			$releasePackages[]= $loader->loadPackage($archive, $this->serverName);
+			$releasePackages[]= $server->loadPackage($loader, $archive);
         }
 
 		return $releasePackages;
