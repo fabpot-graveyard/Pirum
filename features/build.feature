@@ -3,6 +3,7 @@ Feature: Build
 	As a maintainer
 	I want to be able to build it using the executable
 
+	@build
 	Scenario: Build localhost
 		Given pirum xml file is in place
 			And the pirum standalone is built
@@ -10,6 +11,7 @@ Feature: Build
 		Then the server index contains channel description
 			And the channel is discoverable
 
+	@add
 	Scenario: Add package to localhost
 		Given a built up pirum repo is in place
 			And the pirum repo does not contain package
@@ -17,12 +19,14 @@ Feature: Build
 		Then the server index contains package description
 			And the package is installable
 
+	@remove
 	Scenario: Remove package from localhost
 		Given a built up pirum repo is in place
 			And the server index contains package description
 		When I issue the command `php pirum remove packagename`
 		Then the pirum repo does not contain package
 
+	@clean
 	Scenario: Remove package from localhost
 		Given a built up pirum repo is in place
 		When I issue the command `php pirum clean`
