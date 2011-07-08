@@ -51,23 +51,31 @@ class Pirum_Server_Builder
 		$this->fixArchives();
         $this->buildSelf();
         $this->buildChannel();
-        $this->buildMaintainers();
-        $this->buildCategories();
-        $this->buildPackages();
-        $this->buildReleasePackages();
         $this->buildIndex();
         $this->buildCss();
         $this->buildFeed();
 
+        $this->buildMaintainers();
+        $this->buildCategories();
+        $this->buildPackages();
+        $this->buildReleasePackages();
+
+
         $this->formatter->info("Updating PEAR server files");
 
-        $this->updateSelf();
-        $this->updateChannel();
-        $this->updateIndex();
-        $this->updateCss();
-        $this->updateFeed();
-        $this->updatePackages();
+        copy($this->buildDir.'/pirum.php', $this->targetDir.'/pirum.php');
+        if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml')) {
+            if (file_exists($this->targetDir.'/channel.xml'))
+            {
+                unlink($this->targetDir.'/channel.xml');
+            }
 
+            rename($this->buildDir.'/channel.xml', $this->targetDir.'/channel.xml');
+        }
+        copy($this->buildDir.'/index.html', $this->targetDir.'/index.html');
+        copy($this->buildDir.'/pirum.css', $this->targetDir.'/pirum.css');
+        copy($this->buildDir.'/feed.xml', $this->targetDir.'/feed.xml');
+        $this->fs->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
 		$this->fs->removeDir($this->buildDir);
    }
 
@@ -100,43 +108,6 @@ class Pirum_Server_Builder
                 }
             }
         }
-    }
-
-    protected function updateSelf()
-    {
-        copy($this->buildDir.'/pirum.php', $this->targetDir.'/pirum.php');
-    }
-
-    protected function updateChannel()
-    {
-        if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml')) {
-            if (file_exists($this->targetDir.'/channel.xml'))
-            {
-                unlink($this->targetDir.'/channel.xml');
-            }
-
-            rename($this->buildDir.'/channel.xml', $this->targetDir.'/channel.xml');
-        }
-    }
-
-    protected function updateIndex()
-    {
-        copy($this->buildDir.'/index.html', $this->targetDir.'/index.html');
-    }
-
-    protected function updateCss()
-    {
-        copy($this->buildDir.'/pirum.css', $this->targetDir.'/pirum.css');
-    }
-
-    protected function updateFeed()
-    {
-        copy($this->buildDir.'/feed.xml', $this->targetDir.'/feed.xml');
-    }
-
-    protected function updatePackages()
-    {
-        $this->fs->mirrorDir($this->buildDir.'/rest', $this->targetDir.'/rest');
     }
 
     protected function buildFeed()
