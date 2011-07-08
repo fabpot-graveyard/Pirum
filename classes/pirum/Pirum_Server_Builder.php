@@ -175,17 +175,6 @@ class Pirum_Server_Builder
     {
         $this->formatter->info("Building index");
 
-        if (file_exists($file = dirname(__FILE__).'/templates/index.html') ||
-            file_exists($file = $this->buildDir.'/templates/index.html')) {
-            ob_start();
-            include $file;
-            $html = ob_get_clean();
-
-            file_put_contents($this->buildDir.'/index.html', $html);
-
-            return;
-        }
-
         ob_start();
 
 		$template = new Pirum_Index_Template($this->server, $this->packages);
@@ -200,11 +189,11 @@ class Pirum_Server_Builder
     {
         $this->formatter->info("Building releases");
 
-        mkdir($this->buildDir.'/rest/r', 0777, true);
+		$this->fs->mkDir($this->buildDir.'/rest/r');
 
-        foreach ($this->packages as $package) {
-            mkdir($dir = $this->buildDir.'/rest/r/'.strtolower($package['name']), 0777, true);
-
+		foreach ($this->packages as $package) {
+			$dir = $this->buildDir.'/rest/r/'.strtolower($package['name']);
+            $this->fs->mkDir($dir);
             $this->buildReleasePackage($dir, $package);
         }
     }
@@ -581,45 +570,12 @@ EOF;
 
     protected function buildChannel()
     {
-		$serverAlias   = $this->server->alias;
-		$serverName    = $this->server->name;
-		$serverSummary = $this->server->summary;
-		$serverUrl     = $this->server->url;
-
         $this->formatter->info("Building channel");
 
-        $suggestedAlias = '';
-        if (!empty($serverAlias)) {
-            $suggestedAlias = '
-	<suggestedalias>'.$serverAlias.'</suggestedalias>';
-        }
-
-        $validator = '';
-
-        if (!empty($this->server->validatepackage) && !empty($this->server->validateversion)) {
-            $validator = '
-    <validatepackage version="'.$this->server->validateversion.'">'.$this->server->validatepackage.'</validatepackage>';
-        }
-
-        $content = <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<channel version="1.0" xmlns="http://pear.php.net/channel-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/channel-1.0 http://pear.php.net/dtd/channel-1.0.xsd">
-    <name>$serverName</name>
-    <summary>$serverSummary</summary>$suggestedAlias
-    <servers>
-        <primary>
-            <rest>
-                <baseurl type="REST1.0">$serverUrl/rest/</baseurl>
-                <baseurl type="REST1.1">$serverUrl/rest/</baseurl>
-                <baseurl type="REST1.2">$serverUrl/rest/</baseurl>
-                <baseurl type="REST1.3">$serverUrl/rest/</baseurl>
-            </rest>
-        </primary>
-    </servers>{$validator}
-</channel>
-EOF;
-
-        file_put_contents($this->buildDir.'/channel.xml', $content);
+        file_put_contents(
+			$this->buildDir.'/channel.xml',
+			$this->server->buildChannel()
+		);
     }
 }
 
