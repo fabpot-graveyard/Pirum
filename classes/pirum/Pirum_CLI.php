@@ -118,18 +118,8 @@ class Pirum_CLI
 
     protected function runRemove($targetDir)
     {
-		$pearPackage = $this->getPearPackage();
-
-        if (!is_file($targetDir.'/get/'.basename($pearPackage))) {
-            return $this->formatter->error(
-				'The PEAR package "%s" does not exist in this channel',
-				$pearPackage
-			);
-        }
-
-        unlink($targetDir.'/get/'.basename($pearPackage));
-        unlink($targetDir.'/get/'.substr_replace(basename($pearPackage), '.tar', -4));
-
+		$builder = new Pirum_RemovePackage_Builder($this, $this->fs, $targetDir);
+		$builder->build();
         $this->runBuild($targetDir);
     }
 

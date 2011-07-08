@@ -188,11 +188,16 @@ class FileSystem
 
 	public function checkFile($file)
 	{
-        if ($this->fs->isFile($pearPackage)) {
+        if ($this->isFile($pearPackage)) {
 			return;
         }
 
 		throw new FileNotFound_Exception('File '.$file.' not found!');
+	}
+
+	public function baseName($file)
+	{
+		return basename($file);
 	}
 }
 
