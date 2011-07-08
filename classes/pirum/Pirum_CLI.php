@@ -101,8 +101,12 @@ class Pirum_CLI
         return $ret;
     }
 
-    protected function isCommand($cmd) {
-        return in_array($cmd, $this->commands);
+
+    protected function runBuild($targetDir)
+    {
+		$buildDir = $this->fs->createTempDir('pirum_build', '/rest');
+        $this->createServerBuilder($targetDir, $buildDir)->build();
+		$this->fs->removeDir($buildDir);
     }
 
 	private function printUsage()
@@ -116,62 +120,8 @@ class Pirum_CLI
 		));
 	}
 
-    protected function runRemove($targetDir)
-    {
-		$builder = new Pirum_RemovePackage_Builder(
-			$this, $this->fs, $targetDir
-		);
-		$builder->build();
-        $this->runBuild($targetDir);
-    }
-
-    protected function runAdd($targetDir)
-    {
-		$builder = new Pirum_AddPackage_Builder(
-			$this, $this->fs, $targetDir
-		);
-
-		$builder->build();
-        $this->runBuild($targetDir);
-    }
-
-	private function isValidPearPackageFileName($pearPackage)
-	{
-		return (bool)preg_match(
-			Pirum_Package::PACKAGE_FILE_PATTERN,
-			$pearPackage
-		);
-	}
-
-    protected function runClean($targetDir)
-    {
-		$builder = new Pirum_CleanRepo_Builder($this->fs, $targetDir);
-		$builder->build();
-    }
-
-	public function getPearPackage()
-	{
-        if (!isset($this->options[3])) {
-			throw new Pirum_Package_Exception(
-				'You must pass a PEAR package file path'
-			);
-        }
-
-        if (!$this->isValidPearPackageFileName($this->options[3])) {
-            throw new Pirum_Package_Exception(sprintf(
-				'The PEAR package "%s" filename is badly formatted',
-				$this->options[3]
-			));
-        }
-
-		return $this->options[3];
-	}
-
-    protected function runBuild($targetDir)
-    {
-		$buildDir = $this->fs->createTempDir('pirum_build', '/rest');
-        $this->createServerBuilder($targetDir, $buildDir)->build();
-		$this->fs->removeDir($buildDir);
+    protected function isCommand($cmd) {
+        return in_array($cmd, $this->commands);
     }
 
 	private function createServerBuilder($targetDir, $buildDir)
@@ -221,6 +171,57 @@ class Pirum_CLI
 			$targetDir, $buildDir,
 			$this->fs, $this->formatter,
 			$server, $repoBuilder->build()
+		);
+	}
+
+    protected function runAdd($targetDir)
+    {
+		$builder = new Pirum_AddPackage_Builder(
+			$this, $this->fs, $targetDir
+		);
+
+		$builder->build();
+        $this->runBuild($targetDir);
+    }
+
+	protected function runRemove($targetDir)
+    {
+		$builder = new Pirum_RemovePackage_Builder(
+			$this, $this->fs, $targetDir
+		);
+		$builder->build();
+        $this->runBuild($targetDir);
+    }
+
+    protected function runClean($targetDir)
+    {
+		$builder = new Pirum_CleanRepo_Builder($this->fs, $targetDir);
+		$builder->build();
+    }
+
+	public function getPearPackage()
+	{
+        if (!isset($this->options[3])) {
+			throw new Pirum_Package_Exception(
+				'You must pass a PEAR package file path'
+			);
+        }
+
+        if (!$this->isValidPearPackageFileName($this->options[3])) {
+            throw new Pirum_Package_Exception(sprintf(
+				'The PEAR package "%s" filename is badly formatted',
+				$this->options[3]
+			));
+        }
+
+		return $this->options[3];
+	}
+
+	private function isValidPearPackageFileName($pearPackage)
+	{
+		return (bool)preg_match(
+			Pirum_Package::PACKAGE_FILE_PATTERN,
+			$pearPackage
 		);
 	}
 }
