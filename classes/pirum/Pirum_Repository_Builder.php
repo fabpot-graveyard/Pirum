@@ -79,7 +79,11 @@ class Pirum_Repository_Builder
 	{
 		/* @var $package Pirum_Package_Release */
         foreach ($packages as $file => $package) {
-			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
+			$this->formatter->info(
+				'Parsing package %s for %s',
+				$package->getVersion(),
+				$package->getName()
+			);
 
 			$this->initPackageMetaData($package);
 			$this->addPackageRelease($package);
@@ -87,6 +91,8 @@ class Pirum_Repository_Builder
         }
 
         ksort($this->packages);
+
+		file_put_contents('packagelog', var_export($this->packages, true));
 
 		return $this->packages;
 	}

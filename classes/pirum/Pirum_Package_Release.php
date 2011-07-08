@@ -79,6 +79,51 @@ class Pirum_Package_Release
     {
         return (string) $this->package->stability->release;
     }
+    public function getDeps()
+    {
+        return serialize($this->XMLToArray($this->package->dependencies));
+    }
+
+    public function getMinPhp()
+    {
+        return isset($this->package->dependencies->required->php->min) ? (string) $this->package->dependencies->required->php->min : null;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function getVersion()
+    {
+        return $this->version;
+    }
+
+    public function getProvidedExtension() {
+        return isset($this->package->providesextension) ? (string)$this->package->providesextension : null;
+    }
+
+    protected function XMLToArray($xml)
+    {
+        $array = array();
+        foreach ($xml->children() as $element => $value) {
+            $key = (string) $element;
+            $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
+
+            if (array_key_exists($key, $array)) {
+                if (!isset($array[$key][0]))
+                {
+                    $array[$key] = array($array[$key]);
+                }
+                $array[$key][] = $value;
+            } else {
+                $array[$key] = $value;
+            }
+        }
+
+        return $array;
+    }
+
 
     public function getMaintainers()
     {
@@ -108,65 +153,6 @@ class Pirum_Package_Release
         return $maintainers;
     }
 
-    public function getDeps()
-    {
-        return serialize($this->XMLToArray($this->package->dependencies));
-    }
-
-    public function getMinPhp()
-    {
-        return isset($this->package->dependencies->required->php->min) ? (string) $this->package->dependencies->required->php->min : null;
-    }
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function getVersion()
-    {
-        return $this->version;
-    }
-
-    public function getProvidedExtension() {
-        return isset($this->package->providesextension) ? (string)$this->package->providesextension : null;
-    }
-
-    public function copyPackageXml($target)
-    {
-        copy($this->packageXml, $target);
-    }
-
-	/**
-	 * @param Pirum_Package_Loader $loader
-	 * @param string               $file
-	 */
-    public function loadPackageFromXml($loader, $file)
-    {
-		$loader->loadPackageFromXml($this, $file);
-    }
-
-    protected function XMLToArray($xml)
-    {
-        $array = array();
-        foreach ($xml->children() as $element => $value) {
-            $key = (string) $element;
-            $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
-
-            if (array_key_exists($key, $array)) {
-                if (!isset($array[$key][0]))
-                {
-                    $array[$key] = array($array[$key]);
-                }
-                $array[$key][] = $value;
-            } else {
-                $array[$key] = $value;
-            }
-        }
-
-        return $array;
-    }
-
 	public function getMetaData()
 	{
 		return array(
@@ -193,7 +179,7 @@ class Pirum_Package_Release
 			'deps'        => $this->getDeps(),
 			'notes'       => htmlspecialchars($this->getNotes()),
 			'maintainers' => $this->getMaintainers(),
-			'info'        => $this,
+			'packageXml'  => $this->packageXml,
 		);
 	}
 

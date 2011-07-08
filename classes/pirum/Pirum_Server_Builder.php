@@ -390,7 +390,7 @@ EOF
 
         file_put_contents($dir.'/deps.'.$release['version'].'.txt', $release['deps']);
 
-        $release['info']->copyPackageXml($dir."/package.{$release['version']}.xml");
+		copy($release['packageXml'], $dir."/package.{$release['version']}.xml");
     }
 
     protected function buildPackages()
