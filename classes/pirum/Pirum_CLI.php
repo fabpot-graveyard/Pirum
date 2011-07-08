@@ -177,7 +177,8 @@ class Pirum_CLI
 
         return new Pirum_Server_Builder(
 			$targetDir, $this->fs, $this->formatter,
-			$server, $repoBuilder->build()
+			$server, $repoBuilder->build(),
+			new Pirum_StaticAsset_Builder()
 		);
 	}
 
