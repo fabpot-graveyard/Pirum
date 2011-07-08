@@ -138,7 +138,7 @@ class Pirum_Package_Release
         copy($this->packageFile, $target);
     }
 
-	public function loadWith($pirum)
+	public function loadWith($pirum, $packageTmpDir)
 	{
 		if (file_exists($file = $pirum->getPackageXmlFor($this))) {
 			$this->loadPackageFromFile($file);

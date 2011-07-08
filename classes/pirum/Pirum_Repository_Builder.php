@@ -115,16 +115,20 @@ class Pirum_Repository_Builder
         $packages = array();
         foreach ($files as $file) {
 			$packageTmpDir = $this->fs->createTempDir('Pirum_Package_Release');
-            $package       = new Pirum_Package_Release($file);
-
-			$package->loadWith($this);
-
-            $packages[$file] = $package;
+			$packages[$file] = $this->loadPackageFrom($file, $packageTmpDir);
 			$this->fs->removeDir($packageTmpDir);
         }
 
 		return $packages;
 	}
+
+	private function loadPackageFrom($file, $packageTmpDir)
+	{
+		$package = new Pirum_Package_Release($file);
+		$package->loadWith($this, $packageTmpDir);
+		return $package;
+	}
+
 	private function getReleaseInfoFrom(SplFileInfo $file)
 	{
 		if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
