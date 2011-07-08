@@ -14,13 +14,15 @@ class Pirum_Package_Release
     protected $name;
     protected $version;
     protected $archive;
-    protected $packageFile;
+    protected $packageXml;
 
-    public function __construct($archive, $name, $version)
+    public function __construct($archive, $name, $version, $packageXml, $package)
     {
-        $this->archive = $archive;
-		$this->name    = $name;
-		$this->version = $version;
+        $this->archive    = $archive;
+		$this->name       = $name;
+		$this->version    = $version;
+		$this->packageXml = $packageXml;
+		$this->package    = $package;
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
@@ -132,7 +134,7 @@ class Pirum_Package_Release
 
     public function copyPackageXml($target)
     {
-        copy($this->packageFile, $target);
+        copy($this->packageXml, $target);
     }
 
 	/**
@@ -141,71 +143,7 @@ class Pirum_Package_Release
 	 */
     public function loadPackageFromXml($loader, $file)
     {
-        $this->packageFile = $file;
-        $this->package     = $loader->loadPackageFrom($file);
-
-		$this->package->validate($this->name, $this->version);
-    }
-
-	/**
-	 * @param Pirum_Package_Loader $loader
-	 * @param string               $tmpDir
-	 */
-    public function loadPackageFromArchive($loader, $tmpDir)
-    {
-        if (!function_exists('gzopen')) {
-            copy($this->archive, $tmpDir.'/archive.tgz');
-            system('cd '.$tmpDir.' && tar zxpf archive.tgz');
-
-            if (!is_file($tmpDir.'/package.xml')) {
-                throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
-            }
-
-            $this->loadPackageFromXml($loader, $tmpDir.'/package.xml');
-
-            return;
-        }
-
-        $gz = gzopen($this->archive, 'r');
-        $tar = '';
-        while (!gzeof($gz)) {
-            $tar .= gzread($gz, 10000);
-        }
-        gzclose($gz);
-
-        while (strlen($tar)) {
-            $filename = rtrim(substr($tar, 0, 100), chr(0));
-            $filesize = octdec(rtrim(substr($tar, 124, 12), chr(0)));
-
-            if ($filename != 'package.xml') {
-                $offset = $filesize % 512 == 0 ? $filesize : $filesize + (512 - $filesize % 512);
-                $tar = substr($tar, 512 + $offset);
-
-                continue;
-            }
-
-            $checksum = octdec(rtrim(substr($tar, 148, 8), chr(0)));
-            $cchecksum = 0;
-            $tar = substr_replace($tar, '        ', 148, 8);
-            for ($i = 0; $i < 512; $i++) {
-                $cchecksum += ord($tar[$i]);
-            }
-
-            if ($checksum != $cchecksum) {
-                throw new InvalidArgumentException('The PEAR archive is not a valid archive.');
-            }
-
-            $package = substr($tar, 512, $filesize);
-            $this->packageFile = $tmpDir.'/package.xml';
-
-            file_put_contents($this->packageFile, $package);
-
-            $this->loadPackageFromXml($loader, $tmpDir.'/package.xml');
-
-            return;
-        }
-
-        throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
+		$loader->loadPackageFromXml($this, $file);
     }
 
     protected function XMLToArray($xml)

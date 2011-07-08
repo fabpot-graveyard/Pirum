@@ -117,15 +117,21 @@ class Pirum_Repository_Builder
 
 	private function getPackageList(array $files)
 	{
-        $releasePackages = array();
+		$loader = $this->createLoader();
+
+		$releasePackages = array();
         foreach ($files as $file) {
-			$loader = new Pirum_Package_Loader(
-				$this->fs, $this->targetDir.'/rest/r/'
-			);
 			$releasePackages[]= $loader->loadPackage($file);
         }
 
 		return $releasePackages;
+	}
+
+	private function createLoader()
+	{
+		return new Pirum_Package_Loader(
+			$this->fs, $this->targetDir.'/rest/r/'
+		);
 	}
 
 	private function getReleaseInfoFrom(SplFileInfo $file)
