@@ -35,14 +35,6 @@ class Pirum_Repository_Builder
 		return $this->processPackageList($packages);
 	}
 
-	/**
-	 * @param Pirum_Package_Release $package
-	 */
-	public function getPackageXmlFor($package)
-	{
-		return $package->getPackageXml($this->targetDir.'/rest/r/');
-	}
-
 	private function processPackageList($packages)
 	{
 		/* @var $package Pirum_Package_Release */
@@ -125,43 +117,16 @@ class Pirum_Repository_Builder
 
 	private function getPackageList(array $files)
 	{
-        $packages = array();
+        $releasePackages = array();
         foreach ($files as $file) {
-			$packageTmpDir = $this->fs->createTempDir('Pirum_Package_Release');
-			$packages[$file] = $this->loadPackageReleaseFrom($file, $packageTmpDir);
-			$this->fs->removeDir($packageTmpDir);
+			$loader = new Pirum_Package_Loader(
+				$this->fs, $this->targetDir.'/rest/r/'
+			);
+			$releasePackages[]= $loader->loadPackage($file);
         }
 
-		return $packages;
+		return $releasePackages;
 	}
-
-	public function loadPackageFrom($file)
-	{
-		return new Pirum_Package($this->fs->contentsOf($file));
-	}
-
-	private function loadPackageReleaseFrom($file, $packageTmpDir)
-	{
-		$package = $this->createReleasePackage($file);
-		$package->loadInto($this, $packageTmpDir);
-		return $package;
-	}
-
-	private function createReleasePackage($file)
-	{
-		$baseFileName = basename($file);
-        if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $baseFileName, $match)) {
-            throw new InvalidArgumentException(sprintf(
-				'The archive "%s" does not follow PEAR conventions',
-				$file
-			));
-        }
-
-		return new Pirum_Package_Release(
-			$file, $match['name'], $match['version']
-		);
-	}
-
 
 	private function getReleaseInfoFrom(SplFileInfo $file)
 	{

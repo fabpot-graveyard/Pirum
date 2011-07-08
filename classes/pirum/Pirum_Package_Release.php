@@ -136,35 +136,35 @@ class Pirum_Package_Release
     }
 
 	/**
-	 * @param Pirum_Repository_Builder $repo
-	 * @param string                   $packageTmpDir
+	 * @param Pirum_Package_Loader $loader
+	 * @param string               $packageTmpDir
 	 */
-	public function loadInto($repo, $packageTmpDir)
+	public function loadUsing($loader, $packageTmpDir)
 	{
-		if (file_exists($file = $repo->getPackageXmlFor($this))) {
-			$this->loadPackageFromXml($repo, $file);
+		if (file_exists($file = $loader->getPackageXmlFor($this))) {
+			$this->loadPackageFromXml($loader, $file);
 		} else {
-			$this->loadPackageFromArchive($repo, $packageTmpDir);
+			$this->loadPackageFromArchive($loader, $packageTmpDir);
 		}
 	}
 
 	/**
-	 * @param Pirum_Repository_Builder $repo
-	 * @param string                   $file
+	 * @param Pirum_Package_Loader $loader
+	 * @param string               $file
 	 */
-    private function loadPackageFromXml($repo, $file)
+    private function loadPackageFromXml($loader, $file)
     {
         $this->packageFile = $file;
-        $this->package     = $repo->loadPackageFrom($file);
+        $this->package     = $loader->loadPackageFrom($file);
 
 		$this->package->validate($this->name, $this->version);
     }
 
 	/**
-	 * @param Pirum_Repository_Builder $repo
-	 * @param string                   $tmpDir
+	 * @param Pirum_Package_Loader $loader
+	 * @param string               $tmpDir
 	 */
-    private function loadPackageFromArchive($repo, $tmpDir)
+    private function loadPackageFromArchive($loader, $tmpDir)
     {
         if (!function_exists('gzopen')) {
             copy($this->archive, $tmpDir.'/archive.tgz');
@@ -174,7 +174,7 @@ class Pirum_Package_Release
                 throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
             }
 
-            $this->loadPackageFromXml($repo, $tmpDir.'/package.xml');
+            $this->loadPackageFromXml($loader, $tmpDir.'/package.xml');
 
             return;
         }
@@ -213,7 +213,7 @@ class Pirum_Package_Release
 
             file_put_contents($this->packageFile, $package);
 
-            $this->loadPackageFromXml($tmpDir.'/package.xml');
+            $this->loadPackageFromXml($loader, $tmpDir.'/package.xml');
 
             return;
         }
