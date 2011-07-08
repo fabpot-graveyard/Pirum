@@ -14,7 +14,7 @@ class Pirum_Package_Loader
 		$this->xmlDir = $xmlDir;
 	}
 
-	public function loadPackage($archive)
+	public function loadPackage($archive, $serverName)
 	{
 		$tmpDir = $this->fs->createTempDir('Pirum_Package_Release');
 
@@ -42,6 +42,8 @@ class Pirum_Package_Loader
 		$releasePackage = new Pirum_Package_Release(
 			$archive, $name, $version, $packageXml, $package
 		);
+		$releasePackage->validateForChannel($serverName);
+
 		$this->fs->removeDir($tmpDir);
 		return $releasePackage;
 	}

@@ -196,6 +196,19 @@ class Pirum_Package_Release
 			'info'        => $this,
 		);
 	}
+
+	public function validateForChannel($serverName)
+	{
+		if ($this->getChannel() != $serverName) {
+			throw new Pirum_Package_Exception(sprintf(
+				'Package "%s" channel (%s) is not %s.',
+				$this->getName(),
+				$this->getChannel(),
+				$this->getServerName()
+			));
+		}
+
+	}
 }
 
 ?>

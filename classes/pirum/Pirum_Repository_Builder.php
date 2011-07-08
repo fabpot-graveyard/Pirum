@@ -35,20 +35,51 @@ class Pirum_Repository_Builder
 		return $this->processPackageList($packages);
 	}
 
+	private function getPackageFiles()
+	{
+        $files = array();
+
+		foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
+			if ($this->fs->isDir($file)) {
+				continue;
+			}
+            if (null === $releaseInfo = $this->getReleaseInfoFrom($file)) {
+                continue;
+            }
+
+            $files[$releaseInfo] = (string) $file;
+		}
+
+        // order files to have latest versions first
+        uksort($files, 'version_compare');
+        $files = array_reverse($files);
+		return $files;
+	}
+
+	private function getPackageList(array $files)
+	{
+		$loader = $this->createLoader();
+
+		$releasePackages = array();
+        foreach ($files as $archive) {
+			$releasePackages[]= $loader->loadPackage($archive, $this->serverName);
+        }
+
+		return $releasePackages;
+	}
+
+	private function createLoader()
+	{
+		return new Pirum_Package_Loader(
+			$this->fs, $this->targetDir.'/rest/r/'
+		);
+	}
+
 	private function processPackageList($packages)
 	{
 		/* @var $package Pirum_Package_Release */
         foreach ($packages as $file => $package) {
 			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
-
-            if ($package->getChannel() != $this->getServerName()) {
-				throw new Pirum_Package_Release_Exception(sprintf(
-					'Package "%s" channel (%s) is not %s.',
-					$package->getName(),
-					$package->getChannel(),
-					$this->getServerName()
-				));
-            }
 
 			$this->initPackageMetaData($package);
 			$this->addPackageRelease($package);
@@ -91,46 +122,6 @@ class Pirum_Repository_Builder
 		array_merge(
 			$package->getMaintainers(),
 			$this->packages[$package->getName()]['maintainers']
-		);
-	}
-
-	private function getPackageFiles()
-	{
-        $files = array();
-
-		foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
-			if ($this->fs->isDir($file)) {
-				continue;
-			}
-            if (null === $releaseInfo = $this->getReleaseInfoFrom($file)) {
-                continue;
-            }
-
-            $files[$releaseInfo] = (string) $file;
-		}
-
-        // order files to have latest versions first
-        uksort($files, 'version_compare');
-        $files = array_reverse($files);
-		return $files;
-	}
-
-	private function getPackageList(array $files)
-	{
-		$loader = $this->createLoader();
-
-		$releasePackages = array();
-        foreach ($files as $file) {
-			$releasePackages[]= $loader->loadPackage($file);
-        }
-
-		return $releasePackages;
-	}
-
-	private function createLoader()
-	{
-		return new Pirum_Package_Loader(
-			$this->fs, $this->targetDir.'/rest/r/'
 		);
 	}
 
