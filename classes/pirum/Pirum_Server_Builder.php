@@ -135,37 +135,16 @@ class Pirum_Server_Builder
 
     protected function buildFeed()
     {
-		$serverUrl     = $this->server->url;
-		$serverSummary = $this->server->summary;
-
         $this->formatter->info("Building feed");
+		$feedBuilder = new Pirum_Feed_Builder();
 
         $entries = '';
         foreach ($this->packages as $package) {
             foreach ($package['releases'] as $release)
             {
-                $date = date(DATE_ATOM, strtotime($release['date']));
-
-                reset($release['maintainers']);
-                $maintainer = current($release['maintainers']);
-				$packageHref = $this->server->getHref(
-					$package['name'], $release['version']
+                $entries .= $feedBuilder->releaseItem(
+					$this->server, $package, $release
 				);
-
-                $entries .= <<<EOF
-    <entry>
-        <title>{$package['name']} {$release['version']} ({$release['stability']})</title>
-        <link href="$packageHref" />
-        <id>{$package['name']}-{$release['version']}</id>
-        <author>
-            <name>{$maintainer['nickname']}</name>
-        </author>
-        <updated>$date</updated>
-        <content>
-            {$package['description']}
-        </content>
-    </entry>
-EOF;
             }
         }
 
