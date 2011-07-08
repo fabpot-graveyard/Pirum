@@ -64,16 +64,8 @@ class Pirum_Repository_Builder
 			return;
 		}
 
-		$this->packages[$package->getName()] = array(
-			'name'        => htmlspecialchars($package->getName()),
-			'license'     => htmlspecialchars($package->getLicense()),
-			'summary'     => htmlspecialchars($package->getSummary()),
-			'description' => htmlspecialchars($package->getDescription()),
-			'extension'   => $package->getProvidedExtension(),
-			'releases'    => array(),
-			'maintainers' => array(),
-			'current_maintainers' => $package->getMaintainers(),
-		);
+		$this->packages[$package->getName()] = 
+			$package->getMetaData();
 	}
 
 	/**
@@ -81,18 +73,8 @@ class Pirum_Repository_Builder
 	 */
 	private function addPackageRelease($package)
 	{
-		$this->packages[$package->getName()]['releases'][] = array(
-			'version'     => $package->getVersion(),
-			'api_version' => $package->getApiVersion(),
-			'stability'   => $package->getStability(),
-			'date'        => $package->getDate(),
-			'filesize'    => $package->getFilesize(),
-			'php'         => $package->getMinPhp(),
-			'deps'        => $package->getDeps(),
-			'notes'       => htmlspecialchars($package->getNotes()),
-			'maintainers' => $package->getMaintainers(),
-			'info'        => $package,
-		);
+		$this->packages[$package->getName()]['releases'][] =
+			$package->getReleaseData();
 	}
 
 	/**
@@ -100,7 +82,8 @@ class Pirum_Repository_Builder
 	 */
 	private function addPackageMaintainers($package)
 	{
-		$this->packages[$package->getName()]['maintainers'] = array_merge(
+		$this->packages[$package->getName()]['maintainers'] =
+		array_merge(
 			$package->getMaintainers(),
 			$this->packages[$package->getName()]['maintainers']
 		);

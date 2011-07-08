@@ -241,6 +241,36 @@ class Pirum_Package_Release
 
         return $array;
     }
+
+	public function getMetaData()
+	{
+		return array(
+			'name'        => htmlspecialchars($this->getName()),
+			'license'     => htmlspecialchars($this->getLicense()),
+			'summary'     => htmlspecialchars($this->getSummary()),
+			'description' => htmlspecialchars($this->getDescription()),
+			'extension'   => $this->getProvidedExtension(),
+			'releases'    => array(),
+			'maintainers' => array(),
+			'current_maintainers' => $this->getMaintainers(),
+		);
+	}
+
+	public function getReleaseData()
+	{
+		return array(
+			'version'     => $this->getVersion(),
+			'api_version' => $this->getApiVersion(),
+			'stability'   => $this->getStability(),
+			'date'        => $this->getDate(),
+			'filesize'    => $this->getFilesize(),
+			'php'         => $this->getMinPhp(),
+			'deps'        => $this->getDeps(),
+			'notes'       => htmlspecialchars($this->getNotes()),
+			'maintainers' => $this->getMaintainers(),
+			'info'        => $this,
+		);
+	}
 }
 
 ?>
