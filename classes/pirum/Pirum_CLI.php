@@ -118,7 +118,9 @@ class Pirum_CLI
 
     protected function runRemove($targetDir)
     {
-		$builder = new Pirum_RemovePackage_Builder($this, $this->fs, $targetDir);
+		$builder = new Pirum_RemovePackage_Builder(
+			$this, $this->fs, $targetDir
+		);
 		$builder->build();
         $this->runBuild($targetDir);
     }
@@ -130,7 +132,6 @@ class Pirum_CLI
 		);
 
 		$builder->build();
-
         $this->runBuild($targetDir);
     }
 
@@ -142,19 +143,10 @@ class Pirum_CLI
 		);
 	}
 
-    protected function runClean($target)
+    protected function runClean($targetDir)
     {
-        foreach ($this->fs->resourceDir($target) as $file) {
-            if ($file->getFilename() == 'pirum.xml') {
-                continue;
-            }
-
-            if ($file->isDir()) {
-                $this->fs->removeDir($file);
-            } else {
-                $this->fs->deleteFile($file);
-            }
-        }
+		$builder = new Pirum_CleanRepo_Builder($this->fs, $targetDir);
+		$builder->build();
     }
 
 	public function getPearPackage()
