@@ -73,35 +73,18 @@ class Pirum_CLI
 
         $ret = 0;
         try {
-            switch ($command)
-            {
-                case 'build':
-                    $this->runBuild($serverDir);
-                    break;
-                case 'add':
-					$builder = new Pirum_AddPackage_Builder(
-						$this, $this->fs, $serverDir
-					);
+			$builders = array(
+				$this->builder($command, $serverDir),
+				$this->createServerBuilder($serverDir),
+			);
 
-					$builder->build();
-					$this->runBuild($serverDir);
-					break;
-                case 'remove':
-					$builder = new Pirum_RemovePackage_Builder(
-						$this, $this->fs, $serverDir
-					);
-					$builder->build();
-					$this->runBuild($serverDir);
-                    break;
-                case 'clean':
-                    $ret = $this->runClean($serverDir);
-					$this->runBuild($serverDir);
-                    break;
-            }
+			print gettype($builders[0]) . ' '. gettype($builders[1]).PHP_EOL.PHP_EOL;
 
-            if (0 == $ret) {
-				$this->formatter->info("Command %s run successfully", $command);
-            }
+			foreach ($builders as $builder) {
+				$builder->build();
+			}
+
+			$this->formatter->info("Command %s run successfully", $command);
         } catch (Pirum_Package_Exception $e) {
 			return $this->formatter->error($e->getMessage());
 		} catch (Exception $e) {
@@ -111,13 +94,28 @@ class Pirum_CLI
         return $ret;
     }
 
-
-    protected function runBuild($targetDir)
-    {
-		$buildDir = $this->fs->createTempDir('pirum_build', '/rest');
-        $this->createServerBuilder($targetDir, $buildDir)->build();
-		$this->fs->removeDir($buildDir);
-    }
+	private function builder($command, $serverDir)
+	{
+		switch ($command)
+		{
+			case 'build':
+				return new NullBuilder();
+			case 'add':
+				return new Pirum_AddPackage_Builder(
+					$this, $this->fs, $serverDir
+				);
+			case 'remove':
+				return new Pirum_RemovePackage_Builder(
+					$this, $this->fs, $serverDir
+				);
+			case 'clean':
+				return new Pirum_CleanRepo_Builder(
+					$this->fs, $serverDir
+				);
+			default:
+				throw new Exception('Invalid command!');
+		}
+	}
 
 	private function printUsage()
 	{
@@ -134,7 +132,7 @@ class Pirum_CLI
         return in_array($cmd, $this->commands);
     }
 
-	private function createServerBuilder($targetDir, $buildDir)
+	private function createServerBuilder($targetDir)
 	{
         if (!$this->fs->fileExists($targetDir.'/pirum.xml')) {
             throw new InvalidArgumentException(
@@ -178,17 +176,10 @@ class Pirum_CLI
 		);
 
         return new Pirum_Server_Builder(
-			$targetDir, $buildDir,
-			$this->fs, $this->formatter,
+			$targetDir, $this->fs, $this->formatter,
 			$server, $repoBuilder->build()
 		);
 	}
-
-    protected function runClean($targetDir)
-    {
-		$builder = new Pirum_CleanRepo_Builder($this->fs, $targetDir);
-		$builder->build();
-    }
 
 	public function getPearPackage()
 	{

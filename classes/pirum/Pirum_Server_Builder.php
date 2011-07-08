@@ -24,11 +24,10 @@ class Pirum_Server_Builder
     protected $formatter;
 
     public function __construct(
-		$targetDir, $buildDir, $fs, $formatter, $server, $packages
+		$targetDir, $fs, $formatter, $server, $packages
 	)
     {
         $this->targetDir = $targetDir;
-        $this->buildDir  = $buildDir;
 		$this->fs        = $fs;
         $this->formatter = $formatter;
 		$this->server    = $server;
@@ -37,7 +36,9 @@ class Pirum_Server_Builder
 
     public function build()
     {
-        $this->fixArchives();
+		$this->buildDir = $this->fs->createTempDir('pirum_build', '/rest');
+
+		$this->fixArchives();
         $this->buildSelf();
         $this->buildChannel();
         $this->buildMaintainers();
@@ -56,7 +57,9 @@ class Pirum_Server_Builder
         $this->updateCss();
         $this->updateFeed();
         $this->updatePackages();
-    }
+
+		$this->fs->removeDir($this->buildDir);
+   }
 
     private function buildSelf()
     {

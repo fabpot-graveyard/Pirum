@@ -255,16 +255,6 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
     }
-
-    /**
-     * @Then /^the pirum repo only contains pirum\.xml$/
-     */
-    public function thePirumRepoOnlyContainsPirumxml()
-    {
-        if (!file_exists($this->webRoot.'/pirum.xml')) {
-			throw new Exception('pirum.xml disappeared');
-		}
-    }
 }
 
 ?>
