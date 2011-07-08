@@ -13,7 +13,7 @@ class Pirum_Build_Command
     protected $packages;
 
 	/**
-	 * @var Pirum_Server
+	 * @var Pirum_Channel
 	 */
     protected $server;
 

@@ -22,7 +22,7 @@ class Pirum_Repository_Builder
 	}
 
 	/**
-	 * @param Pirum_Server $server
+	 * @param Pirum_Channel $server
 	 */
 	public function build($server)
 	{
@@ -54,7 +54,7 @@ class Pirum_Repository_Builder
 	}
 
 	/**
-	 * @param Pirum_Server $server
+	 * @param Pirum_Channel $server
 	 * @param array        $files
 	 */
 	private function getPackageList($server, array $files)

@@ -143,7 +143,7 @@ class Pirum_CLI
 		$this->fs->mkDir($targetDir.'/get');
 
         $server = simplexml_load_file(
-			$targetDir.'/pirum.xml', 'Pirum_Server'
+			$targetDir.'/pirum.xml', 'Pirum_Channel'
 		);
 
         if (!$server) {

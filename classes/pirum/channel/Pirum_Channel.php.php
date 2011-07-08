@@ -1,14 +1,6 @@
 <?php
-/**
- * Holds the Pirum_Server class
- *
- * @author fqqdk <simon.csaba@ustream.tv>
- */
 
-/**
- * Description of Pirum_Server
- */
-class Pirum_Server extends SimpleXMLElement
+class Pirum_Channel extends SimpleXMLElement
 {
 	public $name;
 	public $url;
