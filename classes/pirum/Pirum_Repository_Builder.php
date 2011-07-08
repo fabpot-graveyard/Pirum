@@ -32,11 +32,17 @@ class Pirum_Repository_Builder
 
 	private function processPackageList($packages)
 	{
+		/* @var $package Pirum_Package */
         foreach ($packages as $file => $package) {
 			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
 
             if ($package->getChannel() != $this->getServerName()) {
-                throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
+				throw new Pirum_Package_Exception(sprintf(
+					'Package "%s" channel (%s) is not %s.',
+					$package->getName(),
+					$package->getChannel(),
+					$this->getServerName()
+				));
             }
 
 			$this->initPackageMetaData($package);
