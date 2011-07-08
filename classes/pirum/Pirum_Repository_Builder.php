@@ -32,12 +32,12 @@ class Pirum_Repository_Builder
 
 	private function processPackageList($packages)
 	{
-		/* @var $package Pirum_Package */
+		/* @var $package Pirum_Package_Release */
         foreach ($packages as $file => $package) {
 			$this->formatter->info('Parsing package %s for %s', $package->getVersion(), $package->getName());
 
             if ($package->getChannel() != $this->getServerName()) {
-				throw new Pirum_Package_Exception(sprintf(
+				throw new Pirum_Package_Release_Exception(sprintf(
 					'Package "%s" channel (%s) is not %s.',
 					$package->getName(),
 					$package->getChannel(),
@@ -54,6 +54,10 @@ class Pirum_Repository_Builder
 
 		return $this->packages;
 	}
+
+	/**
+	 * @param Pirum_Package_Release $package
+	 */
 	private function initPackageMetaData($package)
 	{
 		if (isset($this->packages[$package->getName()])) {
@@ -72,6 +76,9 @@ class Pirum_Repository_Builder
 		);
 	}
 
+	/**
+	 * @param Pirum_Package_Release $package
+	 */
 	private function addPackageRelease($package)
 	{
 		$this->packages[$package->getName()]['releases'][] = array(
@@ -88,6 +95,9 @@ class Pirum_Repository_Builder
 		);
 	}
 
+	/**
+	 * @param Pirum_Package_Release $package
+	 */
 	private function addPackageMaintainers($package)
 	{
 		$this->packages[$package->getName()]['maintainers'] = array_merge(
@@ -121,8 +131,8 @@ class Pirum_Repository_Builder
 	{
         $packages = array();
         foreach ($files as $file) {
-			$packageTmpDir = $this->fs->createTempDir('pirum_package');
-            $package       = new Pirum_Package($file);
+			$packageTmpDir = $this->fs->createTempDir('Pirum_Package_Release');
+            $package       = new Pirum_Package_Release($file);
 
 			$package->loadWith($this);
 
@@ -134,7 +144,7 @@ class Pirum_Repository_Builder
 	}
 	private function getReleaseInfoFrom(SplFileInfo $file)
 	{
-		if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+		if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
 			return null;
 		}
 

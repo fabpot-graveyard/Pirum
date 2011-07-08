@@ -75,7 +75,7 @@ class Pirum_Server_Builder
     {
         // create tar files when missing
         foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName())) {
+            if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $file->getFileName())) {
                 continue;
             }
 

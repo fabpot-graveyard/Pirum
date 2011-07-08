@@ -5,7 +5,7 @@
  * @package    Pirum
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class Pirum_Package
+class Pirum_Package_Release
 {
     const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
 
