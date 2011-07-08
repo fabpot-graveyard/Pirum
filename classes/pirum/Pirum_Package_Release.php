@@ -10,20 +10,17 @@ class Pirum_Package_Release
     const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
 
     protected $package;
+
     protected $name;
     protected $version;
     protected $archive;
     protected $packageFile;
 
-    public function __construct($archive)
+    public function __construct($archive, $name, $version)
     {
         $this->archive = $archive;
-        if (!preg_match(self::PACKAGE_FILE_PATTERN, $filename = basename($archive), $match)) {
-            throw new InvalidArgumentException(sprintf('The archive "%s" does not follow PEAR conventions', $filename));
-        }
-
-        $this->name    = $match['name'];
-        $this->version = $match['version'];
+		$this->name    = $name;
+		$this->version = $version;
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
@@ -138,33 +135,36 @@ class Pirum_Package_Release
         copy($this->packageFile, $target);
     }
 
-	public function loadWith($pirum, $packageTmpDir)
+	/**
+	 * @param Pirum_Repository_Builder $repo
+	 * @param string                   $packageTmpDir
+	 */
+	public function loadInto($repo, $packageTmpDir)
 	{
-		if (file_exists($file = $pirum->getPackageXmlFor($this))) {
-			$this->loadPackageFromFile($file);
+		if (file_exists($file = $repo->getPackageXmlFor($this))) {
+			$this->loadPackageFromFile($repo, $file);
 		} else {
-			$this->loadPackageFromArchive($packageTmpDir);
+			$this->loadPackageFromArchive($repo, $packageTmpDir);
 		}
 	}
 
-    private function loadPackageFromFile($file)
+	/**
+	 * @param Pirum_Repository_Builder $repo
+	 * @param string                   $file
+	 */
+    private function loadPackageFromFile($repo, $file)
     {
         $this->packageFile = $file;
+        $this->package     = $repo->loadPackageFrom($file);
 
-        $this->package = new SimpleXMLElement(file_get_contents($file));
-
-        // check name
-        if ($this->name != (string) $this->package->name) {
-            throw new InvalidArgumentException(sprintf('The package.xml name "%s" does not match the name of the archive file "%s".', $this->package->name, $this->name));
-        }
-
-        // check version
-        if ($this->version != (string) $this->package->version->release) {
-            throw new InvalidArgumentException(sprintf('The package.xml version "%s" does not match the version of the archive file "%s".', $this->package->version->release, $this->version));
-        }
+		$this->package->validate($this->name, $this->version);
     }
 
-    private function loadPackageFromArchive($tmpDir)
+	/**
+	 * @param Pirum_Repository_Builder $repo
+	 * @param string                   $tmpDir
+	 */
+    private function loadPackageFromArchive($repo, $tmpDir)
     {
         if (!function_exists('gzopen')) {
             copy($this->archive, $tmpDir.'/archive.tgz');
@@ -174,7 +174,7 @@ class Pirum_Package_Release
                 throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
             }
 
-            $this->loadPackageFromFile($tmpDir.'/package.xml');
+            $this->loadPackageFromFile($repo, $tmpDir.'/package.xml');
 
             return;
         }

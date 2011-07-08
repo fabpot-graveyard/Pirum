@@ -4,6 +4,16 @@ class Pirum_Repository_Builder
 {
 	private $packages = array();
 
+	/**
+	 * @var FileSystem
+	 */
+	private $fs;
+
+	/**
+	 * @var CLI_Formatter
+	 */
+	private $formatter;
+
 	public function __construct($serverName, $targetDir, $fs, $formatter)
 	{
 		$this->serverName = $serverName;
@@ -115,19 +125,40 @@ class Pirum_Repository_Builder
         $packages = array();
         foreach ($files as $file) {
 			$packageTmpDir = $this->fs->createTempDir('Pirum_Package_Release');
-			$packages[$file] = $this->loadPackageFrom($file, $packageTmpDir);
+			$packages[$file] = $this->loadPackageReleaseFrom($file, $packageTmpDir);
 			$this->fs->removeDir($packageTmpDir);
         }
 
 		return $packages;
 	}
 
-	private function loadPackageFrom($file, $packageTmpDir)
+	public function loadPackageFrom($file)
 	{
-		$package = new Pirum_Package_Release($file);
-		$package->loadWith($this, $packageTmpDir);
+		return new Pirum_Package($this->fs->contentsOf($file));
+	}
+
+	private function loadPackageReleaseFrom($file, $packageTmpDir)
+	{
+		$package = $this->createReleasePackage($file);
+		$package->loadInto($this, $packageTmpDir);
 		return $package;
 	}
+
+	private function createReleasePackage($file)
+	{
+		$baseFileName = basename($file);
+        if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $baseFileName, $match)) {
+            throw new InvalidArgumentException(sprintf(
+				'The archive "%s" does not follow PEAR conventions',
+				$file
+			));
+        }
+
+		return new Pirum_Package_Release(
+			$file, $match['name'], $match['version']
+		);
+	}
+
 
 	private function getReleaseInfoFrom(SplFileInfo $file)
 	{
