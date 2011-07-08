@@ -183,9 +183,9 @@ class Pirum_Package_Release
 		);
 	}
 
-	public function validateForChannel($serverName)
+	public function validateFor($channel)
 	{
-		if ($this->getChannel() != $serverName) {
+		if ($this->getChannel() != $channel) {
 			throw new Pirum_Package_Exception(sprintf(
 				'Package "%s" channel (%s) is not %s.',
 				$this->getName(),
