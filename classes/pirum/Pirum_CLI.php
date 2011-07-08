@@ -135,20 +135,11 @@ class Pirum_CLI
 
     protected function runAdd($targetDir)
     {
-		$pearPackage = $this->getPearPackage();
+		$builder = new Pirum_AddPackage_Builder(
+			$this, $this->fs, $targetDir
+		);
 
-        if (!is_file($pearPackage)) {
-			throw new Pirum_Package_Exception(sprintf(
-				'The PEAR package "%s" does not exist',
-				$pearPackage
-			));
-        }
-
-        if (!is_dir($targetDir.'/get')) {
-            mkdir($targetDir.'/get', 0777, true);
-        }
-
-        copy($pearPackage, $targetDir.'/get/'.basename($pearPackage));
+		$builder->build();
 
         $this->runBuild($targetDir);
     }
@@ -169,14 +160,14 @@ class Pirum_CLI
             }
 
             if ($file->isDir()) {
-                rmdir($file);
+                $this->fs->removeDir($file);
             } else {
-                unlink($file);
+                $this->fs->deleteFile($file);
             }
         }
     }
 
-	private function getPearPackage()
+	public function getPearPackage()
 	{
         if (!isset($this->options[3])) {
 			throw new Pirum_Package_Exception(

@@ -181,9 +181,18 @@ class FileSystem
 		return chdir($dir);
 	}
 
-	public function exec($command)
+	public function copyToDir($file, $targetDir)
 	{
-		return exec($command);
+		copy($file, $targetDir.'/'.basename($file));
+	}
+
+	public function checkFile($file)
+	{
+        if ($this->fs->isFile($pearPackage)) {
+			return;
+        }
+
+		throw new FileNotFound_Exception('File '.$file.' not found!');
 	}
 }
 
