@@ -1,6 +1,6 @@
 <?php
 
-class Pirum_RemovePackage_Builder
+class Pirum_RemovePackage_Command
 {
 	/**
 	 * @var FileSystem

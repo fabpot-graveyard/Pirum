@@ -6,7 +6,7 @@
  * @package    Pirum
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class Pirum_Server_Builder
+class Pirum_Build_Command
 {
     protected $buildDir;
     protected $targetDir;

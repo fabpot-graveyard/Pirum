@@ -1,6 +1,6 @@
 <?php
 
-class Pirum_CleanRepo_Builder
+class Pirum_CleanRepo_Command
 {
 	public function  __construct($fs, $targetDir) {
 		$this->fs        = $fs;

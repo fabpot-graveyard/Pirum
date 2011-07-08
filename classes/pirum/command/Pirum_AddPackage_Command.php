@@ -1,6 +1,6 @@
 <?php
 
-class Pirum_AddPackage_Builder
+class Pirum_AddPackage_Command
 {
 	public function __construct($pirum, $fs, $targetDir)
 	{

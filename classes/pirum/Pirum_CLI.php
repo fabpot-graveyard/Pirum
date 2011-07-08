@@ -101,15 +101,15 @@ class Pirum_CLI
 			case 'build':
 				return new NullBuilder();
 			case 'add':
-				return new Pirum_AddPackage_Builder(
+				return new Pirum_AddPackage_Command(
 					$this, $this->fs, $serverDir
 				);
 			case 'remove':
-				return new Pirum_RemovePackage_Builder(
+				return new Pirum_RemovePackage_Command(
 					$this, $this->fs, $serverDir
 				);
 			case 'clean':
-				return new Pirum_CleanRepo_Builder(
+				return new Pirum_CleanRepo_Command(
 					$this->fs, $serverDir
 				);
 			default:
@@ -175,7 +175,7 @@ class Pirum_CLI
 			$this->formatter
 		);
 
-        return new Pirum_Server_Builder(
+        return new Pirum_Build_Command(
 			$targetDir, $this->fs, $this->formatter,
 			$server, $repoBuilder->build(),
 			new Pirum_StaticAsset_Builder()
