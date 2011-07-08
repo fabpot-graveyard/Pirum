@@ -35,9 +35,12 @@ class Pirum_Repository_Builder
 		return $this->processPackageList($packages);
 	}
 
+	/**
+	 * @param Pirum_Package_Release $package
+	 */
 	public function getPackageXmlFor($package)
 	{
-		return $this->targetDir.'/rest/r/'.strtolower($package->getName()).'/package.'.$package->getVersion().'.xml';
+		return $package->getPackageXml($this->targetDir.'/rest/r/');
 	}
 
 	private function processPackageList($packages)

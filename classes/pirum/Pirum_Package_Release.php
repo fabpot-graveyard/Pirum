@@ -142,7 +142,7 @@ class Pirum_Package_Release
 	public function loadInto($repo, $packageTmpDir)
 	{
 		if (file_exists($file = $repo->getPackageXmlFor($this))) {
-			$this->loadPackageFromFile($repo, $file);
+			$this->loadPackageFromXml($repo, $file);
 		} else {
 			$this->loadPackageFromArchive($repo, $packageTmpDir);
 		}
@@ -152,7 +152,7 @@ class Pirum_Package_Release
 	 * @param Pirum_Repository_Builder $repo
 	 * @param string                   $file
 	 */
-    private function loadPackageFromFile($repo, $file)
+    private function loadPackageFromXml($repo, $file)
     {
         $this->packageFile = $file;
         $this->package     = $repo->loadPackageFrom($file);
@@ -174,7 +174,7 @@ class Pirum_Package_Release
                 throw new InvalidArgumentException('The PEAR package does not have a package.xml file.');
             }
 
-            $this->loadPackageFromFile($repo, $tmpDir.'/package.xml');
+            $this->loadPackageFromXml($repo, $tmpDir.'/package.xml');
 
             return;
         }
@@ -213,7 +213,7 @@ class Pirum_Package_Release
 
             file_put_contents($this->packageFile, $package);
 
-            $this->loadPackageFromFile($tmpDir.'/package.xml');
+            $this->loadPackageFromXml($tmpDir.'/package.xml');
 
             return;
         }
@@ -270,6 +270,11 @@ class Pirum_Package_Release
 			'maintainers' => $this->getMaintainers(),
 			'info'        => $this,
 		);
+	}
+
+	public function getPackageXml($baseDir)
+	{
+		return $baseDir.'/'.strtolower($this->getName()).'/package.'.$this->getVersion().'.xml';
 	}
 }
 
