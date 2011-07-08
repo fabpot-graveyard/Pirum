@@ -79,13 +79,23 @@ class Pirum_CLI
                     $this->runBuild($serverDir);
                     break;
                 case 'add':
-                    $ret = $this->runAdd($serverDir);
-                    break;
+					$builder = new Pirum_AddPackage_Builder(
+						$this, $this->fs, $serverDir
+					);
+
+					$builder->build();
+					$this->runBuild($serverDir);
+					break;
                 case 'remove':
-                    $ret = $this->runRemove($serverDir);
+					$builder = new Pirum_RemovePackage_Builder(
+						$this, $this->fs, $serverDir
+					);
+					$builder->build();
+					$this->runBuild($serverDir);
                     break;
                 case 'clean':
                     $ret = $this->runClean($serverDir);
+					$this->runBuild($serverDir);
                     break;
             }
 
@@ -173,25 +183,6 @@ class Pirum_CLI
 			$server, $repoBuilder->build()
 		);
 	}
-
-    protected function runAdd($targetDir)
-    {
-		$builder = new Pirum_AddPackage_Builder(
-			$this, $this->fs, $targetDir
-		);
-
-		$builder->build();
-        $this->runBuild($targetDir);
-    }
-
-	protected function runRemove($targetDir)
-    {
-		$builder = new Pirum_RemovePackage_Builder(
-			$this, $this->fs, $targetDir
-		);
-		$builder->build();
-        $this->runBuild($targetDir);
-    }
 
     protected function runClean($targetDir)
     {

@@ -30,5 +30,7 @@ Feature: Build
 	Scenario: Remove package from localhost
 		Given a built up pirum repo is in place
 		When I issue the command `php pirum clean`
-		Then the pirum repo only contains pirum.xml
+		Then the server index contains channel description
+			And the channel is discoverable
+			And the pirum repo does not contain package
 

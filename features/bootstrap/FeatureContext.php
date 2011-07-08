@@ -264,10 +264,6 @@ class FeatureContext extends BehatContext
         if (!file_exists($this->webRoot.'/pirum.xml')) {
 			throw new Exception('pirum.xml disappeared');
 		}
-
-        if (file_exists($this->webRoot.'/index.html')) {
-			throw new Exception('index.html has not disappear');
-		}
     }
 }
 
