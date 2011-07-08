@@ -10,8 +10,12 @@ class Pirum_Server_Builder
 {
     protected $buildDir;
     protected $targetDir;
-    protected $server;
     protected $packages;
+
+	/**
+	 * @var Pirum_Server
+	 */
+    protected $server;
 
 	/**
 	 * @var FileSystem
@@ -144,11 +148,14 @@ class Pirum_Server_Builder
 
                 reset($release['maintainers']);
                 $maintainer = current($release['maintainers']);
+				$packageHref = $this->server->getHref(
+					$package['name'], $release['version']
+				);
 
                 $entries .= <<<EOF
     <entry>
         <title>{$package['name']} {$release['version']} ({$release['stability']})</title>
-        <link href="$serverUrl/get/{$package['name']}-{$release['version']}.tgz" />
+        <link href="$packageHref" />
         <id>{$package['name']}-{$release['version']}</id>
         <author>
             <name>{$maintainer['nickname']}</name>

@@ -16,6 +16,11 @@ class Pirum_Server extends SimpleXMLElement
 	public $summary;
 	public $validatepackage;
 	public $validateversion;
+
+	public function getHref($packageName, $releaseVersion)
+	{
+		return $this->url.'/get/'.$packageName.'-'. $releaseVersion.'.tgz';
+	}
 }
 
 ?>
