@@ -21,6 +21,23 @@ class Pirum_Server extends SimpleXMLElement
 	{
 		return $this->url.'/get/'.$packageName.'-'. $releaseVersion.'.tgz';
 	}
+
+	public function getAtomFeed($entries)
+	{
+	return <<<EOF
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:base="$this->url">
+    <title>$this->summary Latest Releases</title>
+    <link href="$this->url" />
+    <author>
+        <name>$this->url</name>
+    </author>
+
+$entries
+</feed>
+EOF;
+
+	}
 }
 
 ?>

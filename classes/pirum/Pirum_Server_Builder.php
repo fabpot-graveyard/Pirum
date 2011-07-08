@@ -169,20 +169,10 @@ EOF;
             }
         }
 
-        $index = <<<EOF
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:base="$serverUrl">
-    <title>$serverSummary Latest Releases</title>
-    <link href="$serverUrl" />
-    <author>
-        <name>$serverUrl</name>
-    </author>
-
-$entries
-</feed>
-EOF;
-
-        file_put_contents($this->buildDir.'/feed.xml', $index);
+        $this->fs->writeTo(
+			$this->buildDir.'/feed.xml',
+			$this->server->getAtomFeed($entries)
+		);
     }
 
     protected function buildCss()

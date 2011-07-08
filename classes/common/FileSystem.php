@@ -50,6 +50,11 @@ class FileSystem
 		file_put_contents($file, $contents, FILE_APPEND);
 	}
 
+	public function writeTo($file, $contents)
+	{
+		file_put_contents($file, $contents);
+	}
+
 	public function contentsOf($file)
 	{
 		return file_get_contents($file);
