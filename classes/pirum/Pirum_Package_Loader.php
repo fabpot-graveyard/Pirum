@@ -25,24 +25,31 @@ class Pirum_Package_Loader
 				$file
 			));
 		}
+		$name    = $match['name'];
+		$version = $match['version'];
+		$package = new Pirum_Package_Release($file, $name, $version);
 
-		$releasePackage = new Pirum_Package_Release(
-			$file, $match['name'], $match['version']
-		);
+		$packageXml = $this->getPackageXmlFile($name, $version);
 
-		$releasePackage->loadUsing($this, $packageTmpDir);
+		if (file_exists($packageXml)) {
+			$package->loadPackageFromXml($this, $packageXml);
+		} else {
+			$package->loadPackageFromArchive($this, $packageTmpDir);
+		}
 
 		$this->fs->removeDir($packageTmpDir);
 
-		return $releasePackage;
+		return $package;
 	}
 
-	/**
-	 * @param Pirum_Package_Release $package
-	 */
-	public function getPackageXmlFor($package)
+	private function getPackageXmlFile($name, $version)
 	{
-		return $package->getPackageXml($this->xmlDir);
+		return sprintf(
+			'%s/%s/package.%s.xml',
+			$this->xmlDir,
+			strtolower($name),
+			$version
+		);
 	}
 
 	/**

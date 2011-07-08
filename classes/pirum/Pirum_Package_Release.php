@@ -137,22 +137,9 @@ class Pirum_Package_Release
 
 	/**
 	 * @param Pirum_Package_Loader $loader
-	 * @param string               $packageTmpDir
-	 */
-	public function loadUsing($loader, $packageTmpDir)
-	{
-		if (file_exists($file = $loader->getPackageXmlFor($this))) {
-			$this->loadPackageFromXml($loader, $file);
-		} else {
-			$this->loadPackageFromArchive($loader, $packageTmpDir);
-		}
-	}
-
-	/**
-	 * @param Pirum_Package_Loader $loader
 	 * @param string               $file
 	 */
-    private function loadPackageFromXml($loader, $file)
+    public function loadPackageFromXml($loader, $file)
     {
         $this->packageFile = $file;
         $this->package     = $loader->loadPackageFrom($file);
@@ -164,7 +151,7 @@ class Pirum_Package_Release
 	 * @param Pirum_Package_Loader $loader
 	 * @param string               $tmpDir
 	 */
-    private function loadPackageFromArchive($loader, $tmpDir)
+    public function loadPackageFromArchive($loader, $tmpDir)
     {
         if (!function_exists('gzopen')) {
             copy($this->archive, $tmpDir.'/archive.tgz');
@@ -270,11 +257,6 @@ class Pirum_Package_Release
 			'maintainers' => $this->getMaintainers(),
 			'info'        => $this,
 		);
-	}
-
-	public function getPackageXml($baseDir)
-	{
-		return $baseDir.'/'.strtolower($this->getName()).'/package.'.$this->getVersion().'.xml';
 	}
 }
 
