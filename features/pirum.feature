@@ -6,16 +6,16 @@ Feature: Build
 
 	@build
 	Scenario: Build localhost
-		Given only pirum xml file is in place
-			And pirum is built
+		Given pirum is built
+			And only pirum xml file is in place
 		When I issue the command `php pirum build webroot`
 		Then the server index contains channel description
 			And the channel is discoverable
 
 	@add
 	Scenario: Add package to localhost
-		Given a built up pirum repo is in place
-			And pirum is built
+		Given pirum is built
+			And a built up pirum repo is in place
 			And the pirum repo does not contain package
 		When I issue the command `php pirum add packagename`
 		Then the server index contains package description
@@ -23,8 +23,8 @@ Feature: Build
 
 	@remove
 	Scenario: Remove package from localhost
-		Given a built up pirum repo is in place
-			And pirum is built
+		Given pirum is built
+			And a built up pirum repo is in place
 			And a package is added
 			And the server index contains package description
 		When I issue the command `php pirum remove packagename`
@@ -32,8 +32,8 @@ Feature: Build
 
 	@clean
 	Scenario: Remove package from localhost
-		Given a built up pirum repo is in place
-			And pirum is built
+		Given pirum is built
+			And a built up pirum repo is in place
 		When I issue the command `php pirum clean`
 		Then the server index contains channel description
 			And the channel is discoverable
