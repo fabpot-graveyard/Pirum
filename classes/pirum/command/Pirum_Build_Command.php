@@ -10,7 +10,6 @@ class Pirum_Build_Command
 {
     protected $buildDir;
     protected $targetDir;
-    protected $repo;
 
 	/**
 	 * @var Pirum_Channel
@@ -31,6 +30,11 @@ class Pirum_Build_Command
 	 * @var Pirum_StaticAsset_Builder
 	 */
 	protected $assetBuilder;
+
+	/**
+	 * @var Pirum_Repository
+	 */
+	private $repo;
 
     public function __construct(
 		$targetDir, $fs, $formatter, $server, $repo, $assetBuilder

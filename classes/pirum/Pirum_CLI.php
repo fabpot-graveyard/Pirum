@@ -86,6 +86,7 @@ class Pirum_CLI
 			$repo->collectReleasePackageList();
 
 			$builders = array(
+				new Pirum_RepositoryLoad_Command($repo),
 				$this->builder($command, $targetDir, $repo),
 				$this->createServerBuilder($targetDir, $server, $repo),
 			);
@@ -93,7 +94,9 @@ class Pirum_CLI
 			print gettype($builders[0]) . ' '. gettype($builders[1]).PHP_EOL.PHP_EOL;
 
 			foreach ($builders as $builder) {
-				$builder->build();
+				if ($builder) {
+					$builder->build();
+				}
 			}
 
 			$this->formatter->info("Command %s run successfully", $command);
@@ -110,8 +113,6 @@ class Pirum_CLI
 	{
 		switch ($command)
 		{
-			case 'build':
-				return new NullBuilder();
 			case 'add':
 				return new Pirum_AddPackage_Command(
 					$this, $this->fs, $serverDir, $repo
@@ -124,8 +125,6 @@ class Pirum_CLI
 				return new Pirum_CleanRepo_Command(
 					$this->fs, $serverDir
 				);
-			default:
-				throw new Exception('Invalid command!');
 		}
 	}
 

@@ -35,9 +35,13 @@ class Pirum_Repository implements IteratorAggregate
         }
 	}
 
-	public function loadPackage($archive)
+	private function loadPackage($archive)
 	{
 		$this->releasePackages[$archive]= $this->loader->loadPackage($archive);
+	}
+
+	public function addPackage($archive) {
+		$this->loadPackage($archive);
 	}
 
 	public function removePackage($archive)

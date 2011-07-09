@@ -23,7 +23,7 @@ class Pirum_AddPackage_Command
 		$this->fs->mkDir($this->targetDir.'/get');
 		$this->fs->copyToDir($archive, $this->targetDir.'/get');
 
-		$this->repo->loadPackage($archive);
+		$this->repo->addPackage($archive);
 	}
 }
 
