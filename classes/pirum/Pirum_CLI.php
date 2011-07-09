@@ -142,33 +142,7 @@ class Pirum_CLI
 
 		$this->fs->mkDir($targetDir.'/get');
 
-        $server = simplexml_load_file(
-			$targetDir.'/pirum.xml', 'Pirum_Channel'
-		);
-
-        if (!$server) {
-            throw new InvalidArgumentException(
-				'Invalid pirum.xml (you must have a <server> tag).'
-			);
-        }
-
-        $emptyFields = array();
-        if (empty($server->name)) {
-            $emptyFields[] = 'name';
-        }
-        if (empty($server->summary)) {
-            $emptyFields[] = 'summary';
-        }
-        if (empty($server->url)) {
-            $emptyFields[] = 'url';
-        }
-
-        if (!empty($emptyFields)) {
-            throw new InvalidArgumentException(sprintf(
-				'You must fill required tags in your pirum.xml: %s.',
-				implode(', ', $emptyFields)
-			));
-        }
+		$server = $this->createServer($targetDir.'/pirum.xml');
 
 		$repoBuilder = new Pirum_Repository(
 			$targetDir,
@@ -185,6 +159,23 @@ class Pirum_CLI
 			$server, $repoBuilder,
 			new Pirum_StaticAsset_Builder()
 		);
+	}
+
+	private function createServer($pirumXml)
+	{
+       $channel = simplexml_load_file(
+			$pirumXml, 'Pirum_Channel'
+		);
+
+        if (!$channel) {
+            throw new InvalidArgumentException(
+				'Invalid pirum.xml (you must have a <server> tag).'
+			);
+        }
+
+		$channel->validate();
+
+		return $channel;
 	}
 
 	private function createLoader($serverDir, $channelName)

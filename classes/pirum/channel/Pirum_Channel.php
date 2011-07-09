@@ -70,14 +70,25 @@ EOF;
 
 	}
 
-	/**
-	 *
-	 * @param Pirum_Package_Loader $loader
-	 * @param string               $archive
-	 */
-	public function loadPackage($loader, $archive)
+	public function validate()
 	{
-		return $loader->loadPackage($archive);
+        $emptyFields = array();
+        if (empty($this->name)) {
+            $emptyFields[] = 'name';
+        }
+        if (empty($this->summary)) {
+            $emptyFields[] = 'summary';
+        }
+        if (empty($this->url)) {
+            $emptyFields[] = 'url';
+        }
+
+        if (!empty($emptyFields)) {
+            throw new InvalidArgumentException(sprintf(
+				'You must fill required tags in your pirum.xml: %s.',
+				implode(', ', $emptyFields)
+			));
+        }
 	}
 }
 
