@@ -60,13 +60,16 @@ class Pirum_Repository implements IteratorAggregate
 	{
 		/* @var $package Pirum_Package_Release */
         foreach ($this->releasePackages as $file => $package) {
-			$package->printProcessingWith($this->formatter);
-			$this->initPackageMetaData($package);
-			$this->addPackageRelease($package);
-			$this->addPackageMaintainers($package);
+			$this->processReleasePackage($package);
         }
+	}
 
-        ksort($this->packageData);
+	public function processReleasePackage($package)
+	{
+		$package->printProcessingWith($this->formatter);
+		$this->initPackageMetaData($package);
+		$this->addPackageRelease($package);
+		$this->addPackageMaintainers($package);
 	}
 
 	private function getPackageFiles()
@@ -135,7 +138,9 @@ class Pirum_Repository implements IteratorAggregate
 
 	public function  getIterator()
 	{
-		return new ArrayIterator($this->packageData);
+		$packageData = $this->packageData;
+		ksort($packageData);
+		return new ArrayIterator($packageData);
 	}
 }
 
