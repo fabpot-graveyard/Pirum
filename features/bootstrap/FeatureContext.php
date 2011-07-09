@@ -251,6 +251,7 @@ class FeatureContext extends BehatContext
         if ($this->execute('php pirum clean '.$this->webRoot)) {
 			throw new Exception();
 		}
+		$this->iIssueTheCommandPhpBuildphpClean();
     }
 
 	/**

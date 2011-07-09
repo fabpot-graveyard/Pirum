@@ -1,8 +1,9 @@
 <?php
 
-class Pirum_Repository
+class Pirum_Repository implements IteratorAggregate
 {
-	private $packages = array();
+	private $packageData     = array();
+	private $releasePackages = array();
 
 	/**
 	 * @var FileSystem
@@ -14,22 +15,39 @@ class Pirum_Repository
 	 */
 	private $formatter;
 
-	public function __construct($targetDir, $fs, $formatter)
+	public function __construct($targetDir, $fs, $formatter, $loader, $server)
 	{
 		$this->targetDir  = $targetDir;
 		$this->fs         = $fs;
 		$this->formatter  = $formatter;
+		$this->loader     = $loader;
+		$this->server     = $server;
 	}
 
-	/**
-	 * @param Pirum_Channel $server
-	 */
-	public function build($server)
+	public function collectReleasePackageList()
 	{
-		$files    = $this->getPackageFiles();
-		$packages = $this->getPackageList($server, $files);
+        foreach ($this->getPackageFiles() as $archive) {
+			$this->loadPackageWith($archive);
+        }
+	}
 
-		return $this->processPackageList($packages);
+	public function loadPackageWith($archive)
+	{
+		$this->releasePackages[]=
+			$this->server->loadPackage($this->loader, $archive);
+	}
+
+	public function processReleasePackageList()
+	{
+		/* @var $package Pirum_Package_Release */
+        foreach ($this->releasePackages as $file => $package) {
+			$package->printProcessingWith($this->formatter);
+			$this->initPackageMetaData($package);
+			$this->addPackageRelease($package);
+			$this->addPackageMaintainers($package);
+        }
+
+        ksort($this->packageData);
 	}
 
 	private function getPackageFiles()
@@ -54,60 +72,15 @@ class Pirum_Repository
 	}
 
 	/**
-	 * @param Pirum_Channel $server
-	 * @param array        $files
-	 */
-	private function getPackageList($server, array $files)
-	{
-		$loader = $this->createLoader();
-
-		$releasePackages = array();
-        foreach ($files as $archive) {
-			$releasePackages[]= $server->loadPackage($loader, $archive);
-        }
-
-		return $releasePackages;
-	}
-
-	private function createLoader()
-	{
-		return new Pirum_Package_Loader(
-			$this->fs, $this->targetDir.'/rest/r/'
-		);
-	}
-
-	private function processPackageList($packages)
-	{
-		/* @var $package Pirum_Package_Release */
-        foreach ($packages as $file => $package) {
-			$this->formatter->info(
-				'Parsing package %s for %s',
-				$package->getVersion(),
-				$package->getName()
-			);
-
-			$this->initPackageMetaData($package);
-			$this->addPackageRelease($package);
-			$this->addPackageMaintainers($package);
-        }
-
-        ksort($this->packages);
-
-		file_put_contents('packagelog', var_export($this->packages, true));
-
-		return $this->packages;
-	}
-
-	/**
 	 * @param Pirum_Package_Release $package
 	 */
 	private function initPackageMetaData($package)
 	{
-		if (isset($this->packages[$package->getName()])) {
+		if (isset($this->packageData[$package->getName()])) {
 			return;
 		}
 
-		$this->packages[$package->getName()] = 
+		$this->packageData[$package->getName()] =
 			$package->getMetaData();
 	}
 
@@ -116,7 +89,7 @@ class Pirum_Repository
 	 */
 	private function addPackageRelease($package)
 	{
-		$this->packages[$package->getName()]['releases'][] =
+		$this->packageData[$package->getName()]['releases'][] =
 			$package->getReleaseData();
 	}
 
@@ -125,10 +98,10 @@ class Pirum_Repository
 	 */
 	private function addPackageMaintainers($package)
 	{
-		$this->packages[$package->getName()]['maintainers'] =
+		$this->packageData[$package->getName()]['maintainers'] =
 		array_merge(
 			$package->getMaintainers(),
-			$this->packages[$package->getName()]['maintainers']
+			$this->packageData[$package->getName()]['maintainers']
 		);
 	}
 
@@ -139,6 +112,11 @@ class Pirum_Repository
 		}
 
 		return $match['release'];
+	}
+
+	public function  getIterator()
+	{
+		return new ArrayIterator($this->packageData);
 	}
 }
 

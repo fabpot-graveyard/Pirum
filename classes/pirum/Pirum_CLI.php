@@ -173,13 +173,25 @@ class Pirum_CLI
 		$repoBuilder = new Pirum_Repository(
 			$targetDir,
 			$this->fs,
-			$this->formatter
+			$this->formatter,
+			$this->createLoader($targetDir),
+			$server
 		);
+
+		$repoBuilder->collectReleasePackageList();
+		$repoBuilder->processReleasePackageList();
 
         return new Pirum_Build_Command(
 			$targetDir, $this->fs, $this->formatter,
-			$server, $repoBuilder->build($server),
+			$server, $repoBuilder,
 			new Pirum_StaticAsset_Builder()
+		);
+	}
+
+	private function createLoader($serverDir)
+	{
+		return new Pirum_Package_Loader(
+			$this->fs, $serverDir.'/rest/r/'
 		);
 	}
 

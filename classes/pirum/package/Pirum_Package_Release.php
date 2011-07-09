@@ -193,6 +193,15 @@ class Pirum_Package_Release
 				$this->getServerName()
 			));
 		}
+	}
+
+	public function printProcessingWith($formatter)
+	{
+		$formatter->info(
+			'Parsing package %s for %s',
+			$this->getVersion(),
+			$this->getName()
+		);
 
 	}
 }
