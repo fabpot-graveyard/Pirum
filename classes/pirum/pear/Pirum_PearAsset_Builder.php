@@ -2,6 +2,16 @@
 
 class Pirum_PearAsset_Builder
 {
+	/**
+	 * @var Pirum_Pear_Helper
+	 */
+	private $helper1;
+
+	/**
+	 * @var Pirum_Pear2_Helper
+	 */
+	private $helper2;
+
 	public function __construct(
 		$buildDir, $formatter, $repo, $fs,
 		$channel, $helper1, $helper2
@@ -63,32 +73,37 @@ class Pirum_PearAsset_Builder
             $allreleases  .= $this->helper1->allReleasesItem($release);
             $allreleases2 .= $this->helper2->allReleasesItem($release);
 
+			$channel   = $this->channel->name;
+			$serverUrl = $this->channel->url;
 
-		$channel   = $this->channel->name;
-		$serverUrl = $this->channel->url;
+			$this->formatter->info("Building release %s for %s", $release['version'], $package['name']);
 
-        $this->formatter->info("Building release %s for %s", $release['version'], $package['name']);
+			$url = strtolower($package['name']);
 
-        $url = strtolower($package['name']);
+			reset($release['maintainers']);
+			$maintainer = current($release['maintainers']);
 
-        reset($release['maintainers']);
-        $maintainer = current($release['maintainers']);
+			file_put_contents($dir.'/'.$release['version'].'.xml',
+				$this->helper1->versionXml(
+					$channel, $release, $package, $maintainer
+				)
+			);
 
-        file_put_contents($dir.'/'.$release['version'].'.xml',
-			$this->helper1->versionXml(
-				$channel, $release, $package, $maintainer
-			)
-        );
+			file_put_contents($dir.'/v2.'.$release['version'].'.xml',
+				$this->helper2->versionXml(
+					$channel, $release, $package, $maintainer
+				)
+			);
 
-        file_put_contents($dir.'/v2.'.$release['version'].'.xml',
-			$this->helper2->versionXml(
-				$channel, $release, $package, $maintainer
-			)
-        );
+			file_put_contents(
+				$dir.'/deps.'.$release['version'].'.txt',
+				$release['deps']
+			);
 
-        file_put_contents($dir.'/deps.'.$release['version'].'.txt', $release['deps']);
-
-		copy($release['packageXml'], $dir."/package.{$release['version']}.xml");
+			copy(
+				$release['packageXml'],
+				$dir."/package.{$release['version']}.xml"
+			);
         }
 
         if (count($package['releases'])) {
@@ -111,24 +126,12 @@ class Pirum_PearAsset_Builder
             file_put_contents($dir.'/snapshot.txt', $snapshot);
         }
 
-        file_put_contents($dir.'/allreleases.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<a xmlns="http://pear.php.net/dtd/rest.allreleases" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases http://pear.php.net/dtd/rest.allreleases.xsd">
-    <p>{$package['name']}</p>
-    <c>$channel</c>
-$allreleases
-</a>
-EOF
+        file_put_contents($dir.'/allreleases.xml',
+			$this->helper1->allReleases($package, $channel, $allreleases)
         );
 
-        file_put_contents($dir.'/allreleases2.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<a xmlns="http://pear.php.net/dtd/rest.allreleases2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases2 http://pear.php.net/dtd/rest.allreleases2.xsd">
-    <p>{$package['name']}</p>
-    <c>$channel</c>
-$allreleases2
-</a>
-EOF
+        file_put_contents($dir.'/allreleases2.xml',
+			$this->helper2->allReleases($package, $channel, $allreleases2)
         );
     }
 

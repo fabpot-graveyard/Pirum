@@ -12,6 +12,20 @@ class Pirum_Pear2_Helper
     </r>
 EOF;
 	}
+
+	public function allReleases($package, $channel, $allreleases)
+	{
+		return <<<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<a xmlns="http://pear.php.net/dtd/rest.allreleases2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases2 http://pear.php.net/dtd/rest.allreleases2.xsd">
+    <p>{$package['name']}</p>
+    <c>$channel</c>
+$allreleases
+</a>
+EOF;
+	}
+
+
 	public function versionXml($channel, $release, $package, $maintainer)
 	{
 		$url = strtolower($package['name']);
