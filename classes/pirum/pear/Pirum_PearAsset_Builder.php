@@ -42,8 +42,6 @@ class Pirum_PearAsset_Builder
 
         $this->formatter->info("Building releases for %s", $package['name']);
 
-        $url = strtolower($package['name']);
-
         $alpha = '';
         $beta = '';
         $stable = '';
@@ -62,25 +60,12 @@ class Pirum_PearAsset_Builder
                 $snapshot = $release['version'];
             }
 
-            $allreleases .= <<<EOF
-    <r>
-        <v>{$release['version']}</v>
-        <s>{$release['stability']}</s>
-    </r>
+            $allreleases  .= $this->helper1->allReleasesItem($release);
+            $allreleases2 .= $this->helper2->allReleasesItem($release);
 
-EOF;
 
-            $allreleases2 .= <<<EOF
-    <r>
-        <v>{$release['version']}</v>
-        <s>{$release['stability']}</s>
-        <m>{$release['php']}</m>
-    </r>
-
-EOF;
-
-		$channel = $this->channel->name;
-		$serverUrl  = $this->channel->url;
+		$channel   = $this->channel->name;
+		$serverUrl = $this->channel->url;
 
         $this->formatter->info("Building release %s for %s", $release['version'], $package['name']);
 
@@ -89,46 +74,16 @@ EOF;
         reset($release['maintainers']);
         $maintainer = current($release['maintainers']);
 
-        file_put_contents($dir.'/'.$release['version'].'.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<r xmlns="http://pear.php.net/dtd/rest.release" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.release http://pear.php.net/dtd/rest.release.xsd">
-    <p xlink:href="/rest/p/$url">{$package['name']}</p>
-    <c>$channel</c>
-    <v>{$release['version']}</v>
-    <st>{$release['stability']}</st>
-    <l>{$package['license']}</l>
-    <m>{$maintainer['nickname']}</m>
-    <s>{$package['summary']}</s>
-    <d>{$package['description']}</d>
-    <da>{$release['date']}</da>
-    <n>{$release['notes']}</n>
-    <f>{$release['filesize']}</f>
-    <g>$serverUrl/get/{$package['name']}-{$release['version']}</g>
-    <x xlink:href="package.{$release['version']}.xml"/>
-</r>
-EOF
+        file_put_contents($dir.'/'.$release['version'].'.xml',
+			$this->helper1->versionXml(
+				$channel, $release, $package, $maintainer
+			)
         );
 
-        file_put_contents($dir.'/v2.'.$release['version'].'.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<r xmlns="http://pear.php.net/dtd/rest.release2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.release2 http://pear.php.net/dtd/rest.release2.xsd">
-    <p xlink:href="/rest/p/$url">{$package['name']}</p>
-    <c>$channel</c>
-    <v>{$release['version']}</v>
-    <a>{$release['api_version']}</a>
-    <mp>{$release['php']}</mp>
-    <st>{$release['stability']}</st>
-    <l>{$package['license']}</l>
-    <m>{$maintainer['nickname']}</m>
-    <s>{$package['summary']}</s>
-    <d>{$package['description']}</d>
-    <da>{$release['date']}</da>
-    <n>{$release['notes']}</n>
-    <f>{$release['filesize']}</f>
-    <g>$serverUrl/get/{$package['name']}-{$release['version']}</g>
-    <x xlink:href="package.{$release['version']}.xml"/>
-</r>
-EOF
+        file_put_contents($dir.'/v2.'.$release['version'].'.xml',
+			$this->helper2->versionXml(
+				$channel, $release, $package, $maintainer
+			)
         );
 
         file_put_contents($dir.'/deps.'.$release['version'].'.txt', $release['deps']);
