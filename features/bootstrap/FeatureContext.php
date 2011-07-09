@@ -154,8 +154,8 @@ class FeatureContext extends BehatContext
  <summary>Dummy</summary>
  <description>Dummy</description>
  <lead>
-  <name>Dummy</name>
-  <user>dummy</user>
+  <name>Joe Bloggs</name>
+  <user>jb</user>
   <email>dummy@dummy.net</email>
   <active>yes</active>
  </lead>

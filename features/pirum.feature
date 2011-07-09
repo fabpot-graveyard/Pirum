@@ -21,15 +21,15 @@ Feature: Build
 		Then the server index contains package description
 			And the package is installable
 			And the following xml files should exist:
-			| File                            |Content        |
-			| channel.xml                     |Dummy          |
-			| feed.xml                        |Dummy          |
-			| rest/c/categories.xml           |Default        |
-			| rest/c/Default/info.xml         |Default        |
-			| rest/c/Default/packagesinfo.xml |Dummy          |
-			| rest/c/Default/packages.xml     |Dummy          |
-			| rest/m/allmaintainers.xml       |Dummy|
-			| rest/p/packages.xml             |Dummy          |
+			| File                            |Content                          |
+			| channel.xml                     |Dummy                            |
+			| feed.xml                        |Dummy                            |
+			| rest/c/categories.xml           |Default                          |
+			| rest/c/Default/info.xml         |Default                          |
+			| rest/c/Default/packagesinfo.xml |Dummy                            |
+			| rest/c/Default/packages.xml     |Dummy                            |
+			| rest/m/allmaintainers.xml       |<h xlink:href="/rest/m/jb">jb</h>|
+			| rest/p/packages.xml             |Dummy                            |
 
 	@remove
 	Scenario: Remove package from localhost
