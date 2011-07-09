@@ -69,13 +69,25 @@ class Pirum_CLI
 			);
         }
 
-        $serverDir = $this->options[2];
+        $targetDir = $this->options[2];
 
         $ret = 0;
         try {
+			$server = $this->createServer($targetDir.'/pirum.xml');
+
+			$repo = new Pirum_Repository(
+				$targetDir,
+				$this->fs,
+				$this->formatter,
+				$this->createLoader($targetDir, $server->name)
+			);
+
+			$this->fs->mkDir($targetDir.'/get');
+			$repo->collectReleasePackageList();
+
 			$builders = array(
-				$this->builder($command, $serverDir),
-				$this->createServerBuilder($serverDir),
+				$this->builder($command, $targetDir),
+				$this->createServerBuilder($targetDir, $server, $repo),
 			);
 
 			print gettype($builders[0]) . ' '. gettype($builders[1]).PHP_EOL.PHP_EOL;
@@ -132,38 +144,24 @@ class Pirum_CLI
         return in_array($cmd, $this->commands);
     }
 
-	private function createServerBuilder($targetDir)
+	private function createServerBuilder($targetDir, $server, $repo)
 	{
-        if (!$this->fs->fileExists($targetDir.'/pirum.xml')) {
-            throw new InvalidArgumentException(
-				'You must create a "pirum.xml" file at the root of the target dir.'
-			);
-        }
-
-		$this->fs->mkDir($targetDir.'/get');
-
-		$server = $this->createServer($targetDir.'/pirum.xml');
-
-		$repoBuilder = new Pirum_Repository(
-			$targetDir,
-			$this->fs,
-			$this->formatter,
-			$this->createLoader($targetDir, $server->name)
-		);
-
-		$repoBuilder->collectReleasePackageList();
-		$repoBuilder->processReleasePackageList();
-
         return new Pirum_Build_Command(
 			$targetDir, $this->fs, $this->formatter,
-			$server, $repoBuilder,
+			$server, $repo,
 			new Pirum_StaticAsset_Builder()
 		);
 	}
 
 	private function createServer($pirumXml)
 	{
-       $channel = simplexml_load_file(
+        if (!$this->fs->fileExists($pirumXml)) {
+            throw new InvalidArgumentException(
+				'You must create a "pirum.xml" file at the root of the target dir.'
+			);
+        }
+
+		$channel = simplexml_load_file(
 			$pirumXml, 'Pirum_Channel'
 		);
 

@@ -10,7 +10,7 @@ class Pirum_Build_Command
 {
     protected $buildDir;
     protected $targetDir;
-    protected $packages;
+    protected $repo;
 
 	/**
 	 * @var Pirum_Channel
@@ -33,19 +33,20 @@ class Pirum_Build_Command
 	protected $assetBuilder;
 
     public function __construct(
-		$targetDir, $fs, $formatter, $server, $packages, $assetBuilder
+		$targetDir, $fs, $formatter, $server, $repo, $assetBuilder
 	)
     {
         $this->targetDir    = $targetDir;
 		$this->fs           = $fs;
         $this->formatter    = $formatter;
 		$this->server       = $server;
-		$this->packages     = $packages;
+		$this->repo         = $repo;
 		$this->assetBuilder = $assetBuilder;
     }
 
     public function build()
     {
+		$this->repo->processReleasePackageList();
 		$this->buildDir = $this->fs->createTempDir('pirum_build', '/rest');
 
 		$this->fixArchives();
@@ -115,7 +116,7 @@ class Pirum_Build_Command
         $this->formatter->info("Building feed");
 
         $entries = '';
-        foreach ($this->packages as $package) {
+        foreach ($this->repo as $package) {
             foreach ($package['releases'] as $release)
             {
                 $entries .= $this->assetBuilder->releaseItemForFeed(
@@ -148,7 +149,7 @@ class Pirum_Build_Command
 
         ob_start();
 
-		$template = new Pirum_Index_Template($this->server, $this->packages);
+		$template = new Pirum_Index_Template($this->server, $this->repo);
 		$template->render(Pirum_CLI::version());
 
         $index = ob_get_clean();
@@ -162,7 +163,7 @@ class Pirum_Build_Command
 
 		$this->fs->mkDir($this->buildDir.'/rest/r');
 
-		foreach ($this->packages as $package) {
+		foreach ($this->repo as $package) {
 			$dir = $this->buildDir.'/rest/r/'.strtolower($package['name']);
             $this->fs->mkDir($dir);
             $this->buildReleasePackage($dir, $package);
@@ -324,7 +325,7 @@ EOF
         mkdir($this->buildDir.'/rest/p', 0777, true);
 
         $packages = '';
-        foreach ($this->packages as $package) {
+        foreach ($this->repo as $package) {
             $packages .= "  <p>{$package['name']}</p>\n";
 
             mkdir($dir = $this->buildDir.'/rest/p/'.strtolower($package['name']), 0777, true);
@@ -435,7 +436,7 @@ EOF
 
         $packages = '';
         $packagesinfo = '';
-        foreach ($this->packages as $package) {
+        foreach ($this->repo as $package) {
             $url = strtolower($package['name']);
 
             $packages .= "  <p xlink:href=\"/rest/p/$url\">{$package['name']}</p>\n";
@@ -505,7 +506,7 @@ EOF
         mkdir($dir = $this->buildDir.'/rest/m/', 0777, true);
 
         $all = '';
-        foreach ($this->packages as $package) {
+        foreach ($this->repo as $package) {
             foreach ($package['maintainers'] as $nickname => $maintainer)
             {
                 $dir = $this->buildDir.'/rest/m/'.$nickname;
