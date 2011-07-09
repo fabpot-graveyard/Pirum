@@ -307,6 +307,28 @@ class FeatureContext extends BehatContext
 			$this->iIssueTheCommandPhpBuildphpBuild();
 		}
     }
+
+   /**
+     * @Given /^the following xml files should exist:$/
+     */
+    public function theFollowingXmlFilesShouldExist(TableNode $table)
+    {
+        foreach ($table->getHash() as $row) {
+			$absFile = $this->webRoot.'/'.$row['File'];
+			if (!file_exists($absFile)) {
+				throw new Exception($row['File'].' missing');
+			}
+
+			if (!simplexml_load_file($absFile)) {
+				throw new Exception($row['File'].' bad xml');
+			}
+
+			$content = file_get_contents($absFile);
+			if (false === strpos($content, $row['Content'])) {
+				throw new Exception($row["Content"] .' not in '. $row['File']);
+			}
+		}
+    }
 }
 
 ?>
