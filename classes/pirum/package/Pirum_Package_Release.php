@@ -25,6 +25,11 @@ class Pirum_Package_Release
 		$this->package    = $package;
     }
 
+	public static function isPackageFile($file)
+	{
+		return preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $file);
+	}
+
 	public function equals(Pirum_Package_Release $that)
 	{
 		return

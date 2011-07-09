@@ -145,10 +145,11 @@ class Pirum_CLI
 
 	private function createServerBuilder($targetDir, $server, $repo)
 	{
-        return new Pirum_Build_Command (
+        return new Pirum_Build_Command(
 			$targetDir, $this->version(), $this->fs, $this->formatter,
 			$server, $repo,
-			new Pirum_StaticAsset_Builder()
+			new Pirum_StaticAsset_Builder(),
+			$this->createArchiveHandler()
 		);
 	}
 
@@ -178,8 +179,14 @@ class Pirum_CLI
 	private function createLoader($serverDir, $channelName)
 	{
 		return new Pirum_Package_Loader(
-			$this->fs, $serverDir.'/rest/r/', $channelName
+			$this->fs, $serverDir.'/rest/r/', $channelName,
+			$this->createArchiveHandler()
 		);
+	}
+
+	private function createArchiveHandler()
+	{
+		return new Archive_Handler();
 	}
 
 	public function getPearPackage()

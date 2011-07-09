@@ -43,8 +43,14 @@ class Pirum_Build_Command
 	 */
 	private $repo;
 
+	/**
+	 * @var Archive_Handler
+	 */
+	private $handler;
+
     public function __construct(
-		$targetDir, $version, $fs, $formatter, $server, $repo, $assetBuilder
+		$targetDir, $version, $fs, $formatter, 
+		$server, $repo, $assetBuilder, $handler
 	)
     {
         $this->targetDir    = $targetDir;
@@ -54,6 +60,7 @@ class Pirum_Build_Command
 		$this->server       = $server;
 		$this->repo         = $repo;
 		$this->assetBuilder = $assetBuilder;
+		$this->handler      = $handler;
     }
 
     public function build()
@@ -102,24 +109,15 @@ class Pirum_Build_Command
     {
         // create tar files when missing
         foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
-            if (!preg_match(Pirum_Package_Release::PACKAGE_FILE_PATTERN, $file->getFileName())) {
+            if (!Pirum_Package_Release::isPackageFile($file->getFilename())) {
                 continue;
             }
 
-            $tar = preg_replace('/\.tgz/', '.tar', $file);
-            if (!file_exists($tar)) {
-                if (function_exists('gzopen')) {
-                    $gz = gzopen($file, 'r');
-                    $fp = fopen(str_replace('.tgz', '.tar', $file), 'wb');
-                    while (!gzeof($gz)) {
-                        fwrite($fp, gzread($gz, 10000));
-                    }
-                    gzclose($gz);
-                    fclose($fp);
-                } else {
-                    system('cd '.$target.'/get/ && gunzip -c -f '.basename($file));
-                }
+            if (file_exists(preg_replace('/\.tgz/', '.tar', $file))) {
+				continue;
             }
+
+			$this->handler->fixArchive($this->targetDir, $file);
         }
     }
 
