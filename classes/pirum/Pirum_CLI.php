@@ -37,9 +37,9 @@ class Pirum_CLI
     }
 
 
-    public static function version()
+    private function version()
     {
-        if (strpos(self::VERSION, '@package_version') === 0) {
+        if (0 === strpos(self::VERSION, '@package_version')) {
             return 'DEV';
         } else {
             return self::VERSION;
@@ -130,7 +130,7 @@ class Pirum_CLI
 
 	private function printUsage()
 	{
-		$this->formatter->comment("Pirum %s by Fabien Potencier".PHP_EOL, self::version());
+		$this->formatter->comment("Pirum %s by Fabien Potencier".PHP_EOL, $this->version());
 		$this->formatter->comment("Available commands:".PHP_EOL);
 		$this->formatter->printUsage(array(
 			"  pirum build target_dir",
@@ -145,8 +145,8 @@ class Pirum_CLI
 
 	private function createServerBuilder($targetDir, $server, $repo)
 	{
-        return new Pirum_Build_Command(
-			$targetDir, $this->fs, $this->formatter,
+        return new Pirum_Build_Command (
+			$targetDir, $this->version(), $this->fs, $this->formatter,
 			$server, $repo,
 			new Pirum_StaticAsset_Builder()
 		);

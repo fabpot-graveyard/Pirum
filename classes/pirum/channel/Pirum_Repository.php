@@ -31,22 +31,23 @@ class Pirum_Repository implements IteratorAggregate
 	public function collectReleasePackageList()
 	{
         foreach ($this->getPackageFiles() as $archive) {
-			$this->loadPackage($archive);
+			$this->loadArchive($archive);
         }
 	}
 
-	private function loadPackage($archive)
+	private function loadArchive($archive)
 	{
 		$this->releasePackages[$archive]= $this->loader->loadPackage($archive);
+		$this->formatter->info($archive.' has loaded');
 	}
 
 	public function addPackage($archive) {
-		$this->loadPackage($archive);
+		$this->loadArchive($archive);
 	}
 
 	public function removePackage($archive)
 	{
-		$toDelete = $this->loader->loadPackage($archive);
+		$toDelete = $this->loader->loadArchive($archive);
 
 		foreach ($this->releasePackages as $file => $package)
 		{

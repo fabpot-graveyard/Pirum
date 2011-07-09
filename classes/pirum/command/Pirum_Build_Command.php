@@ -8,7 +8,14 @@
  */
 class Pirum_Build_Command
 {
+	/**
+	 * @var string
+	 */
     protected $buildDir;
+
+	/**
+	 * @var string
+	 */
     protected $targetDir;
 
 	/**
@@ -37,10 +44,11 @@ class Pirum_Build_Command
 	private $repo;
 
     public function __construct(
-		$targetDir, $fs, $formatter, $server, $repo, $assetBuilder
+		$targetDir, $version, $fs, $formatter, $server, $repo, $assetBuilder
 	)
     {
         $this->targetDir    = $targetDir;
+		$this->version      = $version;
 		$this->fs           = $fs;
         $this->formatter    = $formatter;
 		$this->server       = $server;
@@ -137,28 +145,22 @@ class Pirum_Build_Command
 
     protected function buildCss()
     {
-        if (file_exists($file = dirname(__FILE__).'/templates/pirum.css') ||
-            file_exists($file = $this->buildDir.'/templates/pirum.css')) {
-            $content = file_get_contents($file);
-        } else {
-            $content = $this->assetBuilder->css();
-        }
-
-        file_put_contents($this->buildDir.'/pirum.css', $content);
+        file_put_contents(
+			$this->buildDir.'/pirum.css',
+			$this->assetBuilder->css()
+		);
     }
 
     protected function buildIndex()
     {
         $this->formatter->info("Building index");
 
-        ob_start();
-
-		$template = new Pirum_Index_Template($this->server, $this->repo);
-		$template->render(Pirum_CLI::version());
-
-        $index = ob_get_clean();
-
-        file_put_contents($this->buildDir.'/index.html', $index);
+        file_put_contents(
+			$this->buildDir.'/index.html',
+			$this->assetBuilder->indexHtml(
+				$this->server, $this->repo, $this->version
+			)
+		);
     }
 
     protected function buildReleasePackages()

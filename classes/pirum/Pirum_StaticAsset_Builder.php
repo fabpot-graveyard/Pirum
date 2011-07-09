@@ -53,6 +53,16 @@ p { margin-bottom: 5px }
 EOF;
 	}
 
+	public function indexHtml($server, $repo, $version)
+	{
+        ob_start();
+
+		$template = new Pirum_Index_Template($server, $repo);
+		$template->render($version);
+
+        return ob_get_clean();
+	}
+
 }
 
 ?>
