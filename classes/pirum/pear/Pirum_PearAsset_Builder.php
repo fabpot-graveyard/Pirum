@@ -2,20 +2,25 @@
 
 class Pirum_PearAsset_Builder
 {
-	public function __construct($buildDir, $formatter, $repo, $fs, $channel)
+	public function __construct(
+		$buildDir, $formatter, $repo, $fs,
+		$channel, $helper1, $helper2
+	)
 	{
-		$this->buildDir = $buildDir;
+		$this->buildDir  = $buildDir;
 		$this->formatter = $formatter;
 		$this->repo      = $repo;
 		$this->fs        = $fs;
 		$this->channel   = $channel;
+		$this->helper1   = $helper1;
+		$this->helper2   = $helper2;
 	}
 	public function build()
 	{
-        $this->buildMaintainers();
-        $this->buildCategories($this->channel);
-        $this->buildPackages($this->channel);
         $this->buildReleasePackages($this->channel);
+        $this->buildPackages($this->channel);
+        $this->buildCategories($this->channel);
+        $this->buildMaintainers();
 
 	}
    protected function buildReleasePackages($channel)

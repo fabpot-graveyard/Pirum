@@ -75,10 +75,14 @@ class Pirum_Build_Command
         $this->buildCss();
         $this->buildFeed();
 
+		$helper1 = new Pirum_Pear_Helper();
+		$helper2 = new Pirum_Pear2_Helper();
+
 		$pearBuilder = new Pirum_PearAsset_Builder(
 			$this->buildDir, $this->formatter, $this->repo,
-			$this->fs, $this->channel->name
+			$this->fs, $this->channel->name, $helper1, $helper2
 		);
+
 		$pearBuilder->build();
 
         $this->formatter->info("Updating PEAR server files");
