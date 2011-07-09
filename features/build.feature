@@ -6,7 +6,6 @@ Feature: Build
 	@build
 	Scenario: Build localhost
 		Given only pirum xml file is in place
-			And the pirum standalone is built
 		When I issue the command `php pirum build webroot`
 		Then the server index contains channel description
 			And the channel is discoverable

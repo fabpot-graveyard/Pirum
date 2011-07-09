@@ -7,6 +7,15 @@ use Behat\Behat\Context\ClosuredContextInterface,
 use Behat\Gherkin\Node\PyStringNode,
     Behat\Gherkin\Node\TableNode;
 
+require_once __dir__.'/../../build.php';
+
+Pirum_Base_Builder::build(__dir__.'/../../', array('', 'clean'));
+Pirum_Base_Builder::build(__dir__.'/../../', array('', 'build'));
+
+register_shutdown_function(function () {
+Pirum_Base_Builder::build(__dir__.'/../../', array('', 'clean'));
+});
+
 class FeatureContext extends BehatContext
 {
     /**
@@ -18,7 +27,6 @@ class FeatureContext extends BehatContext
     public function __construct(array $parameters)
     {
         $this->baseDir     = __dir__.'/../../';
-		require_once $this->baseDir.'/build.php';
 
 		$this->fs          = new FileSystem();
 		$this->channelName = 'dummy';
@@ -42,17 +50,8 @@ class FeatureContext extends BehatContext
 				<alias>dummy</alias>
 				<url>'.$this->channelUrl.'</url>
 			</server>'
-);
+		);
     }
-
-    /**
-     * @Given /^the pirum standalone is built$/
-     */
-    public function iBuildThePirumStandalone()
-    {
-		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
-		Pirum_Base_Builder::build($this->baseDir, array('', 'build'));
-	}
 
     /**
      * @When /^I issue the command `php pirum build webroot`$/
@@ -95,7 +94,6 @@ class FeatureContext extends BehatContext
 		$this->discoverChannel($tmpDir);
 
 		$this->fs->removeDir($tmpDir);
-		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
    }
 
 	private function discoverChannel($tmpDir)
@@ -132,7 +130,6 @@ class FeatureContext extends BehatContext
      */
     public function aBuiltUpPirumRepoIsInPlace()
     {
-		$this->iBuildThePirumStandalone();
         $this->iCleanTheWebrootAndPlaceOnlyAPirumXmlThere();
 		$this->iIssueTheCommandPhpPirumBuild();
     }
@@ -217,7 +214,6 @@ class FeatureContext extends BehatContext
      */
     public function aPackageIsAdded()
     {
-		$this->iBuildThePirumStandalone();
         $this->iCleanTheWebrootAndPlaceOnlyAPirumXmlThere();
 		$this->iIssueTheCommandPhpPirumBuild();
 		$this->iIssueTheCommandPhpPirumAddPackagename();
@@ -252,7 +248,6 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
 		$this->fs->removeDir($tmpDir);
-		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
     }
 
     /**
