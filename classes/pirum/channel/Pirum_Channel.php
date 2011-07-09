@@ -77,7 +77,7 @@ EOF;
 	 */
 	public function loadPackage($loader, $archive)
 	{
-		return $loader->loadPackage($archive, $this->name);
+		return $loader->loadPackage($archive);
 	}
 }
 

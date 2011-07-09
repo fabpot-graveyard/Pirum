@@ -174,8 +174,7 @@ class Pirum_CLI
 			$targetDir,
 			$this->fs,
 			$this->formatter,
-			$this->createLoader($targetDir),
-			$server
+			$this->createLoader($targetDir, $server->name)
 		);
 
 		$repoBuilder->collectReleasePackageList();
@@ -188,10 +187,10 @@ class Pirum_CLI
 		);
 	}
 
-	private function createLoader($serverDir)
+	private function createLoader($serverDir, $channelName)
 	{
 		return new Pirum_Package_Loader(
-			$this->fs, $serverDir.'/rest/r/'
+			$this->fs, $serverDir.'/rest/r/', $channelName
 		);
 	}
 

@@ -8,13 +8,14 @@ class Pirum_Package_Loader
 	private $fs;
 	private $xmlDir;
 
-	public function __construct($fs, $xmlDir)
+	public function __construct($fs, $xmlDir, $channelName)
 	{
-		$this->fs     = $fs;
-		$this->xmlDir = $xmlDir;
+		$this->fs          = $fs;
+		$this->xmlDir      = $xmlDir;
+		$this->channelName = $channelName;
 	}
 
-	public function loadPackage($archive, $channel)
+	public function loadPackage($archive)
 	{
 		$tmpDir = $this->fs->createTempDir('Pirum_Package_Release');
 
@@ -42,7 +43,7 @@ class Pirum_Package_Loader
 		$releasePackage = new Pirum_Package_Release(
 			$archive, $name, $version, $packageXml, $package
 		);
-		$releasePackage->validateFor($channel);
+		$releasePackage->validateFor($this->channelName);
 
 		$this->fs->removeDir($tmpDir);
 		return $releasePackage;

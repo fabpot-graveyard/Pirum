@@ -15,26 +15,29 @@ class Pirum_Repository implements IteratorAggregate
 	 */
 	private $formatter;
 
-	public function __construct($targetDir, $fs, $formatter, $loader, $server)
+	/**
+	 * @var Pirum_Package_Loader
+	 */
+	private $loader;
+
+	public function __construct($targetDir, $fs, $formatter, $loader)
 	{
 		$this->targetDir  = $targetDir;
 		$this->fs         = $fs;
 		$this->formatter  = $formatter;
 		$this->loader     = $loader;
-		$this->server     = $server;
 	}
 
 	public function collectReleasePackageList()
 	{
         foreach ($this->getPackageFiles() as $archive) {
-			$this->loadPackageWith($archive);
+			$this->loadPackage($archive);
         }
 	}
 
-	public function loadPackageWith($archive)
+	public function loadPackage($archive)
 	{
-		$this->releasePackages[]=
-			$this->server->loadPackage($this->loader, $archive);
+		$this->releasePackages[]= $this->loader->loadPackage($archive);
 	}
 
 	public function processReleasePackageList()
