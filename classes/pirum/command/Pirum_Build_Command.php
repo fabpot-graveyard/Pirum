@@ -219,52 +219,6 @@ EOF;
 
 EOF;
 
-            $this->buildRelease($dir, $package, $release);
-        }
-
-        if (count($package['releases'])) {
-            file_put_contents($dir.'/latest.txt', $package['releases'][0]['version']);
-        }
-
-        if ($stable) {
-            file_put_contents($dir.'/stable.txt', $stable);
-        }
-
-        if ($beta) {
-            file_put_contents($dir.'/beta.txt', $beta);
-        }
-
-        if ($alpha) {
-            file_put_contents($dir.'/alpha.txt', $alpha);
-        }
-
-        if ($snapshot) {
-            file_put_contents($dir.'/snapshot.txt', $snapshot);
-        }
-
-        file_put_contents($dir.'/allreleases.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<a xmlns="http://pear.php.net/dtd/rest.allreleases" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases http://pear.php.net/dtd/rest.allreleases.xsd">
-    <p>{$package['name']}</p>
-    <c>$serverName</c>
-$allreleases
-</a>
-EOF
-        );
-
-        file_put_contents($dir.'/allreleases2.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<a xmlns="http://pear.php.net/dtd/rest.allreleases2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases2 http://pear.php.net/dtd/rest.allreleases2.xsd">
-    <p>{$package['name']}</p>
-    <c>$serverName</c>
-$allreleases2
-</a>
-EOF
-        );
-    }
-
-    protected function buildRelease($dir, $package, $release)
-    {
 		$serverName = $this->server->name;
 		$serverUrl  = $this->server->url;
 
@@ -320,6 +274,47 @@ EOF
         file_put_contents($dir.'/deps.'.$release['version'].'.txt', $release['deps']);
 
 		copy($release['packageXml'], $dir."/package.{$release['version']}.xml");
+        }
+
+        if (count($package['releases'])) {
+            file_put_contents($dir.'/latest.txt', $package['releases'][0]['version']);
+        }
+
+        if ($stable) {
+            file_put_contents($dir.'/stable.txt', $stable);
+        }
+
+        if ($beta) {
+            file_put_contents($dir.'/beta.txt', $beta);
+        }
+
+        if ($alpha) {
+            file_put_contents($dir.'/alpha.txt', $alpha);
+        }
+
+        if ($snapshot) {
+            file_put_contents($dir.'/snapshot.txt', $snapshot);
+        }
+
+        file_put_contents($dir.'/allreleases.xml', <<<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<a xmlns="http://pear.php.net/dtd/rest.allreleases" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases http://pear.php.net/dtd/rest.allreleases.xsd">
+    <p>{$package['name']}</p>
+    <c>$serverName</c>
+$allreleases
+</a>
+EOF
+        );
+
+        file_put_contents($dir.'/allreleases2.xml', <<<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<a xmlns="http://pear.php.net/dtd/rest.allreleases2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink"     xsi:schemaLocation="http://pear.php.net/dtd/rest.allreleases2 http://pear.php.net/dtd/rest.allreleases2.xsd">
+    <p>{$package['name']}</p>
+    <c>$serverName</c>
+$allreleases2
+</a>
+EOF
+        );
     }
 
     protected function buildPackages()
