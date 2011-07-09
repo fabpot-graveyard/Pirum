@@ -37,7 +37,19 @@ class Pirum_Repository implements IteratorAggregate
 
 	public function loadPackage($archive)
 	{
-		$this->releasePackages[]= $this->loader->loadPackage($archive);
+		$this->releasePackages[$archive]= $this->loader->loadPackage($archive);
+	}
+
+	public function removePackage($archive)
+	{
+		$toDelete = $this->loader->loadPackage($archive);
+
+		foreach ($this->releasePackages as $file => $package)
+		{
+			if ($toDelete->equals($package)) {
+				unset($this->releasePackages[$file]);
+			}
+		}
 	}
 
 	public function processReleasePackageList()

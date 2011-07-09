@@ -7,23 +7,30 @@ class Pirum_RemovePackage_Command
 	 */
 	private $fs;
 
-	public function  __construct($pirum, $fs, $targetDir)
+	/**
+	 * @var Pirum_Repository
+	 */
+	private $repo;
+
+	public function __construct($pirum, $fs, $targetDir, $repo)
 	{
 		$this->pirum     = $pirum;
 		$this->fs        = $fs;
 		$this->targetDir = $targetDir;
+		$this->repo      = $repo;
 	}
 
 	public function build()
 	{
 		$pearPackage = $this->pirum->getPearPackage();
 
-		$targetFile = $this->targetDir.'/get/'. $this->fs->baseName($pearPackage);
+		$archive = $this->targetDir.'/get/'. $this->fs->baseName($pearPackage);
 
-		$this->fs->checkFile($targetFile);
-		$this->fs->deleteFile($targetFile);
-        $this->fs->deleteFile(substr_replace($targetFile, '.tar', -4));
+		$this->fs->checkFile($archive);
+		$this->fs->deleteFile($archive);
+        $this->fs->deleteFile(substr_replace($archive, '.tar', -4));
 
+		$this->repo->removePackage($archive);
 	}
 }
 

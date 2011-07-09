@@ -25,6 +25,13 @@ class Pirum_Package_Release
 		$this->package    = $package;
     }
 
+	public function equals(Pirum_Package_Release $that)
+	{
+		return
+			$this->name    = $that->getName() &&
+			$this->version = $that->getVersion();
+	}
+
     public function getDate($format = 'Y-m-d H:i:s')
     {
         return date($format, strtotime($this->package->date.' '.$this->package->time));

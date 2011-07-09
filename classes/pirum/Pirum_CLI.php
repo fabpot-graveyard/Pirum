@@ -86,7 +86,7 @@ class Pirum_CLI
 			$repo->collectReleasePackageList();
 
 			$builders = array(
-				$this->builder($command, $targetDir),
+				$this->builder($command, $targetDir, $repo),
 				$this->createServerBuilder($targetDir, $server, $repo),
 			);
 
@@ -106,7 +106,7 @@ class Pirum_CLI
         return $ret;
     }
 
-	private function builder($command, $serverDir)
+	private function builder($command, $serverDir, $repo)
 	{
 		switch ($command)
 		{
@@ -114,11 +114,11 @@ class Pirum_CLI
 				return new NullBuilder();
 			case 'add':
 				return new Pirum_AddPackage_Command(
-					$this, $this->fs, $serverDir
+					$this, $this->fs, $serverDir, $repo
 				);
 			case 'remove':
 				return new Pirum_RemovePackage_Command(
-					$this, $this->fs, $serverDir
+					$this, $this->fs, $serverDir, $repo
 				);
 			case 'clean':
 				return new Pirum_CleanRepo_Command(
