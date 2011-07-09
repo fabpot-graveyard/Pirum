@@ -24,6 +24,29 @@ $allreleases
 EOF;
 	}
 
+	public function maintainer($nickname, $maintainer)
+	{
+		return <<<EOF
+    <m>
+        <h>{$nickname}</h>
+        <a>{$maintainer['active']}</a>
+    </m>
+
+EOF;
+	}
+
+	public function maintainerList($channel, $package, $maintainers)
+	{
+		return <<<EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<m xmlns="http://pear.php.net/dtd/rest.packagemaintainers" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.packagemaintainers http://pear.php.net/dtd/rest.packagemaintainers.xsd">
+    <p>{$package['name']}</p>
+    <c>$channel</c>
+$maintainers
+</m>
+EOF;
+	}
+
 	public function versionXml($channel, $release, $package, $maintainer)
 	{
        $url = strtolower($package['name']);

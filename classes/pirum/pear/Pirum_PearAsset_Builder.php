@@ -149,23 +149,27 @@ class Pirum_PearAsset_Builder
             $this->buildPackage($channel, $dir, $package);
         }
 
-        file_put_contents($this->buildDir.'/rest/p/packages.xml', <<<EOF
+        file_put_contents($this->buildDir.'/rest/p/packages.xml',
+			$this->packageXml($channel, $packages)
+        );
+    }
+
+	private function packageXml($channel, $packages)
+	{
+		return <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allpackages" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.allpackages http://pear.php.net/dtd/rest.allpackages.xsd">
     <c>$channel</c>
 $packages
 </a>
-EOF
-        );
-    }
+EOF;
+	}
 
-    protected function buildPackage($channel, $dir, $package)
-    {
-		$this->formatter->info("Building package %s", $package['name']);
-
+	private function infoXml()
+	{
         $url = strtolower($package['name']);
 
-        file_put_contents($dir.'/info.xml', <<<EOF
+		return <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <p xmlns="http://pear.php.net/dtd/rest.package" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.package    http://pear.php.net/dtd/rest.package.xsd">
 <n>{$package['name']}</n>
@@ -176,67 +180,48 @@ EOF
 <d>{$package['description']}</d>
 <r xlink:href="/rest/r/{$url}" />
 </p>
-EOF
-        );
+EOF;
+	}
+
+    protected function buildPackage($channel, $dir, $package)
+    {
+		$this->formatter->info("Building package %s", $package['name']);
+
+        file_put_contents($dir.'/info.xml', 
+			$this->infoXml($channel, $package)
+		);
 
         $maintainers = '';
         $maintainers2 = '';
+
         foreach ($package['current_maintainers'] as $nickname => $maintainer) {
-            $maintainers .= <<<EOF
-    <m>
-        <h>{$nickname}</h>
-        <a>{$maintainer['active']}</a>
-    </m>
-
-EOF;
-
-            $maintainers2 .= <<<EOF
-    <m>
-        <h>{$nickname}</h>
-        <a>{$maintainer['active']}</a>
-        <r>{$maintainer['role']}</r>
-    </m>
-
-EOF;
+            $maintainers  .= $this->helper1->maintainer($nickname, $maintainer);
+            $maintainers2 .= $this->helper2->maintainer($nickname, $maintainer);
         }
 
-        file_put_contents($dir.'/maintainers.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<m xmlns="http://pear.php.net/dtd/rest.packagemaintainers" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.packagemaintainers http://pear.php.net/dtd/rest.packagemaintainers.xsd">
-    <p>{$package['name']}</p>
-    <c>$channel</c>
-$maintainers
-</m>
-EOF
+        file_put_contents($dir.'/maintainers.xml',
+			$this->helper1->maintainerList($channel, $package, $maintainers)
         );
 
-        file_put_contents($dir.'/maintainers2.xml', <<<EOF
-<?xml version="1.0" encoding="UTF-8" ?>
-<m xmlns="http://pear.php.net/dtd/rest.packagemaintainers2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.packagemaintainers2 http://pear.php.net/dtd/rest.packagemaintainers2.xsd">
-    <p>{$package['name']}</p>
-    <c>$channel</c>
-$maintainers2
-</m>
-EOF
+        file_put_contents($dir.'/maintainers2.xml',
+			$this->helper2->maintainerList($channel, $package, $maintainers2)
         );
     }
 
-    protected function buildCategories($channel)
-    {
-		$this->formatter->info("Building categories");
-
-        mkdir($this->buildDir.'/rest/c/Default', 0777, true);
-
-        file_put_contents($this->buildDir.'/rest/c/categories.xml', <<<EOF
+	private function categoriesXml($channel)
+	{
+		return <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <a xmlns="http://pear.php.net/dtd/rest.allcategories" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.allcategories http://pear.php.net/dtd/rest.allcategories.xsd">
     <ch>$channel</ch>
     <c xlink:href="/rest/c/Default/info.xml">Default</c>
 </a>
-EOF
-        );
+EOF;
+	}
 
-        file_put_contents($this->buildDir.'/rest/c/Default/info.xml', <<<EOF
+	private function defaultCategoryXml($channel)
+	{
+		return <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <c xmlns="http://pear.php.net/dtd/rest.category" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.category http://pear.php.net/dtd/rest.category.xsd">
     <n>Default</n>
@@ -244,7 +229,21 @@ EOF
     <a>Default</a>
     <d>Default category</d>
 </c>
-EOF
+EOF;
+	}
+
+    protected function buildCategories($channel)
+    {
+		$this->formatter->info("Building categories");
+
+        $this->fs->mkDir($this->buildDir.'/rest/c/Default');
+
+		file_put_contents($this->buildDir.'/rest/c/categories.xml',
+			$this->categoriesXml($channel)
+        );
+
+        file_put_contents($this->buildDir.'/rest/c/Default/info.xml',
+			$this->defaultCategoryXml($channel)
         );
 
         $packages = '';
