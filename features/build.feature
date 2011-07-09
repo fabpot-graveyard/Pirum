@@ -1,36 +1,24 @@
+@buildscript
 Feature: Build
-	In order to have a pirum repo
-	As a maintainer
-	I want to be able to build it using the executable
+	In order to maintain pirum
+	As a developer
+	I want to be able to build and test using a simple build script
 
 	@build
-	Scenario: Build localhost
-		Given only pirum xml file is in place
-		When I issue the command `php pirum build webroot`
-		Then the server index contains channel description
-			And the channel is discoverable
-
-	@add
-	Scenario: Add package to localhost
-		Given a built up pirum repo is in place
-			And the pirum repo does not contain package
-		When I issue the command `php pirum add packagename`
-		Then the server index contains package description
-			And the package is installable
-
-	@remove
-	Scenario: Remove package from localhost
-		Given a built up pirum repo is in place
-			And a package is added
-			And the server index contains package description
-		When I issue the command `php pirum remove packagename`
-		Then the pirum repo does not contain package
+	Scenario: Build pirum
+		When I issue the command `php build.php build`
+		Then the following files will exist
+			|File           |
+			|pirum          |
+			|package.xml    |
+			|Pirum-1.0.1.tgz|
 
 	@clean
-	Scenario: Remove package from localhost
-		Given a built up pirum repo is in place
-		When I issue the command `php pirum clean`
-		Then the server index contains channel description
-			And the channel is discoverable
-			And the pirum repo does not contain package
+	Scenario: Clean pirum
+		When I issue the command `php build.php clean`
+		Then the following files will not exist
+			|File           |
+			|pirum          |
+			|package.xml    |
+			|Pirum-1.0.1.tgz|
 

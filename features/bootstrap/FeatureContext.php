@@ -9,13 +9,6 @@ use Behat\Gherkin\Node\PyStringNode,
 
 require_once __dir__.'/../../build.php';
 
-Pirum_Base_Builder::build(__dir__.'/../../', array('', 'clean'));
-Pirum_Base_Builder::build(__dir__.'/../../', array('', 'build'));
-
-register_shutdown_function(function () {
-Pirum_Base_Builder::build(__dir__.'/../../', array('', 'clean'));
-});
-
 class FeatureContext extends BehatContext
 {
     /**
@@ -257,6 +250,60 @@ class FeatureContext extends BehatContext
     {
         if ($this->execute('php pirum clean '.$this->webRoot)) {
 			throw new Exception();
+		}
+    }
+
+	/**
+     * @When /^I issue the command `php build\.php build`$/
+     */
+    public function iIssueTheCommandPhpBuildphpBuild()
+    {
+		if($this->execute('php build.php build')) {
+			throw new Exception('Failed to execute build');
+		}
+    }
+
+	/**
+     * @When /^I issue the command `php build\.php clean`$/
+     */
+    public function iIssueTheCommandPhpBuildphpClean()
+    {
+		if($this->execute('php build.php clean')) {
+			throw new Exception('Failed to execute clean');
+		}
+    }
+
+    /**
+     * @Then /^the following files will exist$/
+     */
+    public function theFollowingFilesWillExist(TableNode $table)
+    {
+        foreach ($table->getHash() as $row) {
+			if (!file_exists($this->baseDir.'/'.$row['File'])) {
+				throw new Exception($row['File']. ' is not there');
+			}
+		}
+    }
+
+    /**
+     * @Then /^the following files will not exist$/
+     */
+    public function theFollowingFilesWillNotExist(TableNode $table)
+    {
+        foreach ($table->getHash() as $row) {
+			if (file_exists($this->baseDir.'/'.$row['File'])) {
+				throw new Exception($row['File']. ' is still there');
+			}
+		}
+    }
+
+    /**
+     * @Given /^pirum is built$/
+     */
+    public function pirumIsBuilt()
+    {
+        if (!file_exists($this->baseDir.'/pirum')) {
+			$this->iIssueTheCommandPhpBuildphpBuild();
 		}
     }
 }
