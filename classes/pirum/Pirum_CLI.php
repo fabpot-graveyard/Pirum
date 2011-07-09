@@ -170,7 +170,7 @@ class Pirum_CLI
 			));
         }
 
-		$repoBuilder = new Pirum_Repository_Builder(
+		$repoBuilder = new Pirum_Repository(
 			$targetDir,
 			$this->fs,
 			$this->formatter

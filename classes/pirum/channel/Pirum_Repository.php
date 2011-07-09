@@ -1,6 +1,6 @@
 <?php
 
-class Pirum_Repository_Builder
+class Pirum_Repository
 {
 	private $packages = array();
 
