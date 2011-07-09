@@ -186,7 +186,7 @@ class Pirum_CLI
 
 	private function createArchiveHandler()
 	{
-		return new Archive_Handler();
+		return new Pirum_Archive_Handler();
 	}
 
 	public function getPearPackage()

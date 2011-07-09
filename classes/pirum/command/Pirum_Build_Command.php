@@ -44,7 +44,7 @@ class Pirum_Build_Command
 	private $repo;
 
 	/**
-	 * @var Archive_Handler
+	 * @var Pirum_Archive_Handler
 	 */
 	private $handler;
 

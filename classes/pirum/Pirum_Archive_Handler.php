@@ -1,14 +1,6 @@
 <?php
-/**
- * Holds the Archive_Handler class
- *
- * @author fqqdk <simon.csaba@ustream.tv>
- */
 
-/**
- * Description of Archive_Handler
- */
-class Archive_Handler
+class Pirum_Archive_Handler
 {
 	public function loadPackageXmlFrom($archive)
 	{
