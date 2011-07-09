@@ -29,15 +29,12 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @Given /^pirum xml file is in place$/
+     * @Given /^only pirum xml file is in place$/
      */
-    public function pirumXmlFileIsInPlace()
+    public function onlyPirumXmlFileIsInPlace()
     {
-		if (!is_dir($this->webRoot)) {
-			mkdir($this->webRoot, 0777, true);
-		}
-		file_put_contents(
-			'/var/www/pear/pirum.xml',
+		$this->fs->removeDir($this->webRoot);
+		$this->fs->writeTo($this->webRoot.'/pirum.xml',
 			'<?xml version="1.0" encoding="UTF-8" ?>
 			<server>
 				<name>'.$this->channelName.'</name>
@@ -45,7 +42,7 @@ class FeatureContext extends BehatContext
 				<alias>dummy</alias>
 				<url>'.$this->channelUrl.'</url>
 			</server>'
-		);
+);
     }
 
     /**
@@ -136,7 +133,7 @@ class FeatureContext extends BehatContext
     public function aBuiltUpPirumRepoIsInPlace()
     {
 		$this->thePirumStandaloneIsBuilt();
-        $this->pirumXmlFileIsInPlace();
+        $this->onlyPirumXmlFileIsInPlace();
 		$this->iIssueTheCommandPhpPirumBuild();
     }
 
@@ -214,6 +211,18 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
 	}
+
+    /**
+     * @Given /^a package is added$/
+     */
+    public function aPackageIsAdded()
+    {
+		$this->thePirumStandaloneIsBuilt();
+        $this->onlyPirumXmlFileIsInPlace();
+		$this->iIssueTheCommandPhpPirumBuild();
+		$this->iIssueTheCommandPhpPirumAddPackagename();
+    }
+
 	/**
      * @When /^I issue the command `php pirum remove packagename`$/
      */

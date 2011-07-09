@@ -47,11 +47,13 @@ class FileSystem
 
 	public function appendTo($file, $contents)
 	{
+		$this->mkDir(dirname($file));
 		file_put_contents($file, $contents, FILE_APPEND);
 	}
 
 	public function writeTo($file, $contents)
 	{
+		$this->mkDir(dirname($file));
 		file_put_contents($file, $contents);
 	}
 
