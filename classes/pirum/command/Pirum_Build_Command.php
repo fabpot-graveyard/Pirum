@@ -168,14 +168,16 @@ class Pirum_Build_Command
 		$this->fs->mkDir($this->buildDir.'/rest/r');
 
 		foreach ($this->repo as $package) {
-			$dir = $this->buildDir.'/rest/r/'.strtolower($package['name']);
-            $this->fs->mkDir($dir);
-            $this->buildReleasePackage($dir, $package);
+            $this->buildReleasePackage($package);
         }
     }
 
-    protected function buildReleasePackage($dir, $package)
+    protected function buildReleasePackage($package)
     {
+		$dir = $this->buildDir.'/rest/r/'.strtolower($package['name']);
+
+		$this->fs->mkDir($dir);
+
 		$serverName = $this->server->name;
 
         $this->formatter->info("Building releases for %s", $package['name']);
