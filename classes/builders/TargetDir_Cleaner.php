@@ -14,6 +14,7 @@ class TargetDir_Cleaner
 		$collector = $project->collector();
 		$collector
 			->collect($project->file($this->targetDir.'/pirum'))
+			->collect($project->file($this->targetDir.'/package.xml'))
 			->collect($project->glob($this->targetDir.'/Pirum-*'));
 
 		$project->deleteCollection($collector);

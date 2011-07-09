@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?php echo '<?xml version="1.0" encoding="UTF-8"?'.'>' ?>
 <package 
 	packagerversion="1.8.0"
 	version="2.0"
@@ -22,8 +22,8 @@
 		<active>yes</active>
 	</lead>
 
-	<date>2011-03-27</date>
-	<time>12:00:00</time>
+	<date><?php echo date('Y-m-d') ?></date>
+	<time><?php echo date('H:i:s') ?></time>
 
 	<version>
 		<release>1.0.1</release>

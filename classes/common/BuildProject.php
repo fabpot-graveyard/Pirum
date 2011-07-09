@@ -18,6 +18,11 @@ class BuildProject
 		$this->exec = $exec;
 	}
 
+	public function writeFile($file, $contents)
+	{
+		$this->fs->writeTo($file, $contents);
+	}
+
 	public function runCommandInDir($command, $dir)
 	{
 		$this->exec->simpleExecInDir($this->fs, $command, $dir);

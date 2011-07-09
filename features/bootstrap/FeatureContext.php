@@ -31,7 +31,7 @@ class FeatureContext extends BehatContext
     /**
      * @Given /^only pirum xml file is in place$/
      */
-    public function onlyPirumXmlFileIsInPlace()
+    public function iCleanTheWebrootAndPlaceOnlyAPirumXmlThere()
     {
 		$this->fs->removeDir($this->webRoot);
 		$this->fs->writeTo($this->webRoot.'/pirum.xml',
@@ -48,7 +48,7 @@ class FeatureContext extends BehatContext
     /**
      * @Given /^the pirum standalone is built$/
      */
-    public function thePirumStandaloneIsBuilt()
+    public function iBuildThePirumStandalone()
     {
 		Pirum_Base_Builder::build($this->baseDir, array('', 'clean'));
 		Pirum_Base_Builder::build($this->baseDir, array('', 'build'));
@@ -132,8 +132,8 @@ class FeatureContext extends BehatContext
      */
     public function aBuiltUpPirumRepoIsInPlace()
     {
-		$this->thePirumStandaloneIsBuilt();
-        $this->onlyPirumXmlFileIsInPlace();
+		$this->iBuildThePirumStandalone();
+        $this->iCleanTheWebrootAndPlaceOnlyAPirumXmlThere();
 		$this->iIssueTheCommandPhpPirumBuild();
     }
 
@@ -217,8 +217,8 @@ class FeatureContext extends BehatContext
      */
     public function aPackageIsAdded()
     {
-		$this->thePirumStandaloneIsBuilt();
-        $this->onlyPirumXmlFileIsInPlace();
+		$this->iBuildThePirumStandalone();
+        $this->iCleanTheWebrootAndPlaceOnlyAPirumXmlThere();
 		$this->iIssueTheCommandPhpPirumBuild();
 		$this->iIssueTheCommandPhpPirumAddPackagename();
     }
