@@ -11,6 +11,12 @@ Feature: Build
 		When I issue the command `php pirum build webroot`
 		Then the server index contains channel description
 			And the channel is discoverable
+			And the following xml files should exist:
+			| File                            |Content |
+			| channel.xml                     |Dummy   |
+			| feed.xml                        |Dummy   |
+			| rest/c/categories.xml           |Default |
+			| rest/c/Default/info.xml         |Default |
 
 	@add
 	Scenario: Add package to localhost
@@ -21,15 +27,11 @@ Feature: Build
 		Then the server index contains package description
 			And the package is installable
 			And the following xml files should exist:
-			| File                            |Content                          |
-			| channel.xml                     |Dummy                            |
-			| feed.xml                        |Dummy                            |
-			| rest/c/categories.xml           |Default                          |
-			| rest/c/Default/info.xml         |Default                          |
-			| rest/c/Default/packagesinfo.xml |Dummy                            |
-			| rest/c/Default/packages.xml     |Dummy                            |
-			| rest/m/allmaintainers.xml       |<h xlink:href="/rest/m/jb">jb</h>|
-			| rest/p/packages.xml             |Dummy                            |
+			| File                            |Content    |
+			| rest/c/Default/packagesinfo.xml |Dummy      |
+			| rest/c/Default/packages.xml     |Dummy      |
+			| rest/m/jb/info.xml              |Joe Bloggs |
+			| rest/p/packages.xml             |Dummy      |
 
 	@remove
 	Scenario: Remove package from localhost

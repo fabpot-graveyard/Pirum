@@ -140,55 +140,11 @@ class FeatureContext extends BehatContext
      */
     public function iIssueTheCommandPhpPirumAddPackagename()
     {
-			$tmpDir   = $this->fs->createTempDir('temp_package');
-			$cfgFile  = $this->discoverChannel($tmpDir);
-			file_put_contents($tmpDir.'/dummy', '');
-			file_put_contents($tmpDir.'/package.xml',
-				'<?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.8.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
-	http://pear.php.net/dtd/tasks-1.0.xsd
-	http://pear.php.net/dtd/package-2.0
-	http://pear.php.net/dtd/package-2.0.xsd">
- <name>Dummy</name>
- <channel>'.$this->channelName.'</channel>
- <summary>Dummy</summary>
- <description>Dummy</description>
- <lead>
-  <name>Joe Bloggs</name>
-  <user>jb</user>
-  <email>dummy@dummy.net</email>
-  <active>yes</active>
- </lead>
- <date>'.date('Y-m-d').'</date>
- <time>12:00:00</time>
- <version>
-  <release>1.0.0</release>
-  <api>1.0.0</api>
- </version>
- <stability>
-  <release>stable</release>
-  <api>stable</api>
- </stability>
- <license uri="http://www.opensource.org/licenses/mit-license.php">MIT</license>
- <notes>dummy</notes>
- <contents>
-   <dir name="/">
-	<file role="script" baseinstalldir="/" name="dummy"></file>
-   </dir>
- </contents>
-<dependencies>
-  <required>
-   <php>
-	<min>5.2.1</min>
-   </php>
-   <pearinstaller>
-	<min>1.4.0</min>
-   </pearinstaller>
-  </required>
- </dependencies>
-<phprelease>
-</phprelease>
-</package>');
+		$tmpDir   = $this->fs->createTempDir('temp_package');
+		$cfgFile  = $this->discoverChannel($tmpDir);
+
+		$this->fs->copyToDir(__dir__.'/FeatureContext.php', $tmpDir);
+		$this->fs->copyToDir(__dir__.'/package.xml', $tmpDir);
 
 		$oldCwd = getcwd();
 		chdir($tmpDir);
