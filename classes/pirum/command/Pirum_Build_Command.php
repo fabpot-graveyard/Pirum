@@ -71,7 +71,6 @@ class Pirum_Build_Command
 		$this->buildDir = $this->fs->createTempDir('pirum_build', '/rest');
 
 		$this->fixArchives();
-        $this->buildPirumWeb();
         $this->buildChannel();
         $this->buildIndex();
         $this->buildCss();
@@ -89,7 +88,6 @@ class Pirum_Build_Command
 
         $this->formatter->info("Updating PEAR server files");
 
-        copy($this->buildDir.'/pirum.php', $this->targetDir.'/pirum.php');
         if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml')) {
             if (file_exists($this->targetDir.'/channel.xml'))
             {
@@ -105,19 +103,7 @@ class Pirum_Build_Command
 		$this->fs->removeDir($this->buildDir);
    }
 
-    private function buildPirumWeb()
-    {
-		$job = new Standalone_Builder(
-			$this->buildDir.'/pirum.php',
-			$this->baseDir.'/stubs/pirum_web_start.php',
-			$this->baseDir.'/stubs/pirum_web_end.php',
-			$this->baseDir.'/classes'
-		);
-
-		$job->run($this->project);
-    }
-
-    protected function fixArchives()
+     protected function fixArchives()
     {
         // create tar files when missing
         foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
