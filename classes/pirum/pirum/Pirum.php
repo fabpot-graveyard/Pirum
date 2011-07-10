@@ -148,10 +148,9 @@ class Pirum
 			}
 
 			$this->formatter->info("Command %s run successfully", $command);
-        } catch (Pirum_Package_Exception $e) {
-			return $this->formatter->error($e->getMessage());
 		} catch (Exception $e) {
-			return $this->formatter->exception($e);
+			$this->formatter->printStackTrace($e);
+			return $this->formatter->error($e->getMessage());
         }
 
         return 0;

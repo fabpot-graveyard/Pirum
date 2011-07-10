@@ -78,11 +78,6 @@ class WEB_Formatter
 		return 1;
 	}
 
-	public function exception($e)
-	{
-		return $this->error("%s (%s, %s)", $e->getMessage(), get_class($e), $e->getCode());
-	}
-
 	public function comment()
 	{
 		echo $this->format($this->getText(func_get_args()), 'COMMENT');
@@ -97,5 +92,12 @@ class WEB_Formatter
     {
 		echo implode(PHP_EOL, $usage).PHP_EOL.PHP_EOL;
     }
+
+	public function printStackTrace($e)
+	{
+		echo '<pre>';
+		echo $e->getTraceAsString();
+		echo '</pre>';
+	}
 }
 ?>
