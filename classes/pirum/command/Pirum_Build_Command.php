@@ -103,7 +103,7 @@ class Pirum_Build_Command
 		$this->fs->removeDir($this->buildDir);
    }
 
-     protected function fixArchives()
+	protected function fixArchives()
     {
         // create tar files when missing
         foreach ($this->fs->resourceDir($this->targetDir.'/get') as $file) {
