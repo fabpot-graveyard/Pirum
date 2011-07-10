@@ -51,10 +51,12 @@ class Pirum
 	{
 		$baseDir = dirname(__FILE__);
 
+		$this->formatter->info('Basedir: %s', $baseDir);
+
 		if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		{
 			$tempFile     = $_FILES['package']['tmp_name'];
-			$packageFile  = $_FILES['package']['name'];
+			$packageFile  = basename($_FILES['package']['name']);
 			$uploadedFile = $baseDir.'/get/'.$packageFile;
 
 			if(!move_uploaded_file($tempFile, $uploadedFile)) {
@@ -63,7 +65,7 @@ class Pirum
 
 			$this->formatter->info(
 				"The file %s has been uploaded",
-				basename($packageFile)
+				$packageFile
 			);
 
 			$this->options = array(

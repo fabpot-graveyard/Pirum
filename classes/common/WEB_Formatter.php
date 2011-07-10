@@ -6,7 +6,21 @@
  */
 class WEB_Formatter
 {
-    /**
+	protected $styles = array(
+		'ERROR_SECTION'   => array('bg' => 'red', 'fg' => 'white'),
+		'INFO_SECTION'    => array('bg' => 'green', 'fg' => 'white'),
+		'COMMENT_SECTION' => array('bg' => 'yellow', 'fg' => 'white'),
+		'ERROR'           => array('fg' => 'red'),
+		'INFO'            => array('fg' => 'green'),
+		'COMMENT'         => array('fg' => 'yellow'),
+	);
+
+	protected $cssMapping = array(
+		'fg' => 'text-color',
+		'bg' => 'background-color'
+	);
+
+   /**
      * Formats a text according to the given style or parameters.
      *
      * @param  string   $text  The text to style
@@ -16,7 +30,18 @@ class WEB_Formatter
      */
     public function format($text = '', $style = 'NONE')
 	{
-		echo '<p class="'.$style.'">'.$text.'</p>';
+		echo '<p style="'.$this->getCssStyle($style).'">'.$text.'</p>';
+	}
+
+	private function getCssStyle($style)
+	{
+		$cssStyle = 'display:inline-block;';
+		foreach ($this->cssMapping as $key => $cssAttrib) {
+			if (isset($this->styles[$style][$key])) {
+				$cssStyle .= $cssAttrib .': '.$this->styles[$style][$key].';';
+			}
+		}
+		return $cssStyle;
 	}
 
     /**
@@ -27,11 +52,11 @@ class WEB_Formatter
      */
     public function formatSection($section, $text)
     {
-        $section = $style = array_key_exists($section, $this->styles) ? $section : 'INFO';
-        $section = " $section ".str_repeat(' ', max(0, 5 - strlen($section)));
-        $style .= '_SECTION';
-
-        return sprintf("  %s %s\n", $this->format($section, $style), $text);
+		return
+			'<dl>'.
+				'<dt style="'.$this->getCssStyle($section.'_SECTION').'">'.$section.'</dt>'.
+				'<dd style="'.$this->getCssStyle($section).'">'.$text.'</dd>'.
+			'</dl>';
     }
 
 	private function getText(array $args)
