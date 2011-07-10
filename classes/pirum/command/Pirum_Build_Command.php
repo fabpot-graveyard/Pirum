@@ -49,12 +49,11 @@ class Pirum_Build_Command
 	private $handler;
 
     public function __construct(
-		$targetDir, $baseDir, $version, $fs, $formatter,
-		$channel, $repo, $assetBuilder, $handler, $project
+		$targetDir, $version, $fs, $formatter,
+		$channel, $repo, $assetBuilder, $handler
 	)
     {
         $this->targetDir    = $targetDir;
-		$this->baseDir      = $baseDir;
 		$this->version      = $version;
 		$this->fs           = $fs;
         $this->formatter    = $formatter;
@@ -62,7 +61,6 @@ class Pirum_Build_Command
 		$this->repo         = $repo;
 		$this->assetBuilder = $assetBuilder;
 		$this->handler      = $handler;
-		$this->project      = $project;
     }
 
     public function build()

@@ -192,16 +192,12 @@ class Pirum
 
 	private function createServerBuilder($targetDir, $server, $repo)
 	{
-		$exec    = new Executor(STDIN, STDOUT, STDERR);
-		$project = new BuildProject($this->fs, $exec);
-
 		return new Pirum_Build_Command(
-			$targetDir, dirname(__file__),
+			$targetDir,
 			$this->version(), $this->fs, $this->formatter,
 			$server, $repo,
 			new Pirum_StaticAsset_Builder(),
-			$this->createArchiveHandler(),
-			$project
+			$this->createArchiveHandler()
 		);
 	}
 
