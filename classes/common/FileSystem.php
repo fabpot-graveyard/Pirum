@@ -80,6 +80,7 @@ class FileSystem
 	public function mkDir($dir)
 	{
         if ($this->isDir($dir)) {
+			chmod($dir, 0777);
 			return;
         }
 

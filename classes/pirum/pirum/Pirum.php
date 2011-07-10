@@ -49,17 +49,22 @@ class Pirum
 
 	public function web()
 	{
-		$baseDir = dirname(__FILE__);
-
-		$this->formatter->info('Basedir: %s', $baseDir);
+		$targetDir = dirname(__FILE__);
+		$this->fs->mkDir($targetDir.'/get');
+		$this->formatter->info('Basedir: %s', $targetDir);
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		{
 			$tempFile     = $_FILES['package']['tmp_name'];
 			$packageFile  = basename($_FILES['package']['name']);
-			$uploadedFile = $baseDir.'/get/'.$packageFile;
+			$uploadedFile = $targetDir.'/get/'.$packageFile;
 
-			if(!move_uploaded_file($tempFile, $uploadedFile)) {
+			$this->formatter->info('Uploading file to: %s', $uploadedFile);
+
+			$succ = move_uploaded_file($tempFile, $uploadedFile);
+
+			if(!$succ) {
+				$this->formatter->info('PHP upload error code: %s', $_FILES['package']['error']);
 				return $this->formatter->error("There was an error uploading the file, please try again!");
 			}
 
@@ -71,26 +76,35 @@ class Pirum
 			$this->options = array(
 				__FILE__,
 				'add',
-				$baseDir,
+				$targetDir,
 				$uploadedFile
 			);
 		} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
 			$this->options = array(
 				__FILE__,
 				'delete',
-				$baseDir,
+				$targetDir,
 				$_REQUEST['package']
 			);
 		}
-		$this->run();
+		$this->run($targetDir);
 	}
 
 	public function cli()
 	{
-		$this->run();
+        if (!isset($this->options[2]) || !is_dir($this->options[2])) {
+			return $this->formatter->error(
+				"You must give the root dir of the PEAR channel server"
+			);
+        }
+
+        $targetDir = $this->options[2];
+		$this->fs->mkDir($targetDir.'/get');
+
+		$this->run($targetDir);
 	}
 
-	private function run()
+	private function run($targetDir)
     {
 		$this->printUsage();
 
@@ -107,14 +121,6 @@ class Pirum
 
 		$this->formatter->comment("Running the %s command:\n", $command);
 
-        if (!isset($this->options[2]) || !is_dir($this->options[2])) {
-			return $this->formatter->error(
-				"You must give the root dir of the PEAR channel server"
-			);
-        }
-
-        $targetDir = $this->options[2];
-
         $ret = 0;
         try {
 			$server = $this->createServer($targetDir.'/pirum.xml');
@@ -126,7 +132,6 @@ class Pirum
 				$this->createLoader($targetDir, $server->name)
 			);
 
-			$this->fs->mkDir($targetDir.'/get');
 			$repo->collectReleasePackageList();
 
 			$builders = array(

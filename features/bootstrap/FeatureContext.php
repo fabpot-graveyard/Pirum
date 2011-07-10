@@ -181,7 +181,7 @@ class FeatureContext extends BehatContext
         $result = curl_exec($ch);
         curl_close($ch);
 
-		throw new Exception($result);
+		throw new Exception(strip_tags($result));
 
     }
 

@@ -139,13 +139,13 @@ class Pirum_PearAsset_Builder
     {
         $this->formatter->info("Building packages");
 
-        mkdir($this->buildDir.'/rest/p', 0777, true);
+        $this->fs->mkdir($this->buildDir.'/rest/p');
 
         $packages = '';
         foreach ($this->repo as $package) {
             $packages .= "  <p>{$package['name']}</p>\n";
 
-            mkdir($dir = $this->buildDir.'/rest/p/'.strtolower($package['name']), 0777, true);
+            $this->fs->mkDir($dir = $this->buildDir.'/rest/p/'.strtolower($package['name']));
             $this->buildPackage($channel, $dir, $package);
         }
 
@@ -315,7 +315,7 @@ EOF
     {
         $this->formatter->info("Building maintainers");
 
-        mkdir($dir = $this->buildDir.'/rest/m/', 0777, true);
+        $this->fs->mkDir($dir = $this->buildDir.'/rest/m/', 0777, true);
 
         $all = '';
         foreach ($this->repo as $package) {
@@ -323,9 +323,7 @@ EOF
             {
                 $dir = $this->buildDir.'/rest/m/'.$nickname;
 
-                if (!is_dir($dir)) {
-                    mkdir($dir, 0777, true);
-                }
+				$this->fs->mkDir($dir);
 
                 $info = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>

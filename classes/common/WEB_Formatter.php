@@ -30,7 +30,7 @@ class WEB_Formatter
      */
     public function format($text = '', $style = 'NONE')
 	{
-		echo '<p style="'.$this->getCssStyle($style).'">'.$text.'</p>';
+		echo '<p style="'.$this->getCssStyle($style).'">'.$text.'</p>'."\n";
 	}
 
 	private function getCssStyle($style)
@@ -54,9 +54,9 @@ class WEB_Formatter
     {
 		return
 			'<dl>'.
-				'<dt style="'.$this->getCssStyle($section.'_SECTION').'">'.$section.'</dt>'.
+				'<dt style="'.$this->getCssStyle($section.'_SECTION').'">'.$section.'</dt> '.
 				'<dd style="'.$this->getCssStyle($section).'">'.$text.'</dd>'.
-			'</dl>';
+			'</dl>'."\n";
     }
 
 	private function getText(array $args)
