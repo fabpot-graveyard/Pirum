@@ -50,14 +50,16 @@ class Pirum
 	public function web()
 	{
 		$targetDir = dirname(__FILE__);
-		$this->fs->mkDir($targetDir.'/get');
 		$this->formatter->info('Basedir: %s', $targetDir);
+
+		$this->fs->mkDir($targetDir.'/get');
+		$tmpDir = $this->fs->createTempDir('pirum_upload');
 
 		if ($_SERVER['REQUEST_METHOD'] == 'POST')
 		{
 			$tempFile     = $_FILES['package']['tmp_name'];
 			$packageFile  = basename($_FILES['package']['name']);
-			$uploadedFile = $targetDir.'/get/'.$packageFile;
+			$uploadedFile = $tmpDir.'/'.$packageFile;
 
 			$this->formatter->info('Uploading file to: %s', $uploadedFile);
 
@@ -121,7 +123,6 @@ class Pirum
 
 		$this->formatter->comment("Running the %s command:\n", $command);
 
-        $ret = 0;
         try {
 			$server = $this->createServer($targetDir.'/pirum.xml');
 
@@ -153,7 +154,7 @@ class Pirum
 			return $this->formatter->exception($e);
         }
 
-        return $ret;
+        return 0;
     }
 
 	private function builder($command, $serverDir, $repo)

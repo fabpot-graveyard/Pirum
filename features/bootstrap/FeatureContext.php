@@ -170,19 +170,23 @@ class FeatureContext extends BehatContext
     {
 		$file = $this->createPackage('Dummy2');
 
-		$request_url            = $this->channelUrl.'/pirum.php';
-        $post_params['package'] = $file;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_VERBOSE, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible;)");
+		curl_setopt($ch, CURLOPT_URL, $this->channelUrl.'/pirum.php');
+		curl_setopt($ch, CURLOPT_POST, true);
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $request_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_params);
-        $result = curl_exec($ch);
-        curl_close($ch);
+		$post = array(
+			"package"=>"@".$file,
+		);
 
-		throw new Exception(strip_tags($result));
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+		$response = curl_exec($ch);
+		curl_close($ch);
 
+		throw new Exception(strip_tags($response));
     }
 
     /**
