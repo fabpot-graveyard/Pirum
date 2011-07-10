@@ -19,13 +19,13 @@ Feature: Build
 			| rest/c/Default/info.xml         |Default |
 
 	@add
-	Scenario: Add package to localhost
+	Scenario: Add package to localhost using CLI
 		Given pirum is built
 			And a built up pirum repo is in place
 			And the pirum repo does not contain package
 		When I issue the command `php pirum add packagename`
 		Then the server index contains package description
-			And the package is installable
+			And the package 'Dummy' is installable
 			And the following xml files should exist:
 			| File                            |Content    |
 			| rest/c/Default/packagesinfo.xml |Dummy      |
@@ -51,3 +51,16 @@ Feature: Build
 			And the channel is discoverable
 			And the pirum repo does not contain package
 
+	@add
+	Scenario: Add package to localhost using WEB
+		Given pirum is built
+			And a built up pirum repo is in place
+			And the pirum repo does not contain package
+		When I POST a package file to the API URL
+		Then the server index contains package description
+			And the package 'Dummy2' is installable
+			And the following xml files should exist:
+			| File                            |Content    |
+			| rest/c/Default/packagesinfo.xml |Dummy2     |
+			| rest/c/Default/packages.xml     |Dummy2     |
+			| rest/p/packages.xml             |Dummy2     |

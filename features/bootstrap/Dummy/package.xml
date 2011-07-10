@@ -27,7 +27,7 @@
  <notes>dummy</notes>
  <contents>
    <dir name="/">
-	<file role="script" baseinstalldir="/" name="FeatureContext.php"></file>
+	<file role="script" baseinstalldir="/" name="dummy"></file>
    </dir>
  </contents>
 <dependencies>

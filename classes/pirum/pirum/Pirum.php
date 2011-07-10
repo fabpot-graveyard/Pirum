@@ -6,9 +6,9 @@
  * @package    Pirum
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
  */
-class Pirum_CLI
+class Pirum
 {
-    const VERSION = '@package_version@';
+    private $version;
 
     protected $options;
 
@@ -29,24 +29,66 @@ class Pirum_CLI
 	 */
 	protected $fs;
 
-    public function __construct(array $options, $formatter, $fs)
+    public function __construct(array $options, $formatter, $fs, $version)
     {
         $this->options   = $options;
         $this->formatter = $formatter;
 		$this->fs        = $fs;
+		$this->version   = $version;
     }
 
 
     private function version()
     {
-        if (0 === strpos(self::VERSION, '@package_version')) {
+        if (0 === strpos($this->version, '@package_version')) {
             return 'DEV';
         } else {
-            return self::VERSION;
+            return $this->version;
         }
     }
 
-	public function run()
+	public function web()
+	{
+		$baseDir = dirname(__FILE__);
+
+		if ($_SERVER['REQUEST_METHOD'] == 'POST')
+		{
+			$tempFile     = $_FILES['package']['tmp_name'];
+			$packageFile  = $_FILES['package']['name'];
+			$uploadedFile = $baseDir.'/get/'.$packageFile;
+
+			if(!move_uploaded_file($tempFile, $uploadedFile)) {
+				return $this->formatter->error("There was an error uploading the file, please try again!");
+			}
+
+			$this->formatter->info(
+				"The file %s has been uploaded",
+				basename($packageFile)
+			);
+
+			$this->options = array(
+				__FILE__,
+				'add',
+				$baseDir,
+				$uploadedFile
+			);
+		} else if($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+			$this->options = array(
+				__FILE__,
+				'delete',
+				$baseDir,
+				$_REQUEST['package']
+			);
+		}
+		$this->run();
+	}
+
+	public function cli()
+	{
+		$this->run();
+	}
+
+	private function run()
     {
 		$this->printUsage();
 
@@ -90,8 +132,6 @@ class Pirum_CLI
 				$this->builder($command, $targetDir, $repo),
 				$this->createServerBuilder($targetDir, $server, $repo),
 			);
-
-			print gettype($builders[0]) . ' '. gettype($builders[1]).PHP_EOL.PHP_EOL;
 
 			foreach ($builders as $builder) {
 				if ($builder) {
@@ -145,11 +185,16 @@ class Pirum_CLI
 
 	private function createServerBuilder($targetDir, $server, $repo)
 	{
-        return new Pirum_Build_Command(
-			$targetDir, $this->version(), $this->fs, $this->formatter,
+		$exec    = new Executor(STDIN, STDOUT, STDERR);
+		$project = new BuildProject($this->fs, $exec);
+
+		return new Pirum_Build_Command(
+			$targetDir, dirname(__file__),
+			$this->version(), $this->fs, $this->formatter,
 			$server, $repo,
 			new Pirum_StaticAsset_Builder(),
-			$this->createArchiveHandler()
+			$this->createArchiveHandler(),
+			$project
 		);
 	}
 

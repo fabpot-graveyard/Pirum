@@ -23,6 +23,10 @@ class Pirum_Index_Template
     <link rel="alternate" type="application/rss+xml" href="<?php echo $this->server->url ?>/feed.xml" title="<?php echo  $this->server->summary ?> Latest Releases" />
 </head>
 <body>
+	<form style="display:block" method="post" enctype="multipart/form-data" action="pirum.php">
+		<input type="file" name="package" />
+		<input type="submit" name="submit" value="Send package" />
+	</form>
     <div id="doc" class="yui-t7">
         <div id="hd">
             <h1><?php echo $this->server->summary ?></h1>

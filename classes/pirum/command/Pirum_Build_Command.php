@@ -49,11 +49,12 @@ class Pirum_Build_Command
 	private $handler;
 
     public function __construct(
-		$targetDir, $version, $fs, $formatter, 
-		$channel, $repo, $assetBuilder, $handler
+		$targetDir, $baseDir, $version, $fs, $formatter,
+		$channel, $repo, $assetBuilder, $handler, $project
 	)
     {
         $this->targetDir    = $targetDir;
+		$this->baseDir      = $baseDir;
 		$this->version      = $version;
 		$this->fs           = $fs;
         $this->formatter    = $formatter;
@@ -61,6 +62,7 @@ class Pirum_Build_Command
 		$this->repo         = $repo;
 		$this->assetBuilder = $assetBuilder;
 		$this->handler      = $handler;
+		$this->project      = $project;
     }
 
     public function build()
@@ -69,7 +71,7 @@ class Pirum_Build_Command
 		$this->buildDir = $this->fs->createTempDir('pirum_build', '/rest');
 
 		$this->fixArchives();
-        $this->buildSelf();
+        $this->buildPirumWeb();
         $this->buildChannel();
         $this->buildIndex();
         $this->buildCss();
@@ -103,10 +105,16 @@ class Pirum_Build_Command
 		$this->fs->removeDir($this->buildDir);
    }
 
-    private function buildSelf()
+    private function buildPirumWeb()
     {
-		$this->formatter->info("Building self");
-        file_put_contents($this->buildDir.'/pirum.php', file_get_contents(__FILE__));
+		$job = new Standalone_Builder(
+			$this->buildDir.'/pirum.php',
+			$this->baseDir.'/stubs/pirum_web_start.php',
+			$this->baseDir.'/stubs/pirum_web_end.php',
+			$this->baseDir.'/classes'
+		);
+
+		$job->run($this->project);
     }
 
     protected function fixArchives()

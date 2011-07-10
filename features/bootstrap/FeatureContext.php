@@ -135,16 +135,13 @@ class FeatureContext extends BehatContext
         return false === $this->textContains($this->serverIndex(), 'Dummy-1.0.0', 'Packages');
     }
 
-    /**
-     * @When /^I issue the command `php pirum add packagename`$/
-     */
-    public function iIssueTheCommandPhpPirumAddPackagename()
-    {
+	private function createPackage($name)
+	{
 		$tmpDir   = $this->fs->createTempDir('temp_package');
 		$cfgFile  = $this->discoverChannel($tmpDir);
 
-		$this->fs->copyToDir(__dir__.'/FeatureContext.php', $tmpDir);
-		$this->fs->copyToDir(__dir__.'/package.xml', $tmpDir);
+		$this->fs->copyToDir(__dir__.'/'.$name.'/dummy', $tmpDir);
+		$this->fs->copyToDir(__dir__.'/'.$name.'/package.xml', $tmpDir);
 
 		$oldCwd = getcwd();
 		chdir($tmpDir);
@@ -152,11 +149,41 @@ class FeatureContext extends BehatContext
 			throw new Exception();
 		}
 		chdir($oldCwd);
+		return $tmpDir.'/'.$name.'-1.0.0.tgz';
+	}
 
-		if($this->execute('pirum add '.$this->webRoot.' '.$tmpDir.'/Dummy-1.0.0.tgz')) {
+    /**
+     * @When /^I issue the command `php pirum add packagename`$/
+     */
+    public function iIssueTheCommandPhpPirumAddPackagename()
+    {
+		$file = $this->createPackage('Dummy');
+		if($this->execute('pirum add '.$this->webRoot.' '.$file)) {
 			throw new Exception();
 		}
 	}
+
+    /**
+     * @When /^I POST a package file to the API URL$/
+     */
+    public function iPOSTAPackageFileToTheAPIURL()
+    {
+		$file = $this->createPackage('Dummy2');
+
+		$request_url            = $this->channelUrl.'/pirum.php';
+        $post_params['package'] = $file;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $request_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post_params);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+		throw new Exception($result);
+
+    }
 
     /**
      * @Given /^a package is added$/
@@ -187,13 +214,13 @@ class FeatureContext extends BehatContext
     }
 
     /**
-     * @Given /^the package is installable$/
+     * @Given /^the package '([^']+)' is installable$/
      */
-    public function thePackageIsInstallable()
+    public function thePackageIsInstallable($package)
     {
         $tmpDir  = $this->fs->createTempDir('packageinst');
 		$cfgFile = $this->discoverChannel($tmpDir);
-		if (0 !== $this->execute('pear -c '.$cfgFile.' install dummy/Dummy')) {
+		if (0 !== $this->execute('pear -c '.$cfgFile.' install dummy/'.$package)) {
 			throw new Exception();
 		}
 		$this->fs->removeDir($tmpDir);
