@@ -15,10 +15,10 @@
   <email>fabien.potencier@symfony-project.org</email>
   <active>yes</active>
  </lead>
- <date>2010-09-03</date>
+ <date>2011-03-27</date>
  <time>12:00:00</time>
  <version>
-  <release>1.0.0</release>
+  <release>1.0.1</release>
   <api>1.0.0</api>
  </version>
  <stability>
@@ -34,6 +34,10 @@
     <file role="script" baseinstalldir="/" name="pirum">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
     </file>
+    <file role="script" baseinstalldir="/" name="pirum.bat">
+      <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+      <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+    </file>
    </dir>
  </contents>
  <dependencies>
@@ -46,5 +50,19 @@
    </pearinstaller>
   </required>
  </dependencies>
- <phprelease />
+ <phprelease>
+  <installconditions>
+   <os>
+    <name>windows</name>
+   </os>
+  </installconditions>
+  <filelist>
+   <install name="pirum.bat" as="pirum.bat" />
+  </filelist>
+ </phprelease>
+ <phprelease>
+  <filelist>
+   <ignore name="pirum.bat" />
+  </filelist>
+ </phprelease>
 </package>

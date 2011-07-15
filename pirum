@@ -120,21 +120,21 @@ class Pirum_CLI
             return self::VERSION;
         }
     }
-    
-    protected function runRemove($target) 
+
+    protected function runRemove($target)
     {
         if (!isset($this->options[3])) {
             echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package name");
 
             return 1;
         }
-        
+
         if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
             echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
 
             return 1;
         }
-        
+
         if (!is_file($target.'/get/'.basename($this->options[3]))) {
             echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist in this channel', $this->options[3]));
 
@@ -143,7 +143,7 @@ class Pirum_CLI
 
         unlink($target.'/get/'.basename($this->options[3]));
         unlink($target.'/get/'.substr_replace(basename($this->options[3]), '.tar', -4));
-        
+
         $this->runBuild($target);
     }
 
@@ -172,23 +172,6 @@ class Pirum_CLI
         }
 
         copy($this->options[3], $target.'/get/'.basename($this->options[3]));
-        if (function_exists('gzopen')) {
-            $archive = $target.'/get/'.basename($this->options[3]);
-            $gz = gzopen($archive, 'r');
-            if ($gz === false) {
-                throw new Exception(sprintf('Failed extracting archive "%s"!', $this->archive));
-            }
-            $fp = fopen(str_replace('.tgz', '.tar', $archive), 'wb');
-            $tar = '';
-            while (!gzeof($gz)) {
-                fwrite($fp, gzread($gz, 10000));
-            }
-            gzclose($gz);
-            fclose($fp);
-        } else {
-            system('cd '.$target.'/get/ && gunzip -f '.basename($this->options[3]));
-            copy($this->options[3], $target.'/get/'.basename($this->options[3]));
-        }
 
         $this->runBuild($target);
 
@@ -200,11 +183,11 @@ class Pirum_CLI
         $builder = new Pirum_Builder($target, $this->formatter);
         $builder->build();
     }
-    
+
     protected function isCommand($cmd) {
         return in_array($cmd, $this->commands);
     }
-    
+
     protected function getUsage()
     {
         return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
@@ -275,6 +258,7 @@ class Pirum_Builder
     {
         $this->extractInformationFromPackages();
 
+        $this->fixArchives();
         $this->buildChannel();
         $this->buildMaintainers();
         $this->buildCategories();
@@ -285,6 +269,34 @@ class Pirum_Builder
         $this->buildFeed();
 
         $this->updateTargetDir();
+    }
+
+    protected function fixArchives()
+    {
+        // create tar files when missing
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
+            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+                continue;
+            }
+
+            $tar = preg_replace('/\.tgz/', '.tar', $file);
+            if (!file_exists($tar)) {
+                if (function_exists('gzopen')) {
+                    $gz = gzopen($file, 'r');
+                    if ($gz === false) {
+                        throw new Exception(sprintf('Failed extracting archive "%s"!', $this->archive));
+                    }
+                    $fp = fopen(str_replace('.tgz', '.tar', $file), 'wb');
+                    while (!gzeof($gz)) {
+                        fwrite($fp, gzread($gz, 10000));
+                    }
+                    gzclose($gz);
+                    fclose($fp);
+                } else {
+                    system('cd '.$target.'/get/ && gunzip -c -f '.basename($file));
+                }
+            }
+        }
     }
 
     protected function updateTargetDir()
@@ -523,6 +535,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $alpha = '';
         $beta = '';
         $stable = '';
+        $snapshot = '';
         $allreleases = '';
         $allreleases2 = '';
         foreach ($package['releases'] as $release) {
@@ -533,6 +546,8 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 $beta = $release['version'];
             } elseif ('alpha' == $release['stability'] && !$alpha) {
                 $alpha = $release['version'];
+            } elseif ('snapshot' == $release['stability'] && !$snapshot) {
+                $snapshot = $release['version'];
             }
 
             $allreleases .= <<<EOF
@@ -569,6 +584,10 @@ EOF;
 
         if ($alpha) {
             file_put_contents($dir.'/alpha.txt', $alpha);
+        }
+
+        if ($snapshot) {
+            file_put_contents($dir.'/snapshot.txt', $snapshot);
         }
 
         file_put_contents($dir.'/allreleases.xml', <<<EOF
@@ -910,8 +929,7 @@ EOF;
         // get all package files
         $files = array();
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match))
-            {
+            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
                 continue;
             }
 
@@ -1042,7 +1060,7 @@ EOF;
  */
 class Pirum_Package
 {
-    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+(-?(?:RC|beta|alpha|dev)\d*)?))\.tgz$#i';
+    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+(-?(?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
 
     protected $package;
     protected $tmpDir;
@@ -1350,7 +1368,6 @@ class Pirum_CLI_Formatter
      *
      * @param string  $section  The section name
      * @param string  $text     The text message
-     * @param string  $style    The color scheme to apply to the section string
      */
     public function formatSection($section, $text)
     {
