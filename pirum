@@ -21,7 +21,7 @@ if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
  * Command line interface for Pirum.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_CLI
 {
@@ -202,7 +202,7 @@ class Pirum_CLI
  * Builds all the files for a PEAR channel.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_Builder
 {
@@ -1056,7 +1056,7 @@ EOF;
  * Parses a PEAR package and retrieves useful information from it.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_Package
 {
@@ -1301,7 +1301,7 @@ class Pirum_Package
  * Command line colorizer for Pirum.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_CLI_Formatter
 {
