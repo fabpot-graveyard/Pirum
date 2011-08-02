@@ -359,7 +359,7 @@ class Pirum_Builder
     <entry>
         <title>{$package['name']} {$release['version']} ({$release['stability']})</title>
         <link href="{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz" />
-        <id>{$package['name']}-{$release['version']}</id>
+        <id>{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz</id>
         <author>
             <name>{$maintainer['nickname']}</name>
         </author>
@@ -372,11 +372,14 @@ EOF;
             }
         }
 
+        $date = date(DATE_ATOM);
         $index = <<<EOF
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xml:base="{$this->server->url}">
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>{$this->server->url}</id>
+    <updated>$date</updated>
     <title>{$this->server->summary} Latest Releases</title>
-    <link href="{$this->server->url}" />
+    <link href="{$this->server->url}/feed.xml" rel="self" />
     <author>
         <name>{$this->server->url}</name>
     </author>

@@ -15,10 +15,10 @@
   <email>fabien.potencier@symfony-project.org</email>
   <active>yes</active>
  </lead>
- <date>2011-03-27</date>
+ <date>2011-07-25</date>
  <time>12:00:00</time>
  <version>
-  <release>1.0.1</release>
+  <release>1.0.2</release>
   <api>1.0.0</api>
  </version>
  <stability>
