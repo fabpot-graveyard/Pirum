@@ -366,6 +366,7 @@ class Pirum_Builder
         <updated>$date</updated>
         <content>
             {$package['description']}
+            {$release['notes']}
         </content>
     </entry>
 EOF;
