@@ -21,7 +21,7 @@ if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
  * Command line interface for Pirum.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_CLI
 {
@@ -51,7 +51,7 @@ class Pirum_CLI
 
         $command = $this->options[1];
         if (!$this->isCommand($command)) {
-            echo $this->formatter->formatSection('ERROR', sprintf('"%s" is not a valid command', $command));
+            echo $this->formatter->formatSection('ERROR', sprintf('"%s" is not a valid command.', $command));
 
             return 1;
         }
@@ -59,7 +59,7 @@ class Pirum_CLI
         echo $this->formatter->format(sprintf("Running the %s command:\n", $command), 'COMMENT');
 
         if (!isset($this->options[2]) || !is_dir($this->options[2])) {
-            echo $this->formatter->formatSection('ERROR', "You must give the root dir of the PEAR channel server");
+            echo $this->formatter->formatSection('ERROR', "You must give the root directory of the PEAR channel server.");
 
             return 1;
         }
@@ -82,7 +82,7 @@ class Pirum_CLI
             }
 
             if (0 == $ret) {
-                echo $this->formatter->formatSection('INFO', sprintf("Command %s run successfully", $command));
+                echo $this->formatter->formatSection('INFO', sprintf("Command %s run successfully.", $command));
             }
         } catch (Exception $e) {
             echo $this->formatter->formatSection('ERROR', sprintf("%s (%s, %s)", $e->getMessage(), get_class($e), $e->getCode()));
@@ -124,19 +124,19 @@ class Pirum_CLI
     protected function runRemove($target)
     {
         if (!isset($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package name");
+            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package name.");
 
             return 1;
         }
 
         if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted.', $this->options[3]));
 
             return 1;
         }
 
         if (!is_file($target.'/get/'.basename($this->options[3]))) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist in this channel', $this->options[3]));
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist in this channel.', $this->options[3]));
 
             return 1;
         }
@@ -150,19 +150,19 @@ class Pirum_CLI
     protected function runAdd($target)
     {
         if (!isset($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package file path");
+            echo $this->formatter->formatSection('ERROR', "You must pass a PEAR package file path.");
 
             return 1;
         }
 
         if (!is_file($this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist', $this->options[3]));
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" does not exist.', $this->options[3]));
 
             return 1;
         }
 
         if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $this->options[3])) {
-            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted', $this->options[3]));
+            echo $this->formatter->formatSection('ERROR', sprintf('The PEAR package "%s" filename is badly formatted.', $this->options[3]));
 
             return 1;
         }
@@ -202,7 +202,7 @@ class Pirum_CLI
  * Builds all the files for a PEAR channel.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_Builder
 {
@@ -215,7 +215,7 @@ class Pirum_Builder
     public function __construct($targetDir, $formatter = false)
     {
         if (!file_exists($targetDir.'/pirum.xml')) {
-            throw new InvalidArgumentException('You must create a "pirum.xml" file at the root of the target dir.');
+            throw new InvalidArgumentException('You must create a pirum.xml configuration file in the root of the target directory.');
         }
 
         if (!is_dir($targetDir.'/get')) {
@@ -225,7 +225,7 @@ class Pirum_Builder
         $this->server = simplexml_load_file($targetDir.'/pirum.xml');
 
         if (!$this->server) {
-            throw new InvalidArgumentException('Invalid pirum.xml (you must have a <server> tag).');
+            throw new InvalidArgumentException('Your pirum.xml configuration is invalid - <server> tag missing.');
         }
 
         $emptyFields = array();
@@ -240,7 +240,7 @@ class Pirum_Builder
         }
 
         if (!empty($emptyFields)) {
-            throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml: %s.', implode(', ', $emptyFields)));
+            throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml configuration file: %s.', implode(', ', $emptyFields)));
         }
 
         $this->formatter = $formatter;
@@ -301,7 +301,7 @@ class Pirum_Builder
 
     protected function updateTargetDir()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files.");
 
         $this->updateChannel();
         $this->updateIndex();
@@ -344,7 +344,7 @@ class Pirum_Builder
 
     protected function buildFeed()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building feed");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building feed.");
 
         $entries = '';
         foreach ($this->packages as $package) {
@@ -414,12 +414,17 @@ small { font-size: 80% }
 h1, h2, h3 { font-family:Georgia,Times New Roman,serif; letter-spacing: -0.03em; }
 h1 { font-size: 35px; margin-top: 20px; margin-bottom: 30px }
 h2 { font-size: 30px; margin-bottom: 20px; margin-top: 15px }
-h3 { font-size: 26px; margin-bottom: 10px }
+h3 { font-size: 26px; margin-bottom: 10px; margin-top: 20px }
 pre { background-color: #000; color: #fff; margin: 5px 0; overflow: auto; padding: 10px; font-family: monospace }
 #ft { margin-top: 10px }
 ul { margin-top: 5px }
 li strong { color: #666 }
-p { margin-bottom: 5px }
+p { margin-bottom: 10px }
+table { width: 100% }
+table th { width: 20% }
+table td, table th { padding: 4px; border: 1px solid #ccc }
+th { background-color: #eee }
+
 EOF;
         }
 
@@ -428,7 +433,7 @@ EOF;
 
     protected function buildIndex()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building index");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building index.");
 
         $version = Pirum_CLI::version();
 
@@ -450,7 +455,7 @@ EOF;
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title><?php echo $this->server->summary ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo $this->server->url ?>/pirum.css" />
+    <link rel="stylesheet" type="text/css" href="pirum.css" />
     <link rel="alternate" type="application/rss+xml" href="<?php echo $this->server->url ?>/feed.xml" title="<?php echo  $this->server->summary ?> Latest Releases" />
 </head>
 <body>
@@ -460,8 +465,6 @@ EOF;
         </div>
         <div id="bd">
             <div class="yui-g">
-                <h2>Using this Channel</h2>
-                <p>This channel is to be used with the PEAR installer.</p>
                 <em>Registering</em> the channel:
                 <pre><code>pear channel-discover <?php echo $this->server->name ?></code></pre>
                 <em>Listing</em> available packages:
@@ -474,39 +477,49 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 <em>Receiving</em> updates via a <a href="<?php echo $this->server->url ?>/feed.xml">feed</a>:
                 <pre><code><?php echo $this->server->url ?>/feed.xml</code></pre>
 
-                <h2>Packages</h2>
-
-                <?php foreach ($this->packages as $package): ?>
+                <?php foreach ($this->packages as $package):
+                    $deps = array();
+                    if (isset($package['deps']['required']['package'])) {
+                        $deps = $package['deps']['required']['package'];
+                        if (isset($deps['name'])) {
+                            $deps = array($deps);
+                        }
+                    }
+                ?>
                     <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
                     <p><?php echo $package['description'] ?></p>
-                    <ul>
-                        <li><strong>Package name</strong>: <?php echo $package['name'] ?></li>
-                        <li><strong>License</strong>: <?php echo $package['license'] ?></li>
+                    <table>
+                        <tr><th>Install command</th><td><strong><?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></td></tr>
+                        <tr><th>License</th><td><?php echo $package['license'] ?></td></tr>
+                        <?php if ($deps): ?>
+                            <tr><th>Dependencies</th><td>
+                                <?php for ($i = 0, $count = count($deps); $i < $count; $i++): ?>
+                                    <?php echo $deps[$i]['channel'].'/'.$deps[$i]['name'].($i < $count - 1 ? ', ' : '') ?>
+                                <?php endfor; ?>
+                            </td></tr>
+                        <?php endif; ?>
                         <?php
                             $maintainers = array();
                             foreach ($package['current_maintainers'] as $nickname => $maintainer) {
-                                $maintainers[] = $maintainer['name'].' (as '.$maintainer['role'].')';
+                                $maintainers[] = $maintainer['name'].' <small>(as '.$maintainer['role'].')</small>';
                             }
                             $maintainers = implode(', ', $maintainers);
                         ?>
-                        <li><strong>Maintainers</strong>: <?php echo $maintainers ?></li>
+                        <tr><th>Maintainers</th><td><?php echo $maintainers ?></td></tr>
                         <?php
                         $releases = array();
                         foreach ($package['releases'] as $release) {
-                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> ({$release['stability']})";
+                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> <small>({$release['stability']})</small>";
                         }
                         $releases = implode(', ', $releases);
                         ?>
-                        <li><strong>Releases</strong>: <?php echo $releases ?></li>
-                        <li><strong>Install command</strong>: <?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></li>
-                    </ul>
-
-                    <hr />
+                        <tr><th>Releases</th><td><?php echo $releases ?></td></tr>
+                    </table>
                 <?php endforeach; ?>
             </div>
         </div>
         <div id="ft">
-            <p><small>The <em><?php echo $this->server->name ?></em> PEAR Channel Server is proudly powered by <a href="http://www.pirum-project.org/">Pirum</a> <?php echo $version ?></small></p>
+            <p><small>The <em><?php echo $this->server->name ?></em> PEAR Channel Server is proudly powered by <a href="http://pirum.sensiolabs.org/">Pirum</a> <?php echo $version ?></small></p>
         </div>
     </div>
 </body>
@@ -519,7 +532,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
 
     protected function buildReleasePackages()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases.");
 
         mkdir($this->buildDir.'/rest/r', 0777, true);
 
@@ -532,7 +545,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
 
     protected function buildReleasePackage($dir, $package)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases for {$package['name']}");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building releases for {$package['name']}.");
 
         $url = strtolower($package['name']);
 
@@ -617,7 +630,7 @@ EOF
 
     protected function buildRelease($dir, $package, $release)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building release {$release['version']} for {$package['name']}");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building release {$release['version']} for {$package['name']}.");
 
         $url = strtolower($package['name']);
 
@@ -673,7 +686,7 @@ EOF
 
     protected function buildPackages()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building packages");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building packages.");
 
         mkdir($this->buildDir.'/rest/p', 0777, true);
 
@@ -697,7 +710,7 @@ EOF
 
     protected function buildPackage($dir, $package)
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building package {$package['name']}");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building package {$package['name']}.");
 
         $url = strtolower($package['name']);
 
@@ -759,7 +772,7 @@ EOF
 
     protected function buildCategories()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building categories");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building categories.");
 
         mkdir($this->buildDir.'/rest/c/Default', 0777, true);
 
@@ -850,7 +863,7 @@ EOF
 
     protected function buildMaintainers()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building maintainers");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building maintainers.");
 
         mkdir($dir = $this->buildDir.'/rest/m/', 0777, true);
 
@@ -891,7 +904,7 @@ EOF;
 
     protected function buildChannel()
     {
-        $this->formatter and print $this->formatter->formatSection('INFO', "Building channel");
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building channel.");
 
         $suggestedalias = '';
         if (!empty($this->server->alias)) {
@@ -958,7 +971,7 @@ EOF;
         }
 
         foreach ($packages as $file => $package) {
-            $this->formatter and print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s', $package->getVersion(), $package->getName()));
+            $this->formatter and print $this->formatter->formatSection('INFO', sprintf('Parsing package %s for %s.', $package->getVersion(), $package->getName()));
 
             if ($package->getChannel() != $this->server->name) {
                 throw new Exception(sprintf('Package "%s" channel (%s) is not %s.', $package->getName(), $package->getChannel(), $this->server->name));
@@ -973,6 +986,7 @@ EOF;
                     'extension'   => $package->getProvidedExtension(),
                     'releases'    => array(),
                     'maintainers' => array(),
+                    'deps'        => unserialize($package->getDeps()),
                     'current_maintainers' => $package->getMaintainers(),
                 );
             }
@@ -1060,11 +1074,11 @@ EOF;
  * Parses a PEAR package and retrieves useful information from it.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_Package
 {
-    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+(-?(?:RC|beta|alpha|dev|snapshot)\d*)?))\.tgz$#i';
+    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+(-(?:RC|beta|alpha|dev|snapshot|a|b)\d*)?))\.tgz$#i';
 
     protected $package;
     protected $tmpDir;
@@ -1077,7 +1091,7 @@ class Pirum_Package
     {
         $this->archive = $archive;
         if (!preg_match(self::PACKAGE_FILE_PATTERN, $filename = basename($archive), $match)) {
-            throw new InvalidArgumentException(sprintf('The archive "%s" does not follow PEAR conventions', $filename));
+            throw new InvalidArgumentException(sprintf('The archive "%s" does not follow PEAR conventions.', $filename));
         }
 
         $this->name    = $match['name'];
@@ -1308,7 +1322,7 @@ class Pirum_Package
  * Command line colorizer for Pirum.
  *
  * @package    Pirum
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Pirum_CLI_Formatter
 {
