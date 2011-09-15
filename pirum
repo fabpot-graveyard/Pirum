@@ -11,8 +11,7 @@
 
 // only run Pirum automatically when this file is called directly
 // from the command line
-if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
-{
+if (isset($argv[0]) && __FILE__ == realpath($argv[0])) {
     $cli = new Pirum_CLI($argv);
     exit($cli->run());
 }
