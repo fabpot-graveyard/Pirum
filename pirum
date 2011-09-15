@@ -240,6 +240,10 @@ class Pirum_Builder
             throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml configuration file: %s.', implode(', ', $emptyFields)));
         }
 
+        if ('/' == substr($this->server->url, -1)) {
+            $this->server->url = substr($this->server->url, 0, -1);
+        }
+
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
