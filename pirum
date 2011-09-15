@@ -497,7 +497,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         <?php
                             $maintainers = array();
                             foreach ($package['current_maintainers'] as $nickname => $maintainer) {
-                                $maintainers[] = $maintainer['name'].' (as '.$maintainer['role'].')';
+                                $maintainers[] = $maintainer['name'].' <small>(as '.$maintainer['role'].')</small>';
                             }
                             $maintainers = implode(', ', $maintainers);
                         ?>
@@ -505,7 +505,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         <?php
                         $releases = array();
                         foreach ($package['releases'] as $release) {
-                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> ({$release['stability']})";
+                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> <small>({$release['stability']})</small>";
                         }
                         $releases = implode(', ', $releases);
                         ?>
