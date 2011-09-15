@@ -925,6 +925,33 @@ EOF;
                 <baseurl type="REST1.3">{$this->server->url}/rest/</baseurl>
             </rest>
         </primary>
+
+EOF;
+
+        foreach ($this->server->mirror as $mirror) {
+            if ('/' == substr($mirror, -1)) {
+                $mirror = substr($mirror, 0, -1);
+            }
+
+            $ssl = '';
+            if ('https' === substr($mirror, 0, 5)) {
+                $ssl = ' ssl="yes"';
+            }
+
+            $content .= <<<EOF
+        <mirror host="{$mirror}"{$ssl}>
+            <rest>
+                <baseurl type="REST1.0">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.1">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.2">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.3">{$mirror}/rest/</baseurl>
+            </rest>
+        </mirror>
+
+EOF;
+        }
+
+        $content .= <<<EOF
     </servers>{$validator}
 </channel>
 EOF;
