@@ -472,12 +472,28 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
 
                 <h2>Packages</h2>
 
-                <?php foreach ($this->packages as $package): ?>
+                <?php foreach ($this->packages as $package):
+                    $deps = array();
+                    if (isset($package['deps']['required']['package'])) {
+                        $deps = $package['deps']['required']['package'];
+                        if (isset($deps['name'])) {
+                            $deps = array($deps);
+                        }
+                    }
+                ?>
                     <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
                     <p><?php echo $package['description'] ?></p>
                     <ul>
                         <li><strong>Package name</strong>: <?php echo $package['name'] ?></li>
                         <li><strong>License</strong>: <?php echo $package['license'] ?></li>
+                        <?php if ($deps): ?>
+                            <li>
+                                <strong>Dependencies</strong>:
+                                <?php for ($i = 0, $count = count($deps); $i < $count; $i++): ?>
+                                    <?php echo $deps[$i]['channel'].'/'.$deps[$i]['name'].($i < $count - 1 ? ', ' : '') ?>
+                                <?php endfor; ?>
+                            </li>
+                        <?php endif; ?>
                         <?php
                             $maintainers = array();
                             foreach ($package['current_maintainers'] as $nickname => $maintainer) {
@@ -969,6 +985,7 @@ EOF;
                     'extension'   => $package->getProvidedExtension(),
                     'releases'    => array(),
                     'maintainers' => array(),
+                    'deps'        => unserialize($package->getDeps()),
                     'current_maintainers' => $package->getMaintainers(),
                 );
             }
