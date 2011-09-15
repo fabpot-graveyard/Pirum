@@ -3,7 +3,7 @@
 /*
  * Pirum
  *
- * (c) 2009 Fabien Potencier
+ * (c) 2009-2011 Fabien Potencier
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -68,8 +68,7 @@ class Pirum_CLI
 
         $ret = 0;
         try {
-            switch ($command)
-            {
+            switch ($command) {
                 case 'build':
                     $this->runBuild($target);
                     break;
@@ -97,8 +96,7 @@ class Pirum_CLI
     {
         $fp = opendir($target);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
@@ -191,10 +189,10 @@ class Pirum_CLI
     protected function getUsage()
     {
         return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
-                     $this->formatter->format("Available commands:\n", 'COMMENT') .
-                     "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
-                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
+               $this->formatter->format("Available commands:\n", 'COMMENT') .
+               "  pirum build target_dir\n" .
+               "  pirum add target_dir Pirum-1.0.0.tgz\n" .
+               "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
     }
 }
 
@@ -310,8 +308,7 @@ class Pirum_Builder
     protected function updateChannel()
     {
         if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml')) {
-            if (file_exists($this->targetDir.'/channel.xml'))
-            {
+            if (file_exists($this->targetDir.'/channel.xml')) {
                 unlink($this->targetDir.'/channel.xml');
             }
 
@@ -345,8 +342,7 @@ class Pirum_Builder
 
         $entries = '';
         foreach ($this->packages as $package) {
-            foreach ($package['releases'] as $release)
-            {
+            foreach ($package['releases'] as $release) {
                 $date = date(DATE_ATOM, strtotime($release['date']));
 
                 reset($release['maintainers']);
@@ -552,8 +548,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $allreleases = '';
         $allreleases2 = '';
         foreach ($package['releases'] as $release) {
-            if ('stable' == $release['stability'] && !$stable)
-            {
+            if ('stable' == $release['stability'] && !$stable) {
                 $stable = $release['version'];
             } elseif ('beta' == $release['stability'] && !$beta) {
                 $beta = $release['version'];
@@ -865,8 +860,7 @@ EOF
 
         $all = '';
         foreach ($this->packages as $package) {
-            foreach ($package['maintainers'] as $nickname => $maintainer)
-            {
+            foreach ($package['maintainers'] as $nickname => $maintainer) {
                 $dir = $this->buildDir.'/rest/m/'.$nickname;
 
                 if (!is_dir($dir)) {
@@ -1012,7 +1006,6 @@ EOF;
             mkdir($target, 0777, true);
         }
 
-
         $this->removeFilesFromDir($target, $build);
 
         $this->copyFiles($build, $target);
@@ -1022,14 +1015,12 @@ EOF;
     {
         $fp = opendir($build);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
             if (is_dir($build.'/'.$file)) {
-                if (!is_dir($target.'/'.$file))
-                {
+                if (!is_dir($target.'/'.$file)) {
                     mkdir($target.'/'.$file, 0777, true);
                 }
 
@@ -1045,14 +1036,12 @@ EOF;
     {
         $fp = opendir($target);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
             if (is_dir($target.'/'.$file)) {
-                if (!in_array($file, array('.svn', 'CVS')))
-                {
+                if (!in_array($file, array('.svn', 'CVS'))) {
                     $this->removeFilesFromDir($target.'/'.$file, $build.'/'.$file);
                     if (!is_dir($build.'/'.$file)) {
                         rmdir($target.'/'.$file);
@@ -1297,8 +1286,7 @@ class Pirum_Package
             $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
 
             if (array_key_exists($key, $array)) {
-                if (!isset($array[$key][0]))
-                {
+                if (!isset($array[$key][0])) {
                     $array[$key] = array($array[$key]);
                 }
                 $array[$key][] = $value;
@@ -1365,8 +1353,7 @@ class Pirum_CLI_Formatter
             $codes[] = $this->background[$parameters['bg']];
         }
         foreach ($this->options as $option => $value) {
-            if (isset($parameters[$option]) && $parameters[$option])
-            {
+            if (isset($parameters[$option]) && $parameters[$option]) {
                 $codes[] = $value;
             }
         }
@@ -1389,4 +1376,3 @@ class Pirum_CLI_Formatter
         return sprintf("  %s %s\n", $this->format($section, $style), $text);
     }
 }
-
