@@ -240,9 +240,7 @@ class Pirum_Builder
             throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml configuration file: %s.', implode(', ', $emptyFields)));
         }
 
-        if ('/' == substr($this->server->url, -1)) {
-            $this->server->url = substr($this->server->url, 0, -1);
-        }
+        $this->server->url = rtrim($this->server->url, '/');
 
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
@@ -929,9 +927,7 @@ EOF;
 EOF;
 
         foreach ($this->server->mirror as $mirror) {
-            if ('/' == substr($mirror, -1)) {
-                $mirror = substr($mirror, 0, -1);
-            }
+            $mirror = rtrim($mirror, '/');
 
             $ssl = '';
             if ('https' === substr($mirror, 0, 5)) {
