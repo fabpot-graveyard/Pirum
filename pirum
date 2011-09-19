@@ -1203,7 +1203,12 @@ class Pirum_Package
 
     public function getDeps()
     {
-        return serialize($this->XMLToArray($this->package->dependencies));
+        $deps = $this->XMLToArray($this->package->dependencies);
+        if ($this->package->dependencies->group->count() > 0) {
+            $deps['group'] = $this->XMLGroupDepsToArray($this->package->dependencies->group);
+        } // if
+
+        return serialize($deps);
     }
 
     public function getMinPhp()
@@ -1322,6 +1327,32 @@ class Pirum_Package
         }
 
         return $array;
+    }
+
+    protected function XMLGroupDepsToArray($xml)
+    {
+        if ($xml->count() == 0) return array();
+
+        $deps = array();
+        foreach ($xml as $group) {
+            // Extract group attribs (shared by all children)
+            $attribs = array();
+            foreach ($group->attributes() as $key => $val) {
+                $attribs[$key] = (string) $val;
+            } // foreach
+
+            // Create one group dependency per childern
+            foreach ($group->children() as $type => $value) {
+                $value = $this->XMLToArray($value);
+
+                $deps[] = array(
+                    'attribs' => $attribs,
+                    $type     => $value,
+                );
+            }
+        }
+
+        return $deps;
     }
 }
 
