@@ -478,11 +478,25 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                             $deps = array($deps);
                         }
                     }
+
+                    $grps = array();
+                    if (isset($package['deps']['group'])) {
+                        $grps = $package['deps']['group'];
+                    }
                 ?>
                     <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
                     <p><?php echo $package['description'] ?></p>
                     <table>
                         <tr><th>Install command</th><td><strong><?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></td></tr>
+                        <?php if ($grps): ?><?php
+                            $groups = array();
+                            foreach ($grps as $grp) {
+                                $groups[] = ($package['extension'] != null ? 'pecl' : 'pear').' install '.$this->server->alias.'/'.$package['name'].'#'.$grp['attribs']['name'].'&nbsp;<small>('.$grp['attribs']['hint'].')</small>';
+                            }
+                            $groups = implode('<br/>', $groups);
+                        ?>
+                        <tr><th>Install groups:</th><td><?php echo $groups ?></td></tr>
+                        <?php endif; ?>
                         <tr><th>License</th><td><?php echo $package['license'] ?></td></tr>
                         <?php if ($deps): ?>
                             <tr><th>Dependencies</th><td>
