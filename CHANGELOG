@@ -1,0 +1,70 @@
+* 1.0.4
+
+ * added support for optional dependency groups
+ * added support for channel mirrors
+ * added release notes in the feed
+
+* 1.0.3 (2011-09-15)
+
+ * added required dependencies in the main index HTML file
+ * tweaked main index HTML file
+ * added support for versions like 0.0.1a or 0.0.2b1
+
+* 1.0.2 (2011-07-25)
+
+ * added pirum.bat for Windows
+ * fixed Atom feed
+ * moved the creation of .tar when building the PEAR channel (this allows to put the .tgz in get/ and run build without running add)
+
+* 1.0.1 (2011-03-27)
+
+ * allowed development packages
+ * escaped variables in the main index HTML file
+ * Updating pirum to pick up the provides extension tag and to automatically mark the generated instructions to use pecl rather than pear to install
+ * added support for removing packages
+ * added support for valid snapshot stability
+ * added support for <validatepackage> tags in channel.xml
+
+* 1.0.0 (2010-09-03)
+
+ * added the PEAR channel main directory for templates
+ * fixed missing closing tag for root element in maintainers.xml/maintainers2.xml
+ * added an error when adding a package with a badly formatted name
+
+* 0.9.9 (2010-05-12)
+
+ * fixed ordering of files
+ * removed *nix requirement
+
+* 0.9.8 (2010-04-29)
+
+ * fixed package filename regular expression that reads name and version to be case-insensitive
+ * checked whether channel dir is a dir and package path is a file
+ * added an explicit error when the package to add does not exist
+ * split updateTargetDir into smaller parts to make it easier to extend class
+ * when decompressing original pear package .tar.gz, overwrites tar file if it already exists
+ * fixed minimal PHP version
+ * fixed channel.xml generation for channels without aliases
+ * added simple validation for pirum.xml
+ * added a way to override the pirum.css and index.html templates
+ * added support for latest.txt
+
+* 0.9.7 (2009-12-08)
+
+ * fixed typo
+
+* 0.9.6 (2009-12-07)
+
+ * fixed problem when the get/ directory does not exists (at initialization of a new repository for instance)
+ * fixed a small display bug for the build command
+ * fixed a bug when a package have several dependencies
+
+* 0.9.5 (2009-12-07)
+
+ * fixed version management
+
+...
+
+* 0.9.0 (2009-10-18)
+
+ * initial version
