@@ -1218,7 +1218,7 @@ class Pirum_Package
     public function getDeps()
     {
         $deps = $this->XMLToArray($this->package->dependencies);
-        if ($this->package->dependencies->group->length > 0) {
+        if (isset($this->package->dependencies->group) && $this->package->dependencies->group->length > 0) {
             $deps['group'] = $this->XMLGroupDepsToArray($this->package->dependencies->group);
         }
 
