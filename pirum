@@ -459,7 +459,8 @@ EOF;
         <div id="bd">
             <div class="yui-g">
                 <em>Registering</em> the channel:
-                <pre><code>pear channel-discover <?php echo $this->server->name ?></code></pre>
+                <pre><code>pear config-set auto_discover 1
+pear channel-discover <?php echo $this->server->name ?></code></pre>
                 <em>Listing</em> available packages:
                 <pre><code>pear remote-list -c <?php echo $this->server->alias ?></code></pre>
                 <em>Installing</em> a package:
