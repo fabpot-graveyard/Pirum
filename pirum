@@ -260,6 +260,7 @@ class Pirum_Builder
         $this->buildMaintainers();
         $this->buildCategories();
         $this->buildPackages();
+        $this->buildComposerRepository();
         $this->buildReleasePackages();
         $this->buildIndex();
         $this->buildCss();
@@ -297,11 +298,17 @@ class Pirum_Builder
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files.");
 
+        $this->updateComposerRepository();
         $this->updateChannel();
         $this->updateIndex();
         $this->updateCss();
         $this->updateFeed();
         $this->updatePackages();
+    }
+
+    protected function updateComposerRepository()
+    {
+        copy($this->buildDir.'/packages.json', $this->targetDir.'/packages.json');
     }
 
     protected function updateChannel()
@@ -533,6 +540,74 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $index = ob_get_clean();
 
         file_put_contents($this->buildDir.'/index.html', $index);
+    }
+
+    protected function buildComposerRepository()
+    {
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building composer repository.");
+
+        $repository = array();
+
+        foreach ($this->packages as $package) {
+            $packageFields = array(
+                'name' => 'name',
+                'description' => 'summary'
+            );
+            // standard package fields
+            $packageDef = array('versions' => array());
+            foreach ($packageFields as $field => $pearField) {
+                $packageDef[$field] = $package[$pearField];
+            }
+            // package maintainers
+            foreach ($package['current_maintainers'] as $maintainer) {
+                $packageDef['maintainers'][] = array(
+                    'name' => $maintainer['name'],
+                    'email' => $maintainer['email'],
+                    'homepage' => $maintainer['url'],
+                );
+            }
+            $repository[$packageDef['name']] = $packageDef;
+
+            foreach ($package['releases'] as $release) {
+                $versionFields = array(
+                    'license' => 'license',
+                    'version' => 'version',
+                    'time' => 'date',
+                );
+                // standard version fields
+                $version = array(
+                    'name' => $packageDef['name'],
+                    'description' => $packageDef['description'],
+                );
+                foreach ($versionFields as $field => $pearField) {
+                    if (isset($release[$pearField])) {
+                        $version[$field] = $release[$pearField];
+                    }
+                }
+                // version requirements
+                if (isset($release['php'])) {
+                    $version['require']['php'] = '>='.$release['php'];
+                }
+                if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
+                    if (isset($deps['required'])) {
+                        foreach ($deps['required'] as $dep => $spec) {
+                            $version['require'][$dep] = '>='.$spec['min'];
+                        }
+                    }
+                }
+                // version authors
+                foreach ($package['maintainers'] as $maintainer) {
+                    $version['authors'][] = array(
+                        'name' => $maintainer['name'],
+                        'email' => $maintainer['email'],
+                        'homepage' => $maintainer['url'],
+                    );
+                }
+                $repository[$packageDef['name']]['versions'][$version['version']] = $version;
+            }
+        }
+
+        file_put_contents($this->buildDir.'/packages.json', json_encode($repository));
     }
 
     protected function buildReleasePackages()
