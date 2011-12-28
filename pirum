@@ -581,6 +581,10 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 $version = array(
                     'name'        => $packageDef['name'],
                     'description' => $packageDef['description'],
+                    'dist'        => array(
+                        'type' => 'pear',
+                        'url'  => $this->server->url.'/get/'.$packageDef['name'].'-'.$release['version'].'.tgz',
+                    ),
                 );
                 if (isset($release['license'])) {
                     $version['license'] = $release['license'];
