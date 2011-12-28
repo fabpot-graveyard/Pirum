@@ -577,21 +577,19 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
             $repository[$packageDef['name']] = $packageDef;
 
             foreach ($package['releases'] as $release) {
-                $versionFields = array(
-                    'license' => 'license',
-                    'version' => 'version',
-                    'time'    => 'date',
-                );
-
                 // standard version fields
                 $version = array(
                     'name'        => $packageDef['name'],
                     'description' => $packageDef['description'],
                 );
-                foreach ($versionFields as $field => $pearField) {
-                    if (isset($release[$pearField])) {
-                        $version[$field] = $release[$pearField];
-                    }
+                if (isset($release['license'])) {
+                    $version['license'] = $release['license'];
+                }
+                if (isset($release['version'])) {
+                    $version['version'] = $release['version'];
+                }
+                if (isset($release['date'])) {
+                    $version['time'] = date(DATE_ATOM, strtotime($release['date']));
                 }
 
                 // version requirements
