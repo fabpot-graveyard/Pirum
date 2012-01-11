@@ -171,8 +171,6 @@ class Pirum_CLI
         copy($this->options[3], $target.'/get/'.basename($this->options[3]));
 
         $this->runBuild($target);
-
-        $package = $this->options[3];
     }
 
     protected function runBuild($target)
@@ -274,7 +272,7 @@ class Pirum_Builder
     {
         // create tar files when missing
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName())) {
                 continue;
             }
 
@@ -507,7 +505,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         <?php endif; ?>
                         <?php
                             $maintainers = array();
-                            foreach ($package['current_maintainers'] as $nickname => $maintainer) {
+                            foreach ($package['current_maintainers'] as $maintainer) {
                                 $maintainers[] = $maintainer['name'].' <small>(as '.$maintainer['role'].')</small>';
                             }
                             $maintainers = implode(', ', $maintainers);
