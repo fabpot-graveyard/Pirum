@@ -1188,26 +1188,18 @@ class Pirum_Package
     public function getMaintainers()
     {
         $maintainers = array();
-        foreach ($this->package->lead as $lead) {
-            $maintainers[(string) $lead->user] = array(
-                'nickname' => (string) $lead->user,
-                'role'     => 'lead',
-                'email'    => (string) $lead->email,
-                'name'     => (string) $lead->name,
-                'url'      => (string) $lead->url,
-                'active'   => strtolower((string) $lead->active) == 'yes' ? 1 : 0,
-            );
-        }
 
-        foreach ($this->package->developer as $developer) {
-            $maintainers[(string) $developer->user] = array(
-                'nickname' => (string) $developer->user,
-                'role'     => 'developer',
-                'email'    => (string) $developer->email,
-                'name'     => (string) $developer->name,
-                'url'      => (string) $developer->url,
-                'active'   => strtolower((string) $developer->active) == 'yes' ? 1 : 0,
-            );
+        foreach (array('lead', 'developer', 'contributor', 'helper') as $role) {
+            foreach ($this->package->{$role} as $person) {
+                $maintainers[(string) $person->user] = array(
+                    'nickname' => (string) $person->user,
+                    'role'     => $role,
+                    'email'    => (string) $person->email,
+                    'name'     => (string) $person->name,
+                    'url'      => (string) $person->url,
+                    'active'   => strtolower((string) $person->active) == 'yes' ? 1 : 0,
+                );
+            }
         }
 
         return $maintainers;
