@@ -1,4 +1,4 @@
-* 1.0.5 (2011-02-11)
+* 1.0.5 (2012-02-11)
 
  * added support for contributor and helper tags
  * fixed wrong variable name in Pirum_Builder::fixArchives() method
