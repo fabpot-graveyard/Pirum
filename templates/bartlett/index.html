@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><?php echo $this->server->summary ?></title>
+    <link rel="stylesheet" type="text/css" href="pirum.css" />
+    <link rel="alternate" type="application/rss+xml" href="<?php echo $this->server->url ?>/feed.xml" title="<?php echo  $this->server->summary ?> Latest Releases" />
+</head>
+<body>
+    <div id="doc" class="yui-t7">
+        <div id="hd">
+            <div class="header">
+                <div class="illustration">
+                    <div class="logo_header">
+                        <?php echo ucfirst($this->server->alias); ?>
+                    </div>
+                    <h1 class="title_header">PEAR Channel</h1>
+                </div>
+            </div>
+        </div>
+        <div id="bd">
+            <div class="yui-g">
+                <h2>Using this Channel</h2>
+                <em>Registering</em> the channel :
+                <pre><code>pear channel-discover <?php echo $this->server->name ?></code></pre>
+                <em>Listing</em> available packages :
+                <pre><code>pear remote-list -c <?php echo $this->server->alias ?></code></pre>
+                <em>Installing</em> a package :
+                <pre><code>pear install <?php echo $this->server->alias ?>/package_name</code></pre>
+                <em>Installing</em> a specific version/stability :
+                <pre><code>pear install <?php echo $this->server->alias ?>/package_name-1.0.0
+pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
+                <em>Receiving</em> updates via a <a href="<?php echo $this->server->url ?>/feed.xml">feed</a> :
+                <pre><code><?php echo $this->server->url ?>/feed.xml</code></pre>
+
+                <h2>Packages</h2>
+
+                <?php foreach ($this->packages as $package):
+
+                ?>
+                    <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
+                    <p><?php echo $package['description'] ?></p>
+                    <dl>
+                        <dt>License :</dt><dd><?php echo $package['license'] ?></dd>
+                        <?php 
+                            $deps = array();
+                            if (isset($package['deps']['required']['package'])) {
+                                $deps = $package['deps']['required']['package'];
+                                if (isset($deps['name'])) {
+                                    $deps = array($deps);
+                                }
+                            }
+                            if (count($deps) > 0) : 
+                                $dependencies = array();
+                                for ($i = 0, $count = count($deps); $i < $count; $i++) {
+                                    $dependencies[] = $deps[$i]['channel'].'/'.$deps[$i]['name']; 
+                                }
+                                $dependencies = implode('</dd><dd>', $dependencies);
+                            ?>
+                            <dt>Dependencies :</dt><dd><?php echo $dependencies ?></dd>
+                        <?php endif; ?>
+                        <?php
+                            $maintainers = array();
+                            foreach ($package['current_maintainers'] as $nickname => $maintainer) {
+                                $maintainers[] = $maintainer['name'].' (as '.$maintainer['role'].')';
+                            }
+                            $maintainers = implode('</dd><dd>', $maintainers);
+                        ?>
+                        <dt>Maintainers :</dt><dd><?php echo $maintainers ?></dd>
+                        <?php
+                        $releases = array();
+                        foreach ($package['releases'] as $release) {
+                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> ({$release['stability']}) "
+                                . date('F j, Y', strtotime($release['date']))
+                            ;
+                        }
+                        $releases = implode('</dd><dd>', $releases);
+                        ?>
+                        <dt>Releases :</dt><dd><?php echo $releases ?></dd>
+                        <dt>Install command :</dt><dd><strong>pear install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></dd>
+                    </dl>
+
+                    <hr />
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div id="ft">
+            <p><small>The <em><?php echo $this->server->name ?></em> PEAR Channel Server is proudly powered by <a href="http://www.pirum-project.org/">Pirum</a> <?php echo $version ?></small></p>
+        </div>
+    </div>
+</body>
+</html>
