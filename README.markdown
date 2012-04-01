@@ -10,4 +10,6 @@ Pirum consists of just one file: a command line tool written in PHP. There are
 no external dependencies, no need for a database, and nothing needs to be
 installed or configured.
 
+As of Pirum 1.1, a composer repository is generated as well.
+
 More information can be found on the official [website](http://pirum.sensiolabs.org/).

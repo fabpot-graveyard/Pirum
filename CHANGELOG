@@ -1,3 +1,7 @@
+* 1.1.0 (2012-04-10)
+
+ * added generation of a composer repository based on PEAR packages information
+
 * 1.0.5 (2012-02-11)
 
  * added support for contributor and helper tags
