@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 /*
  * Pirum
  *
@@ -8,6 +9,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
+// defined as of PHP 5.4
+if (!defined('JSON_PRETTY_PRINT')) {
+    define('JSON_PRETTY_PRINT', 128);
+}
 
 // only run Pirum automatically when this file is called directly
 // from the command line
@@ -260,6 +266,7 @@ class Pirum_Builder
         $this->buildMaintainers();
         $this->buildCategories();
         $this->buildPackages();
+        $this->buildComposerRepository();
         $this->buildReleasePackages();
         $this->buildIndex();
         $this->buildCss();
@@ -297,11 +304,17 @@ class Pirum_Builder
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files.");
 
+        $this->updateComposerRepository();
         $this->updateChannel();
         $this->updateIndex();
         $this->updateCss();
         $this->updateFeed();
         $this->updatePackages();
+    }
+
+    protected function updateComposerRepository()
+    {
+        copy($this->buildDir.'/packages.json', $this->targetDir.'/packages.json');
     }
 
     protected function updateChannel()
@@ -533,6 +546,132 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $index = ob_get_clean();
 
         file_put_contents($this->buildDir.'/index.html', $index);
+    }
+
+    protected function buildComposerRepository()
+    {
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building composer repository.");
+
+        $repository = array();
+
+        foreach ($this->packages as $package) {
+            $packageFields = array(
+                'name'        => 'name',
+                'description' => 'summary',
+            );
+
+            // standard package fields
+            $packageDef = array('versions' => array());
+            foreach ($packageFields as $field => $pearField) {
+                $packageDef[$field] = $package[$pearField];
+            }
+
+            // package maintainers
+            foreach ($package['current_maintainers'] as $maintainer) {
+                $packageDef['maintainers'][] = array(
+                    'name'     => $maintainer['name'],
+                    'email'    => $maintainer['email'],
+                    'homepage' => $maintainer['url'],
+                );
+            }
+            $repository[$packageDef['name']] = $packageDef;
+
+            foreach ($package['releases'] as $release) {
+                // standard version fields
+                $version = array(
+                    'name'        => $packageDef['name'],
+                    'description' => $packageDef['description'],
+                    'dist'        => array(
+                        'type' => 'pear',
+                        'url'  => $this->server->url.'/get/'.$packageDef['name'].'-'.$release['version'].'.tgz',
+                    ),
+                );
+                if (isset($release['license'])) {
+                    $version['license'] = $release['license'];
+                }
+                if (isset($release['version'])) {
+                    $version['version'] = $release['version'];
+                }
+                if (isset($release['date'])) {
+                    $version['time'] = date(DATE_ATOM, strtotime($release['date']));
+                }
+
+                // version requirements
+                if (isset($release['php'])) {
+                    $version['require']['php'] = '>='.$release['php'];
+                }
+
+                if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
+                    if (isset($deps['required'])) {
+                        foreach ($deps['required'] as $dep => $spec) {
+                            if ('pearinstaller' == $dep) {
+                                continue;
+                            }
+                            $version['require'][$dep] = '>='.(isset($spec['min']) ? $spec['min'] : '0.0.0');
+                        }
+                    }
+                }
+
+                // version authors
+                foreach ($package['maintainers'] as $maintainer) {
+                    $version['authors'][] = array(
+                        'name'     => $maintainer['name'],
+                        'email'    => $maintainer['email'],
+                        'homepage' => $maintainer['url'],
+                    );
+                }
+
+                // autoload
+                $version['autoload'] = $this->guessComposerAutoload($release['info']->getPackageXml());
+
+                $repository[$packageDef['name']]['versions'][$version['version']] = $version;
+            }
+        }
+
+        file_put_contents($this->buildDir.'/packages.json', json_encode($repository, JSON_PRETTY_PRINT));
+    }
+
+    protected function guessComposerAutoload(\SimpleXMLElement $packageInfo)
+    {
+        $files = array();
+        if (count($packageInfo->contents->dir)) {
+            foreach ($packageInfo->contents->dir as $dir) {
+                if (count($dir->file)) {
+                    foreach ($dir->file as $file) {
+                        if ('php' !== (string) $file['role']) {
+                            continue;
+                        }
+
+                        $files[] = ltrim($dir['name'].$file['name'], '/');
+                    }
+                }
+            }
+        }
+
+        // reduce to meaningful unique paths
+        while (true) {
+            foreach ($files as $key => $file) {
+                foreach ($files as $key2 => $file2) {
+                    if ($key === $key2) {
+                        continue;
+                    }
+                    if (false !== strpos($file, '/') && dirname($file) === dirname($file2)) {
+                        unset($files[$key2]);
+                        $files[$key] = dirname($file);
+                        continue 3;
+                    }
+                    if (0 === strpos($file2, $file.'/') || $file === $file2) {
+                        unset($files[$key2]);
+                        continue 3;
+                    }
+                }
+            }
+            break;
+        }
+
+        return array(
+            'classmap' => $files ?: array(''),
+        );
     }
 
     protected function buildReleasePackages()
@@ -1128,6 +1267,11 @@ class Pirum_Package
     public function __destruct()
     {
         Pirum_CLI::removeDir($this->tmpDir);
+    }
+
+    public function getPackageXml()
+    {
+        return $this->package;
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
