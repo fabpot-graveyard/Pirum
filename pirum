@@ -607,7 +607,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                             if ('pearinstaller' == $dep) {
                                 continue;
                             }
-                            $version['require'][$dep] = '>='.isset($spec['min']) ? $spec['min'] : '0.0.0';
+                            $version['require'][$dep] = '>='.(isset($spec['min']) ? $spec['min'] : '0.0.0');
                         }
                     }
                 }
