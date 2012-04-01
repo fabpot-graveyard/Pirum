@@ -620,11 +620,58 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         'homepage' => $maintainer['url'],
                     );
                 }
+
+                // autoload
+                $version['autoload'] = $this->guessComposerAutoload($release['info']->getPackageXml());
+
                 $repository[$packageDef['name']]['versions'][$version['version']] = $version;
             }
         }
 
         file_put_contents($this->buildDir.'/packages.json', json_encode($repository, JSON_PRETTY_PRINT));
+    }
+
+    protected function guessComposerAutoload(\SimpleXMLElement $packageInfo)
+    {
+        $files = array();
+        if (count($packageInfo->contents->dir)) {
+            foreach ($packageInfo->contents->dir as $dir) {
+                if (count($dir->file)) {
+                    foreach ($dir->file as $file) {
+                        if ('php' !== (string) $file['role']) {
+                            continue;
+                        }
+
+                        $files[] = ltrim($dir['name'].$file['name'], '/');
+                    }
+                }
+            }
+        }
+
+        // reduce to meaningful unique paths
+        while (true) {
+            foreach ($files as $key => $file) {
+                foreach ($files as $key2 => $file2) {
+                    if ($key === $key2) {
+                        continue;
+                    }
+                    if (false !== strpos($file, '/') && dirname($file) === dirname($file2)) {
+                        unset($files[$key2]);
+                        $files[$key] = dirname($file);
+                        continue 3;
+                    }
+                    if (0 === strpos($file2, $file.'/') || $file === $file2) {
+                        unset($files[$key2]);
+                        continue 3;
+                    }
+                }
+            }
+            break;
+        }
+
+        return array(
+            'classmap' => $files ?: array(''),
+        );
     }
 
     protected function buildReleasePackages()
@@ -1220,6 +1267,11 @@ class Pirum_Package
     public function __destruct()
     {
         Pirum_CLI::removeDir($this->tmpDir);
+    }
+
+    public function getPackageXml()
+    {
+        return $this->package;
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
