@@ -1,7 +1,7 @@
 @echo off
 REM Pirum
 REM
-REM (c) 2009 Fabien Potencier
+REM (c) 2009-2012 Fabien Potencier
 REM
 REM For the full copyright and license information, please view the LICENSE
 REM file that was distributed with this source code.
