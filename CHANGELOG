@@ -1,8 +1,8 @@
-* 1.1.1 (2012-XX-XX)
+* 1.1.1 (2012-04-07)
 
  * fixed dependency management in composer.json generation
 
-* 1.1.0 (2012-04-10)
+* 1.1.0 (2012-04-01)
 
  * added generation of a composer repository based on PEAR packages information
 
