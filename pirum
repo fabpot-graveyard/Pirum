@@ -576,6 +576,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
             }
             $repository[$packageDef['name']] = $packageDef;
 
+            $pearChannels = array();
             foreach ($package['releases'] as $release) {
                 // standard version fields
                 $version = array(
@@ -604,10 +605,31 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
                     if (isset($deps['required'])) {
                         foreach ($deps['required'] as $dep => $spec) {
-                            if ('pearinstaller' == $dep) {
-                                continue;
+                            if ('package' === $dep) {
+                                foreach ($spec as $depPackage) {
+                                    if (isset($depPackage['providesextension'])) {
+                                        // skip PECL dependencies
+                                        continue;
+                                    }
+                                    if (isset($depPackage['uri'])) {
+                                        // skip uri-based dependencies
+                                        continue;
+                                    }
+
+                                    $channelUrl = 'http://'.$depPackage['channel'];
+                                    if (!isset($pearChannels[$channelUrl])) {
+                                        $channelInfo = new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
+                                        $pearChannels[$channelUrl] = $channelInfo->suggestedalias[0];
+
+                                        $repository['repositories'][] = array(
+                                            'type' => 'pear',
+                                            'url'  => $channelUrl,
+                                        );
+                                    }
+                                    $depPackageName = 'pear-'.$pearChannels[$channelUrl].'/'.$depPackage['name'];
+                                    $version['require'][$depPackageName] = isset($depPackage['min']) ? '>='.$depPackage['min'] : '*';
+                                }
                             }
-                            $version['require'][$dep] = '>='.(isset($spec['min']) ? $spec['min'] : '0.0.0');
                         }
                     }
                 }
