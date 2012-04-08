@@ -603,32 +603,43 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 }
 
                 if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
-                    if (isset($deps['required'])) {
-                        foreach ($deps['required'] as $dep => $spec) {
-                            if ('package' === $dep) {
-                                foreach ($spec as $depPackage) {
-                                    if (isset($depPackage['providesextension'])) {
-                                        // skip PECL dependencies
-                                        continue;
-                                    }
-                                    if (isset($depPackage['uri'])) {
-                                        // skip uri-based dependencies
-                                        continue;
-                                    }
+                    $requirements = isset($deps['required']) ? $deps['required'] : array();
+                    foreach ($requirements as $reqType => $spec) {
+                        // wrap single requirements as an array of requirements
+                        if (isset($spec['name'])) {
+                            $spec = array($spec);
+                        }
 
-                                    $channelUrl = 'http://'.$depPackage['channel'];
-                                    if (!isset($pearChannels[$channelUrl])) {
-                                        $channelInfo = new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
-                                        $pearChannels[$channelUrl] = $channelInfo->suggestedalias[0];
-
-                                        $repository['repositories'][] = array(
-                                            'type' => 'pear',
-                                            'url'  => $channelUrl,
-                                        );
-                                    }
-                                    $depPackageName = 'pear-'.$pearChannels[$channelUrl].'/'.$depPackage['name'];
-                                    $version['require'][$depPackageName] = isset($depPackage['min']) ? '>='.$depPackage['min'] : '*';
+                        if ('php' === $reqType) {
+                            $version['require']['php'] = $this->createComposerConstraint($spec);
+                        } elseif ('package' === $reqType) {
+                            foreach ($spec as $key => $value) {
+                                if (isset($value['providesextension'])) {
+                                    // skip PECL dependencies
+                                    continue;
                                 }
+                                if (isset($value['uri'])) {
+                                    // skip uri-based dependencies
+                                    continue;
+                                }
+
+                                if (is_array($value)) {
+                                    $dataKey = $value['name'];
+                                    if (false === strpos($dataKey, '/')) {
+                                        $channelUrl = 'http://'.$value['channel'];
+                                        if (!isset($pearChannels[$channelUrl])) {
+                                            $channelInfo = new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
+                                            $pearChannels[$channelUrl] = ((string) $channelInfo->suggestedalias[0]) ?: (string) $channelInfo->name[0];
+                                        }
+                                        $dataKey = $pearChannels[$channelUrl].'/'.$dataKey;
+                                    }
+                                    $version['require']['pear-'.$dataKey] = $this->createComposerConstraint($value);
+                                }
+                            }
+                        } elseif ('extension' == $reqType) {
+                            foreach ($spec as $key => $value) {
+                                $dataKey = 'ext-' . $value['name'];
+                                $version['require'][$dataKey] = $this->createComposerConstraint($value);
                             }
                         }
                     }
@@ -651,6 +662,21 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         }
 
         file_put_contents($this->buildDir.'/packages.json', json_encode($repository, JSON_PRETTY_PRINT));
+    }
+
+    protected function createComposerConstraint(array $data)
+    {
+        if (!isset($data['min']) && !isset($data['max'])) {
+            return '*';
+        }
+        $versions = array();
+        if (isset($data['min'])) {
+            $versions[] = '>=' . $data['min'];
+        }
+        if (isset($data['max'])) {
+            $versions[] = '<=' . $data['max'];
+        }
+        return implode(',', $versions);
     }
 
     protected function guessComposerAutoload(\SimpleXMLElement $packageInfo)
