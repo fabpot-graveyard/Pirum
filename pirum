@@ -603,43 +603,49 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 }
 
                 if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
-                    $requirements = isset($deps['required']) ? $deps['required'] : array();
-                    foreach ($requirements as $reqType => $spec) {
-                        // wrap single requirements as an array of requirements
-                        if (isset($spec['name'])) {
-                            $spec = array($spec);
-                        }
-
-                        if ('php' === $reqType) {
-                            $version['require']['php'] = $this->createComposerConstraint($spec);
-                        } elseif ('package' === $reqType) {
-                            foreach ($spec as $key => $value) {
-                                if (isset($value['providesextension'])) {
-                                    // skip PECL dependencies
-                                    continue;
-                                }
-                                if (isset($value['uri'])) {
-                                    // skip uri-based dependencies
-                                    continue;
-                                }
-
-                                if (is_array($value)) {
-                                    $dataKey = $value['name'];
-                                    if (false === strpos($dataKey, '/')) {
-                                        $channelUrl = 'http://'.$value['channel'];
-                                        if (!isset($pearChannels[$channelUrl])) {
-                                            $channelInfo = new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
-                                            $pearChannels[$channelUrl] = ((string) $channelInfo->suggestedalias[0]) ?: (string) $channelInfo->name[0];
-                                        }
-                                        $dataKey = $pearChannels[$channelUrl].'/'.$dataKey;
-                                    }
-                                    $version['require']['pear-'.$dataKey] = $this->createComposerConstraint($value);
-                                }
+                    $depsTypes = array(
+                        'required' => 'require',
+                        'optional' => 'suggest',
+                    );
+                    foreach ($depsTypes as $pearType => $composerType) {
+                        $requirements = isset($deps[$pearType]) ? $deps[$pearType] : array();
+                        foreach ($requirements as $reqType => $spec) {
+                            // wrap single requirements as an array of requirements
+                            if (isset($spec['name'])) {
+                                $spec = array($spec);
                             }
-                        } elseif ('extension' == $reqType) {
-                            foreach ($spec as $key => $value) {
-                                $dataKey = 'ext-' . $value['name'];
-                                $version['require'][$dataKey] = $this->createComposerConstraint($value);
+
+                            if ('php' === $reqType) {
+                                $version[$composerType]['php'] = $this->createComposerConstraint($spec);
+                            } elseif ('package' === $reqType) {
+                                foreach ($spec as $key => $value) {
+                                    if (isset($value['providesextension'])) {
+                                        // skip PECL dependencies
+                                        continue;
+                                    }
+                                    if (isset($value['uri'])) {
+                                        // skip uri-based dependencies
+                                        continue;
+                                    }
+
+                                    if (is_array($value)) {
+                                        $dataKey = $value['name'];
+                                        if (false === strpos($dataKey, '/')) {
+                                            $channelUrl = 'http://'.$value['channel'];
+                                            if (!isset($pearChannels[$channelUrl])) {
+                                                $channelInfo = new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
+                                                $pearChannels[$channelUrl] = ((string) $channelInfo->suggestedalias[0]) ?: (string) $channelInfo->name[0];
+                                            }
+                                            $dataKey = $pearChannels[$channelUrl].'/'.$dataKey;
+                                        }
+                                        $version[$composerType]['pear-'.$dataKey] = $this->createComposerConstraint($value);
+                                    }
+                                }
+                            } elseif ('extension' == $reqType) {
+                                foreach ($spec as $key => $value) {
+                                    $dataKey = 'ext-' . $value['name'];
+                                    $version[$composerType][$dataKey] = $this->createComposerConstraint($value);
+                                }
                             }
                         }
                     }
