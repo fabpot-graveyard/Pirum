@@ -554,17 +554,13 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
 
         $repository = array();
 
-        foreach ($this->packages as $package) {
-            $packageFields = array(
-                'name'        => 'name',
-                'description' => 'summary',
-            );
+        $vendor = !empty($this->server->alias) ? $this->server->alias : $this->server->name;
 
+        foreach ($this->packages as $package) {
             // standard package fields
             $packageDef = array('versions' => array());
-            foreach ($packageFields as $field => $pearField) {
-                $packageDef[$field] = $package[$pearField];
-            }
+            $packageDef['name']        = 'pear-'.$vendor.'/'.$package['name'];
+            $packageDef['description'] = !empty($package['summary']) ? $package['summary'] : $package['description'];
 
             // package maintainers
             foreach ($package['current_maintainers'] as $maintainer) {
