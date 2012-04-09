@@ -560,7 +560,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
             // standard package fields
             $packageDef = array('versions' => array());
             $packageDef['name']        = 'pear-'.$vendor.'/'.$package['name'];
-            $packageDef['description'] = $package['description'];
+            $packageDef['description'] = !empty($package['summary']) ? $package['summary'] : $package['description'];
 
             // package maintainers
             foreach ($package['current_maintainers'] as $maintainer) {
