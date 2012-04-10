@@ -632,7 +632,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                                                 try {
                                                     $channelInfo = @new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
                                                 } catch (Exception $e) {
-                                                    throw new Exception(sprintf('Channel "%s" could not be reached for package %s.', $channelUrl, $packageDef['name']));
+                                                    throw new Exception(sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $packageDef['name'], $version['version']));
                                                 }
                                                 $pearChannels[$channelUrl] = ((string) $channelInfo->suggestedalias[0]) ?: (string) $channelInfo->name[0];
                                             }
