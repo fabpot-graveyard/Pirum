@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><?php echo $this->server->summary ?></title>
+    <link rel="stylesheet" type="text/css" href="pirum.css" />
+    <link rel="alternate" type="application/rss+xml" href="<?php echo $this->server->url ?>/feed.xml" title="<?php echo  $this->server->summary ?> Latest Releases" />
+</head>
+<body>
+    <div id="doc" class="yui-t7">
+        <div id="hd">
+            <h1><?php echo $this->server->summary ?></h1>
+        </div>
+        <div id="bd">
+            <div class="yui-g">
+                <em>Registering</em> the channel:
+                <pre><code>pear channel-discover <?php echo $this->server->name ?></code></pre>
+                <em>Listing</em> available packages:
+                <pre><code>pear remote-list -c <?php echo $this->server->alias ?></code></pre>
+                <em>Installing</em> a package:
+                <pre><code>pear install <?php echo $this->server->alias ?>/package_name</code></pre>
+                <em>Installing</em> a specific version/stability:
+                <pre><code>pear install <?php echo $this->server->alias ?>/package_name-1.0.0
+pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
+                <em>Receiving</em> updates via a <a href="<?php echo $this->server->url ?>/feed.xml">feed</a>:
+                <pre><code><?php echo $this->server->url ?>/feed.xml</code></pre>
+
+                <?php foreach ($this->packages as $package):
+                    $deps = array();
+                    if (isset($package['deps']['required']['package'])) {
+                        $deps = $package['deps']['required']['package'];
+                        if (isset($deps['name'])) {
+                            $deps = array($deps);
+                        }
+                    }
+
+                    $grps = array();
+                    if (isset($package['deps']['group'])) {
+                        $grps = $package['deps']['group'];
+                    }
+                ?>
+                    <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
+                    <p><?php echo $package['description'] ?></p>
+                    <table>
+                        <tr><th>Install command</th><td><strong><?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></td></tr>
+                        <?php if ($grps): ?><?php
+                            $groups = array();
+                            foreach ($grps as $grp) {
+                                $groups[] = ($package['extension'] != null ? 'pecl' : 'pear').' install '.$this->server->alias.'/'.$package['name'].'#'.$grp['attribs']['name'].'&nbsp;<small>('.$grp['attribs']['hint'].')</small>';
+                            }
+                            $groups = implode('<br/>', $groups);
+                        ?>
+                        <tr><th>Install groups:</th><td><?php echo $groups ?></td></tr>
+                        <?php endif; ?>
+                        <tr><th>License</th><td><?php echo $package['license'] ?></td></tr>
+                        <?php if ($deps): ?>
+                            <tr><th>Dependencies</th><td>
+                                <?php for ($i = 0, $count = count($deps); $i < $count; $i++): ?>
+                                    <?php echo $deps[$i]['channel'].'/'.$deps[$i]['name'].($i < $count - 1 ? ', ' : '') ?>
+                                <?php endfor; ?>
+                            </td></tr>
+                        <?php endif; ?>
+                        <?php
+                            $maintainers = array();
+                            foreach ($package['current_maintainers'] as $maintainer) {
+                                $maintainers[] = $maintainer['name'].' <small>(as '.$maintainer['role'].')</small>';
+                            }
+                            $maintainers = implode(', ', $maintainers);
+                        ?>
+                        <tr><th>Maintainers</th><td><?php echo $maintainers ?></td></tr>
+                        <?php
+                        $releases = array();
+                        foreach ($package['releases'] as $release) {
+                            $releases[] = "<a href=\"{$this->server->url}/get/{$package['name']}-{$release['version']}.tgz\">{$release['version']}</a> <small>({$release['stability']})</small>";
+                        }
+                        $releases = implode(', ', $releases);
+                        ?>
+                        <tr><th>Releases</th><td><?php echo $releases ?></td></tr>
+                    </table>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <div id="ft">
+            <p><small>The <em><?php echo $this->server->name ?></em> PEAR Channel Server is proudly powered by <a href="http://pirum.sensiolabs.org/">Pirum</a> <?php echo $version ?></small></p>
+        </div>
+    </div>
+</body>
+</html>
