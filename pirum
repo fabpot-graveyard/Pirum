@@ -634,7 +634,11 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                                                 } catch (Exception $e) {
                                                     throw new Exception(sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
                                                 }
-                                                $pearChannels[$channelUrl] = ((string) $channelInfo->suggestedalias[0]) ?: (string) $channelInfo->name[0];
+                                                if ($tmp = (string) $channelInfo->suggestedalias[0]) {
+                                                    $pearChannels[$channelUrl] = $tmp;
+                                                } else {
+                                                    $pearChannels[$channelUrl] = (string) $channelInfo->name[0];
+                                                }
                                             }
                                             $dataKey = $pearChannels[$channelUrl].'/'.$dataKey;
                                         }
