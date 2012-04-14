@@ -1,6 +1,6 @@
 * 1.1.4 (2012-XX-XX)
 
- * n/a
+ * removed usage of \ in front of class names for PHP 5.2 compatibility
 
 * 1.1.3 (2012-04-11)
 

@@ -630,7 +630,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                                             $channelUrl = 'http://'.$value['channel'];
                                             if (!isset($pearChannels[$channelUrl])) {
                                                 try {
-                                                    $channelInfo = @new \SimpleXMLElement($channelUrl.'/channel.xml', null, true);
+                                                    $channelInfo = @new SimpleXMLElement($channelUrl.'/channel.xml', null, true);
                                                 } catch (Exception $e) {
                                                     throw new Exception(sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
                                                 }
@@ -685,7 +685,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         return implode(',', $versions);
     }
 
-    protected function guessComposerAutoload(\SimpleXMLElement $packageInfo)
+    protected function guessComposerAutoload(SimpleXMLElement $packageInfo)
     {
         $files = array();
         if (count($packageInfo->contents->dir)) {
