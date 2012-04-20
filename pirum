@@ -728,7 +728,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         }
 
         return array(
-            'classmap' => $files ?: array(''),
+            'classmap' => $files ? $files : array(''),
         );
     }
 
