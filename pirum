@@ -1523,7 +1523,7 @@ class Pirum_Package
             $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
 
             if (array_key_exists($key, $array)) {
-                if (!isset($array[$key][0])) {
+                if (!is_array($array[$key])) {
                     $array[$key] = array($array[$key]);
                 }
                 $array[$key][] = $value;
