@@ -485,8 +485,13 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                     $deps = array();
                     if (isset($package['deps']['required']['package'])) {
                         $deps = $package['deps']['required']['package'];
-                        if (isset($deps['name'])) {
+                        if (isset($deps['name']) && !isset($deps['conflicts'])) {
                             $deps = array($deps);
+                        }
+                        foreach ($deps as $i => $dep) {
+                            if (isset($dep['conflicts'])) {
+                                unset($deps[$i]);
+                            }
                         }
                     }
 
