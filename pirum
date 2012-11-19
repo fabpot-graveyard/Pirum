@@ -1672,6 +1672,6 @@ class Pirum_CLI_Formatter
         $section = " $section ".str_repeat(' ', max(0, 5 - strlen($section)));
         $style .= '_SECTION';
 
-        return sprintf('  %s %s', $this->format($section, $style), $text, $newline ? "\n" : '');
+        return sprintf('  %s %s%s', $this->format($section, $style), $text, $newline ? "\n" : '');
     }
 }
