@@ -1,0 +1,102 @@
+* 1.1.5 (2012-XX-XX)
+
+ * removed usage if ?: for PHP 5.2 compatibility
+
+* 1.1.4 (2012-04-19)
+
+ * removed usage of \ in front of class names for PHP 5.2 compatibility
+ * fixed composer.json generation
+
+* 1.1.3 (2012-04-11)
+
+ * enhanced composer.json generation
+
+* 1.1.2 (2012-04-09)
+
+ * made dependency management in composer.json generation even better
+
+* 1.1.1 (2012-04-07)
+
+ * fixed dependency management in composer.json generation
+
+* 1.1.0 (2012-04-01)
+
+ * added generation of a composer repository based on PEAR packages information
+
+* 1.0.5 (2012-02-11)
+
+ * added support for contributor and helper tags
+ * fixed wrong variable name in Pirum_Builder::fixArchives() method
+ * added pirum binary to composer.json
+ * fixed compatibility with PHP 5.2
+
+* 1.0.4 (2011-10-08)
+
+ * added support for optional dependency groups
+ * added support for channel mirrors
+ * added release notes in the feed
+
+* 1.0.3 (2011-09-15)
+
+ * added required dependencies in the main index HTML file
+ * tweaked main index HTML file
+ * added support for versions like 0.0.1a or 0.0.2b1
+
+* 1.0.2 (2011-07-25)
+
+ * added pirum.bat for Windows
+ * fixed Atom feed
+ * moved the creation of .tar when building the PEAR channel (this allows to put the .tgz in get/ and run build without running add)
+
+* 1.0.1 (2011-03-27)
+
+ * allowed development packages
+ * escaped variables in the main index HTML file
+ * Updating pirum to pick up the provides extension tag and to automatically mark the generated instructions to use pecl rather than pear to install
+ * added support for removing packages
+ * added support for valid snapshot stability
+ * added support for <validatepackage> tags in channel.xml
+
+* 1.0.0 (2010-09-03)
+
+ * added the PEAR channel main directory for templates
+ * fixed missing closing tag for root element in maintainers.xml/maintainers2.xml
+ * added an error when adding a package with a badly formatted name
+
+* 0.9.9 (2010-05-12)
+
+ * fixed ordering of files
+ * removed *nix requirement
+
+* 0.9.8 (2010-04-29)
+
+ * fixed package filename regular expression that reads name and version to be case-insensitive
+ * checked whether channel dir is a dir and package path is a file
+ * added an explicit error when the package to add does not exist
+ * split updateTargetDir into smaller parts to make it easier to extend class
+ * when decompressing original pear package .tar.gz, overwrites tar file if it already exists
+ * fixed minimal PHP version
+ * fixed channel.xml generation for channels without aliases
+ * added simple validation for pirum.xml
+ * added a way to override the pirum.css and index.html templates
+ * added support for latest.txt
+
+* 0.9.7 (2009-12-08)
+
+ * fixed typo
+
+* 0.9.6 (2009-12-07)
+
+ * fixed problem when the get/ directory does not exists (at initialization of a new repository for instance)
+ * fixed a small display bug for the build command
+ * fixed a bug when a package have several dependencies
+
+* 0.9.5 (2009-12-07)
+
+ * fixed version management
+
+...
+
+* 0.9.0 (2009-10-18)
+
+ * initial version

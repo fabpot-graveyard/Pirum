@@ -1,18 +1,23 @@
 #!/usr/bin/env php
 <?php
+
 /*
  * Pirum
  *
- * (c) 2009 Fabien Potencier
+ * (c) 2009-2012 Fabien Potencier
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
+// defined as of PHP 5.4
+if (!defined('JSON_PRETTY_PRINT')) {
+    define('JSON_PRETTY_PRINT', 128);
+}
+
 // only run Pirum automatically when this file is called directly
 // from the command line
-if (isset($argv[0]) && __FILE__ == realpath($argv[0]))
-{
+if (isset($argv[0]) && __FILE__ == realpath($argv[0])) {
     $cli = new Pirum_CLI($argv);
     exit($cli->run());
 }
@@ -68,8 +73,7 @@ class Pirum_CLI
 
         $ret = 0;
         try {
-            switch ($command)
-            {
+            switch ($command) {
                 case 'build':
                     $this->runBuild($target);
                     break;
@@ -97,8 +101,7 @@ class Pirum_CLI
     {
         $fp = opendir($target);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
@@ -174,8 +177,6 @@ class Pirum_CLI
         copy($this->options[3], $target.'/get/'.basename($this->options[3]));
 
         $this->runBuild($target);
-
-        $package = $this->options[3];
     }
 
     protected function runBuild($target)
@@ -191,10 +192,10 @@ class Pirum_CLI
     protected function getUsage()
     {
         return $this->formatter->format(sprintf("Pirum %s by Fabien Potencier\n", self::version()), 'INFO') .
-                     $this->formatter->format("Available commands:\n", 'COMMENT') .
-                     "  pirum build target_dir\n" .
-                     "  pirum add target_dir Pirum-1.0.0.tgz\n" .
-                     "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
+               $this->formatter->format("Available commands:\n", 'COMMENT') .
+               "  pirum build target_dir\n" .
+               "  pirum add target_dir Pirum-1.0.0.tgz\n" .
+               "  pirum remove target_dir Pirum-1.0.0.tgz\n\n";
     }
 }
 
@@ -243,6 +244,8 @@ class Pirum_Builder
             throw new InvalidArgumentException(sprintf('You must fill required tags in your pirum.xml configuration file: %s.', implode(', ', $emptyFields)));
         }
 
+        $this->server->url = rtrim($this->server->url, '/');
+
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
@@ -263,6 +266,7 @@ class Pirum_Builder
         $this->buildMaintainers();
         $this->buildCategories();
         $this->buildPackages();
+        $this->buildComposerRepository();
         $this->buildReleasePackages();
         $this->buildIndex();
         $this->buildCss();
@@ -275,7 +279,7 @@ class Pirum_Builder
     {
         // create tar files when missing
         foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->targetDir.'/get'), RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName(), $match)) {
+            if (!preg_match(Pirum_Package::PACKAGE_FILE_PATTERN, $file->getFileName())) {
                 continue;
             }
 
@@ -293,7 +297,7 @@ class Pirum_Builder
                     gzclose($gz);
                     fclose($fp);
                 } else {
-                    system('cd '.$target.'/get/ && gunzip -c -f '.basename($file));
+                    system('cd '.$this->targetDir.'/get/ && gunzip -c -f '.basename($file));
                 }
             }
         }
@@ -303,6 +307,7 @@ class Pirum_Builder
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Updating PEAR server files.");
 
+        $this->updateComposerRepository();
         $this->updateChannel();
         $this->updateIndex();
         $this->updateCss();
@@ -310,11 +315,15 @@ class Pirum_Builder
         $this->updatePackages();
     }
 
+    protected function updateComposerRepository()
+    {
+        copy($this->buildDir.'/packages.json', $this->targetDir.'/packages.json');
+    }
+
     protected function updateChannel()
     {
         if (!file_exists($this->targetDir.'/channel.xml') || file_get_contents($this->targetDir.'/channel.xml') != file_get_contents($this->buildDir.'/channel.xml')) {
-            if (file_exists($this->targetDir.'/channel.xml'))
-            {
+            if (file_exists($this->targetDir.'/channel.xml')) {
                 unlink($this->targetDir.'/channel.xml');
             }
 
@@ -348,8 +357,7 @@ class Pirum_Builder
 
         $entries = '';
         foreach ($this->packages as $package) {
-            foreach ($package['releases'] as $release)
-            {
+            foreach ($package['releases'] as $release) {
                 $date = date(DATE_ATOM, strtotime($release['date']));
 
                 reset($release['maintainers']);
@@ -481,21 +489,38 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 <?php foreach ($this->packages as $package):
                     $deps = array();
                     if (isset($package['deps']['required']['package'])) {
-                        if (isset($package['deps']['required']['package']['name'])) {
+                        if (isset($package['deps']['required']['package']['name']) && !isset($package['deps']['required']['package']['conflicts'])) {
                             $package['deps']['required']['package'] = array($package['deps']['required']['package']);
                         }
                         foreach ($package['deps']['required']['package'] as $p) {
+                            if (isset($p['conflicts'])) {
+                                continue;
+                            }
                             if (!isset($deps[$p['channel']])) {
                                 $deps[$p['channel']] = array();
                             }
                             $deps[$p['channel']][] = $p;
                         }
                     }
+
+                    $grps = array();
+                    if (isset($package['deps']['group'])) {
+                        $grps = $package['deps']['group'];
+                    }
                 ?>
                     <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
                     <p><?php echo $package['description'] ?></p>
                     <table>
                         <tr><th>Install command</th><td><strong><?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></td></tr>
+                        <?php if ($grps): ?><?php
+                            $groups = array();
+                            foreach ($grps as $grp) {
+                                $groups[] = ($package['extension'] != null ? 'pecl' : 'pear').' install '.$this->server->alias.'/'.$package['name'].'#'.$grp['attribs']['name'].'&nbsp;<small>('.$grp['attribs']['hint'].')</small>';
+                            }
+                            $groups = implode('<br/>', $groups);
+                        ?>
+                        <tr><th>Install groups:</th><td><?php echo $groups ?></td></tr>
+                        <?php endif; ?>
                         <tr><th>License</th><td><?php echo $package['license'] ?></td></tr>
                         <?php if ($deps): ?>
                             <tr><th>Dependencies</th><td>
@@ -513,7 +538,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         <?php endif; ?>
                         <?php
                             $maintainers = array();
-                            foreach ($package['current_maintainers'] as $nickname => $maintainer) {
+                            foreach ($package['current_maintainers'] as $maintainer) {
                                 $maintainers[] = $maintainer['name'].' <small>(as '.$maintainer['role'].')</small>';
                             }
                             $maintainers = implode(', ', $maintainers);
@@ -543,6 +568,194 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         file_put_contents($this->buildDir.'/index.html', $index);
     }
 
+    protected function buildComposerRepository()
+    {
+        $this->formatter and print $this->formatter->formatSection('INFO', "Building composer repository.");
+
+        $repository = array();
+
+        $vendor = !empty($this->server->alias) ? $this->server->alias : $this->server->name;
+
+        foreach ($this->packages as $package) {
+            // standard package fields
+            $packageDef = array('versions' => array());
+            $packageDef['name']        = 'pear-'.$vendor.'/'.$package['name'];
+            $packageDef['description'] = !empty($package['summary']) ? $package['summary'] : $package['description'];
+
+            // package maintainers
+            foreach ($package['current_maintainers'] as $maintainer) {
+                $packageDef['maintainers'][] = array(
+                    'name'     => $maintainer['name'],
+                    'email'    => $maintainer['email'],
+                    'homepage' => $maintainer['url'],
+                );
+            }
+            $repository[$packageDef['name']] = $packageDef;
+
+            $pearChannels = array();
+            foreach ($package['releases'] as $release) {
+                // standard version fields
+                $version = array(
+                    'name'        => $packageDef['name'],
+                    'description' => $packageDef['description'],
+                    'dist'        => array(
+                        'type' => 'pear',
+                        'url'  => $this->server->url.'/get/'.$package['name'].'-'.$release['version'].'.tgz',
+                    ),
+                );
+                if (isset($release['license'])) {
+                    $version['license'] = $release['license'];
+                }
+                if (isset($release['version'])) {
+                    $version['version'] = $release['version'];
+                }
+                if (isset($release['date'])) {
+                    $version['time'] = date(DATE_ATOM, strtotime($release['date']));
+                }
+
+                // version requirements
+                if (isset($release['php'])) {
+                    $version['require']['php'] = '>='.$release['php'];
+                }
+
+                if (isset($release['deps']) && $deps = @unserialize($release['deps'])) {
+                    $depsTypes = array(
+                        'required' => 'require',
+                        'optional' => 'suggest',
+                    );
+                    foreach ($depsTypes as $pearType => $composerType) {
+                        $requirements = isset($deps[$pearType]) ? $deps[$pearType] : array();
+                        foreach ($requirements as $reqType => $spec) {
+                            // wrap single requirements as an array of requirements
+                            if (isset($spec['name'])) {
+                                $spec = array($spec);
+                            }
+
+                            if ('php' === $reqType) {
+                                $version[$composerType]['php'] = $this->createComposerConstraint($spec);
+                            } elseif ('package' === $reqType) {
+                                foreach ($spec as $key => $value) {
+                                    if (isset($value['providesextension'])) {
+                                        // skip PECL dependencies
+                                        continue;
+                                    }
+                                    if (isset($value['uri'])) {
+                                        // skip uri-based dependencies
+                                        continue;
+                                    }
+
+                                    if (is_array($value)) {
+                                        $dataKey = $value['name'];
+                                        if (false === strpos($dataKey, '/')) {
+                                            $channelUrl = 'http://'.$value['channel'];
+                                            if (!isset($pearChannels[$channelUrl])) {
+                                                try {
+                                                    $channelInfo = @new SimpleXMLElement($channelUrl.'/channel.xml', null, true);
+                                                } catch (Exception $e) {
+                                                    throw new Exception(sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
+                                                }
+                                                if ($tmp = (string) $channelInfo->suggestedalias[0]) {
+                                                    $pearChannels[$channelUrl] = $tmp;
+                                                } else {
+                                                    $pearChannels[$channelUrl] = (string) $channelInfo->name[0];
+                                                }
+                                            }
+                                            $dataKey = $pearChannels[$channelUrl].'/'.$dataKey;
+                                        }
+                                        $version[$composerType]['pear-'.$dataKey] = $this->createComposerConstraint($value);
+                                    }
+                                }
+                            } elseif ('extension' == $reqType) {
+                                foreach ($spec as $key => $value) {
+                                    $dataKey = 'ext-' . $value['name'];
+                                    $version[$composerType][$dataKey] = $this->createComposerConstraint($value);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // version authors
+                foreach ($package['maintainers'] as $maintainer) {
+                    $version['authors'][] = array(
+                        'name'     => $maintainer['name'],
+                        'email'    => $maintainer['email'],
+                        'homepage' => $maintainer['url'],
+                    );
+                }
+
+                // autoload
+                $version['autoload'] = $this->guessComposerAutoload($release['info']->getPackageXml());
+
+                $repository[$packageDef['name']]['versions'][$version['version']] = $version;
+            }
+        }
+
+        if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
+            file_put_contents($this->buildDir.'/packages.json',json_encode($repository, JSON_PRETTY_PRINT));
+        } else {
+            file_put_contents($this->buildDir.'/packages.json',json_encode($repository));
+        }
+    }
+
+    protected function createComposerConstraint(array $data)
+    {
+        if (!isset($data['min']) && !isset($data['max'])) {
+            return '*';
+        }
+        $versions = array();
+        if (isset($data['min'])) {
+            $versions[] = '>=' . $data['min'];
+        }
+        if (isset($data['max'])) {
+            $versions[] = '<=' . $data['max'];
+        }
+        return implode(',', $versions);
+    }
+
+    protected function guessComposerAutoload(SimpleXMLElement $packageInfo)
+    {
+        $files = array();
+        if (count($packageInfo->contents->dir)) {
+            foreach ($packageInfo->contents->dir as $dir) {
+                if (count($dir->file)) {
+                    foreach ($dir->file as $file) {
+                        if ('php' !== (string) $file['role']) {
+                            continue;
+                        }
+
+                        $files[] = ltrim($dir['name'].$file['name'], '/');
+                    }
+                }
+            }
+        }
+
+        // reduce to meaningful unique paths
+        while (true) {
+            foreach ($files as $key => $file) {
+                foreach ($files as $key2 => $file2) {
+                    if ($key === $key2) {
+                        continue;
+                    }
+                    if (false !== strpos($file, '/') && dirname($file) === dirname($file2)) {
+                        unset($files[$key2]);
+                        $files[$key] = dirname($file);
+                        continue 3;
+                    }
+                    if (0 === strpos($file2, $file.'/') || $file === $file2) {
+                        unset($files[$key2]);
+                        continue 3;
+                    }
+                }
+            }
+            break;
+        }
+
+        return array(
+            'classmap' => $files ? $files : array(''),
+        );
+    }
+
     protected function buildReleasePackages()
     {
         $this->formatter and print $this->formatter->formatSection('INFO', "Building releases.");
@@ -569,8 +782,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $allreleases = '';
         $allreleases2 = '';
         foreach ($package['releases'] as $release) {
-            if ('stable' == $release['stability'] && !$stable)
-            {
+            if ('stable' == $release['stability'] && !$stable) {
                 $stable = $release['version'];
             } elseif ('beta' == $release['stability'] && !$beta) {
                 $beta = $release['version'];
@@ -882,8 +1094,7 @@ EOF
 
         $all = '';
         foreach ($this->packages as $package) {
-            foreach ($package['maintainers'] as $nickname => $maintainer)
-            {
+            foreach ($package['maintainers'] as $nickname => $maintainer) {
                 $dir = $this->buildDir.'/rest/m/'.$nickname;
 
                 if (!is_dir($dir)) {
@@ -945,6 +1156,31 @@ EOF;
                 <baseurl type="REST1.3">{$this->server->url}/rest/</baseurl>
             </rest>
         </primary>
+
+EOF;
+
+        foreach ($this->server->mirror as $mirror) {
+            $mirror = rtrim($mirror, '/');
+
+            $ssl = '';
+            if ('https' === substr($mirror, 0, 5)) {
+                $ssl = ' ssl="yes"';
+            }
+
+            $content .= <<<EOF
+        <mirror host="{$mirror}"{$ssl}>
+            <rest>
+                <baseurl type="REST1.0">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.1">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.2">{$mirror}/rest/</baseurl>
+                <baseurl type="REST1.3">{$mirror}/rest/</baseurl>
+            </rest>
+        </mirror>
+
+EOF;
+        }
+
+        $content .= <<<EOF
     </servers>{$validator}
 </channel>
 EOF;
@@ -1029,7 +1265,6 @@ EOF;
             mkdir($target, 0777, true);
         }
 
-
         $this->removeFilesFromDir($target, $build);
 
         $this->copyFiles($build, $target);
@@ -1039,14 +1274,12 @@ EOF;
     {
         $fp = opendir($build);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
             if (is_dir($build.'/'.$file)) {
-                if (!is_dir($target.'/'.$file))
-                {
+                if (!is_dir($target.'/'.$file)) {
                     mkdir($target.'/'.$file, 0777, true);
                 }
 
@@ -1062,14 +1295,12 @@ EOF;
     {
         $fp = opendir($target);
         while (false !== $file = readdir($fp)) {
-            if (in_array($file, array('.', '..')))
-            {
+            if (in_array($file, array('.', '..'))) {
                 continue;
             }
 
             if (is_dir($target.'/'.$file)) {
-                if (!in_array($file, array('.svn', 'CVS')))
-                {
+                if (!in_array($file, array('.svn', 'CVS'))) {
                     $this->removeFilesFromDir($target.'/'.$file, $build.'/'.$file);
                     if (!is_dir($build.'/'.$file)) {
                         rmdir($target.'/'.$file);
@@ -1118,6 +1349,11 @@ class Pirum_Package
     public function __destruct()
     {
         Pirum_CLI::removeDir($this->tmpDir);
+    }
+
+    public function getPackageXml()
+    {
+        return $this->package;
     }
 
     public function getDate($format = 'Y-m-d H:i:s')
@@ -1178,26 +1414,18 @@ class Pirum_Package
     public function getMaintainers()
     {
         $maintainers = array();
-        foreach ($this->package->lead as $lead) {
-            $maintainers[(string) $lead->user] = array(
-                'nickname' => (string) $lead->user,
-                'role'     => 'lead',
-                'email'    => (string) $lead->email,
-                'name'     => (string) $lead->name,
-                'url'      => (string) $lead->url,
-                'active'   => strtolower((string) $lead->active) == 'yes' ? 1 : 0,
-            );
-        }
 
-        foreach ($this->package->developer as $developer) {
-            $maintainers[(string) $developer->user] = array(
-                'nickname' => (string) $developer->user,
-                'role'     => 'developer',
-                'email'    => (string) $developer->email,
-                'name'     => (string) $developer->name,
-                'url'      => (string) $developer->url,
-                'active'   => strtolower((string) $developer->active) == 'yes' ? 1 : 0,
-            );
+        foreach (array('lead', 'developer', 'contributor', 'helper') as $role) {
+            foreach ($this->package->{$role} as $person) {
+                $maintainers[(string) $person->user] = array(
+                    'nickname' => (string) $person->user,
+                    'role'     => $role,
+                    'email'    => (string) $person->email,
+                    'name'     => (string) $person->name,
+                    'url'      => (string) $person->url,
+                    'active'   => strtolower((string) $person->active) == 'yes' ? 1 : 0,
+                );
+            }
         }
 
         return $maintainers;
@@ -1205,7 +1433,12 @@ class Pirum_Package
 
     public function getDeps()
     {
-        return serialize($this->XMLToArray($this->package->dependencies));
+        $deps = $this->XMLToArray($this->package->dependencies);
+        if (isset($this->package->dependencies->group) && $this->package->dependencies->group->length > 0) {
+            $deps['group'] = $this->XMLGroupDepsToArray($this->package->dependencies->group);
+        }
+
+        return serialize($deps);
     }
 
     public function getMinPhp()
@@ -1317,8 +1550,7 @@ class Pirum_Package
             $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
 
             if (array_key_exists($key, $array)) {
-                if (!isset($array[$key][0]))
-                {
+                if (!is_array($array[$key])) {
                     $array[$key] = array($array[$key]);
                 }
                 $array[$key][] = $value;
@@ -1328,6 +1560,29 @@ class Pirum_Package
         }
 
         return $array;
+    }
+
+    protected function XMLGroupDepsToArray($xml)
+    {
+        if ($xml->count() == 0) {
+            return array();
+        }
+
+        $deps = array();
+        foreach ($xml as $group) {
+            // Extract group attribs (shared by all children)
+            $attribs = array();
+            foreach ($group->attributes() as $key => $val) {
+                $attribs[$key] = (string) $val;
+            }
+
+            // Create one group dependency per childern
+            foreach ($group->children() as $type => $value) {
+                $deps[] = array('attribs' => $attribs, $type => $this->XMLToArray($value));
+            }
+        }
+
+        return $deps;
     }
 }
 
@@ -1385,8 +1640,7 @@ class Pirum_CLI_Formatter
             $codes[] = $this->background[$parameters['bg']];
         }
         foreach ($this->options as $option => $value) {
-            if (isset($parameters[$option]) && $parameters[$option])
-            {
+            if (isset($parameters[$option]) && $parameters[$option]) {
                 $codes[] = $value;
             }
         }
@@ -1409,4 +1663,3 @@ class Pirum_CLI_Formatter
         return sprintf("  %s %s\n", $this->format($section, $style), $text);
     }
 }
-

@@ -1,0 +1,19 @@
+{
+    "name": "pirum/pirum",
+    "type": "library",
+    "description": "Pirum, the simple PEAR Channel Server Manager",
+    "keywords": ["PEAR"],
+    "homepage": "http://pirum.sensiolabs.org",
+    "version": "1.1.5",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fabien Potencier",
+            "email": "fabien@symfony.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.4"
+    },
+    "bin": ["pirum"]
+}
