@@ -489,7 +489,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                 <?php foreach ($this->packages as $package):
                     $deps = array();
                     if (isset($package['deps']['required']['package'])) {
-                        if (isset($package['deps']['required']['package']['name']) && !isset($package['deps']['required']['package']['conflicts'])) {
+                        if (isset($package['deps']['required']['package']['name'])) {
                             $package['deps']['required']['package'] = array($package['deps']['required']['package']);
                         }
                         foreach ($package['deps']['required']['package'] as $p) {
@@ -1550,7 +1550,7 @@ class Pirum_Package
             $value = count($value->children()) ? $this->XMLToArray($value) : (string) $value;
 
             if (array_key_exists($key, $array)) {
-                if (!is_array($array[$key])) {
+                if (!is_array($array[$key]) || !isset($array[$key][0])) {
                     $array[$key] = array($array[$key]);
                 }
                 $array[$key][] = $value;
