@@ -782,7 +782,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
         $allreleases = '';
         $allreleases2 = '';
         $first = true;
-        $this->formatter and print $this->formatter->format('Building release');
+        $this->formatter and print $this->formatter->formatSection('INFO', 'Building release', false);
         foreach ($package['releases'] as $release) {
             if ('stable' == $release['stability'] && !$stable) {
                 $stable = $release['version'];
@@ -814,7 +814,7 @@ EOF;
             $this->buildRelease($dir, $package, $release, $first);
             $first = false;
         }
-        $this->formatter and print $this->formatter->format("\n");
+        $this->formatter and print "\n";
 
         if (count($package['releases'])) {
             file_put_contents($dir.'/latest.txt', $package['releases'][0]['version']);
@@ -1225,7 +1225,7 @@ EOF;
         }
 
         $first = true;
-        $this->formatter and print $this->formatter->format('Parsing package');
+        $this->formatter and print $this->formatter->formatSection('INFO', 'Parsing package', false);
         foreach ($packages as $file => $package) {
             !$first and $this->formatter and print $this->formatter->format(',');
             $this->formatter and print $this->formatter->format(' ' . $package->getName() . ' ' . $package->getVersion());
@@ -1265,6 +1265,7 @@ EOF;
 
             $first = false;
         }
+        $this->formatter and print "\n";
 
         ksort($this->packages);
     }
@@ -1663,13 +1664,14 @@ class Pirum_CLI_Formatter
      *
      * @param string  $section  The section name
      * @param string  $text     The text message
+     * @param boolean $newline  End with line break?
      */
-    public function formatSection($section, $text)
+    public function formatSection($section, $text, $newline = true)
     {
         $section = $style = array_key_exists($section, $this->styles) ? $section : 'INFO';
         $section = " $section ".str_repeat(' ', max(0, 5 - strlen($section)));
         $style .= '_SECTION';
 
-        return sprintf("  %s %s\n", $this->format($section, $style), $text);
+        return sprintf('  %s %s', $this->format($section, $style), $text, $newline ? "\n" : '');
     }
 }
