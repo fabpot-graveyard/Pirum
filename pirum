@@ -500,7 +500,7 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                         $grps = $package['deps']['group'];
                     }
                 ?>
-                    <h3><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
+                    <h3 id="<?php echo strtolower($package['name']) ?>"><?php echo $package['name'] ?><small> - <?php echo $package['summary'] ?></small></h3>
                     <p><?php echo $package['description'] ?></p>
                     <table>
                         <tr><th>Install command</th><td><strong><?php echo $package['extension'] != null ? 'pecl' : 'pear' ?> install <?php echo $this->server->alias ?>/<?php echo $package['name'] ?></strong></td></tr>
