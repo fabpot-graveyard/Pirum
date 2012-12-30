@@ -1430,8 +1430,19 @@ class Pirum_Package
     public function getDeps()
     {
         $deps = $this->XMLToArray($this->package->dependencies);
-        if (isset($this->package->dependencies->group) && $this->package->dependencies->group->length > 0) {
-            $deps['group'] = $this->XMLGroupDepsToArray($this->package->dependencies->group);
+        if (isset($this->package->dependencies->group))
+        {
+            $group = $this->package->dependencies->group;
+            if (is_callable(array($group, "count"))) {
+                //php 5.3+;
+                if ($group->count() > 0)
+                    $deps['group'] = $this->XMLGroupDepsToArray($group);
+            }
+            else {
+                //php 5.2 simplexml didn't have count()
+                if ($group->length > 0)
+                    $deps['group'] = $this->XMLGroupDepsToArray($group);
+            }
         }
 
         return serialize($deps);
