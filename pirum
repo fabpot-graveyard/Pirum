@@ -212,6 +212,7 @@ class Pirum_Builder
     protected $server;
     protected $packages;
     protected $formatter;
+    protected $templateConf;
 
     public function __construct($targetDir, $formatter = false)
     {
@@ -246,6 +247,29 @@ class Pirum_Builder
 
         $this->server->url = rtrim($this->server->url, '/');
 
+        if (DIRECTORY_SEPARATOR == '/') {
+            $configFile = '.pirumrc';
+        } else {
+            $configFile = 'pirum.ini';
+        }
+
+        $defaultConf = array(
+            'pirum' => array(
+                'template' => '', 
+                'templatedir' => dirname(__FILE__) . '/templates'
+            )
+        );
+        if (file_exists(dirname(__FILE__) . "/$configFile")) {
+            $customConf = parse_ini_file($configFile, true);
+            if ($customConf === false) {
+                // if config file could not be parsed; use default values
+                $customConf = array();
+            }
+        } else {
+            $customConf = array();
+        }
+        $this->templateConf = array_merge($defaultConf, $customConf);
+        
         $this->formatter = $formatter;
         $this->targetDir = $targetDir;
         $this->buildDir  = sys_get_temp_dir().'/pirum_build_'.uniqid();
@@ -396,12 +420,42 @@ EOF;
         file_put_contents($this->buildDir.'/feed.xml', $index);
     }
 
+    protected function getTemplateFile($name)
+    {
+        if (array_key_exists($this->targetDir, $this->templateConf)) {
+            // check first if a specific server template is defined 
+            $templateConf = $this->templateConf[$this->targetDir];
+            if (isset($templateConf['templatedir'])) {
+                $dir = $templateConf['templatedir'];
+            } else {
+                // fallback to default template location
+                $dir = $this->templateConf['pirum']['templatedir'];
+            }
+            $file = $dir;
+            if (isset($templateConf['template']) 
+                && !empty($templateConf['template'])
+            ) {
+                $file .= '/' . $templateConf['template'];
+            }
+        } else {
+            // use default template
+            $file = $this->templateConf['pirum']['templatedir'];
+            if (!empty($this->templateConf['pirum']['template'])) {
+                $file .= '/' . $this->templateConf['pirum']['template'];  
+            }
+        }
+        $file .= "/$name";
+        
+        return $file;
+    }
+    
     protected function buildCss()
     {
-        if (file_exists($file = dirname(__FILE__).'/templates/pirum.css') ||
+        if (file_exists($file = $this->getTemplateFile('pirum.css')) ||
             file_exists($file = $this->buildDir.'/templates/pirum.css')) {
             $content = file_get_contents($file);
         } else {
+            // fallback in case of external template is not readable 
             $content = <<<EOF
 /*
 Copyright (c) 2009, Yahoo! Inc. All rights reserved.
@@ -440,8 +494,8 @@ EOF;
         $this->formatter and print $this->formatter->formatSection('INFO', "Building index.");
 
         $version = Pirum_CLI::version();
-
-        if (file_exists($file = dirname(__FILE__).'/templates/index.html') ||
+        
+        if (file_exists($file = $this->getTemplateFile('index.html')) ||
             file_exists($file = $this->buildDir.'/templates/index.html')) {
             ob_start();
             include $file;
@@ -451,7 +505,7 @@ EOF;
 
             return;
         }
-
+        // fallback in case of external template is not readable 
         ob_start();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
