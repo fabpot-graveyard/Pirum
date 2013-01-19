@@ -1087,10 +1087,6 @@ EOF
             foreach ($package['maintainers'] as $nickname => $maintainer) {
                 $dir = $this->buildDir.'/rest/m/'.$nickname;
 
-                if (!is_dir($dir)) {
-                    mkdir($dir, 0777, true);
-                }
-
                 $info = <<<EOF
 <?xml version="1.0" encoding="UTF-8" ?>
 <m xmlns="http://pear.php.net/dtd/rest.maintainer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://pear.php.net/dtd/rest.maintainer http://pear.php.net/dtd/rest.maintainer.xsd">
@@ -1100,7 +1096,10 @@ EOF
 </m>
 EOF;
 
-                $all .= "  <h xlink:href=\"/rest/m/{$nickname}\">{$nickname}</h>\n";
+                if (!is_dir($dir)) {
+                    mkdir($dir, 0777, true);
+                    $all .= "  <h xlink:href=\"/rest/m/{$nickname}\">{$nickname}</h>\n";
+                }
 
                 file_put_contents($dir.'/info.xml', $info);
             }
