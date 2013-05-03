@@ -394,7 +394,7 @@ class Pirum_Builder
         </author>
         <updated>$date</updated>
         <content>
-            {$release['description']}
+            {$package['description']}
             {$release['notes']}
         </content>
     </entry>
