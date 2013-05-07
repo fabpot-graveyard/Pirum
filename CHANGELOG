@@ -1,5 +1,18 @@
 * 1.1.5 (2012-XX-XX)
 
+ * changed the default index display to group dependencies by channel
+ * made pirum executable
+ * added better errors when opening an archive fails
+ * fixed adding multiple deps
+ * added a link to the LICENSE URL when available on the index page
+ * added description to the feed contents
+ * fixed duplicates entries in the allmaintainers.xml file
+ * added the possibility to customize templates location and the usage of different themes
+ * added ids for each package on the index page
+ * condensed output of the build commands (useful for repositories with many packages and versions)
+ * fixed usage of json_encode for PHP 5.2
+ * fixed build with packages with no groups
+ * fixed "conflicts" display
  * removed usage if ?: for PHP 5.2 compatibility
 
 * 1.1.4 (2012-04-19)
