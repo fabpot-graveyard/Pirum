@@ -1,5 +1,7 @@
-Pirum, the simple PEAR Channel Server Manager
-=============================================
+__________________________________________________
+**Warning**: Pirum is not maintained anymore, use
+[Composer](http://getcomposer.org/) instead.
+__________________________________________________
 
 Pirum is a simple and nice looking PEAR channel server manager that lets you
 setup PEAR channel servers in a matter of minutes. Pirum is best suited when
