@@ -1387,7 +1387,7 @@ EOF;
  */
 class Pirum_Package
 {
-    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+((?:RC|beta|alpha|dev|snapshot|a|b)\d*)?))\.tgz$#i';
+    const PACKAGE_FILE_PATTERN = '#^(?P<release>(?P<name>.+)\-(?P<version>[\d\.]+(?:[a-zA-Z]+\d*)?))\.tgz$#i';
 
     protected $package;
     protected $tmpDir;
