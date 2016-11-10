@@ -630,6 +630,8 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
 
         $vendor = !empty($this->server->alias) ? $this->server->alias : $this->server->name;
 
+        $invalidPearChannels = array();
+
         foreach ($this->packages as $package) {
             // standard package fields
             $packageDef = array('versions' => array());
@@ -703,10 +705,17 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                                         if (false === strpos($dataKey, '/')) {
                                             $channelUrl = 'http://'.$value['channel'];
                                             if (!isset($pearChannels[$channelUrl])) {
+                                                if (in_array($channelUrl, $invalidPearChannels)) {
+                                                    print $this->formatter->formatSection('WARN', sprintf('Invalid channel "%s"', $channelUrl));
+                                                    continue;
+                                                }
+
                                                 try {
                                                     $channelInfo = @new SimpleXMLElement($channelUrl.'/channel.xml', null, true);
                                                 } catch (Exception $e) {
-                                                    throw new Exception(sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
+                                                    print $this->formatter->formatSection('WARN', sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
+                                                    $invalidPearChannels[] = $channelUrl;
+                                                    continue;
                                                 }
                                                 if ($tmp = (string) $channelInfo->suggestedalias[0]) {
                                                     $pearChannels[$channelUrl] = $tmp;
