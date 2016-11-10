@@ -706,14 +706,14 @@ pear install <?php echo $this->server->alias ?>/package_name-beta</code></pre>
                                             $channelUrl = 'http://'.$value['channel'];
                                             if (!isset($pearChannels[$channelUrl])) {
                                                 if (in_array($channelUrl, $invalidPearChannels)) {
-                                                    print $this->formatter->formatSection('WARN', sprintf('Invalid channel "%s"', $channelUrl));
+                                                    print $this->formatter->formatSection('ERROR', sprintf('Invalid channel "%s"', $channelUrl));
                                                     continue;
                                                 }
 
                                                 try {
                                                     $channelInfo = @new SimpleXMLElement($channelUrl.'/channel.xml', null, true);
                                                 } catch (Exception $e) {
-                                                    print $this->formatter->formatSection('WARN', sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
+                                                    print $this->formatter->formatSection('ERROR', sprintf('Channel "%s" could not be reached for package %s version %s.', $channelUrl, $package['name'], $version['version']));
                                                     $invalidPearChannels[] = $channelUrl;
                                                     continue;
                                                 }
